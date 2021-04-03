@@ -7,6 +7,8 @@ import { App } from "./App";
 
 // === Styles   ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import "./index.css";
+import "typeface-fira-code";
+import "typeface-fira-sans";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 ReactDOM.render(
