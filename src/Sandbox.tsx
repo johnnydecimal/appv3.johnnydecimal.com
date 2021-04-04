@@ -6,10 +6,12 @@ export const Sandbox = () => {
   let location = useLocation();
   console.debug(location);
   return (
-    <div className="p-4 m-12 border-2 border-red-500 font-jdbody">
-      Tailwind installed.
-      <p className="font-jdcode">
-        I am <span className="text-red-900">code</span>!
+    <div className="">
+      <p className="mb-6 border-b-2 border-green">Johnny&bull;Decimal</p>
+      <p className="">To login, enter your details.</p>
+      <p className="mb-6">To sign up, type 'signup'.</p>
+      <p>
+        login: <span className="blink">_</span>
       </p>
     </div>
   );
