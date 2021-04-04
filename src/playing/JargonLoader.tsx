@@ -1,27 +1,41 @@
-import { useEffect, useState } from "react";
+import arrayShuffle from "array-shuffle";
+import { useEffect, useRef, useState } from "react";
 
-const technicalJargon = [
+const initialJargon = [
   "Initialising sub-stack interface.",
   "Re-configuring port channels.",
   "Upgrading underlying protocols.",
   "Interface v4 establishing core protocols.",
-  "Enhancing the temporal nacelles with antilepton communication.",
-  "Reconfiguring the photon bank with sensing compositor.",
-  "Controlling the focused enhancers with the phase emitter assembly.",
+  "Registering 0F:AE:4F globally.",
+  "De-coupling network interface.",
+  "Setting CPU throttling to maximum.",
+  "Configuring MTU=1200 on central link.",
+  "Transitioning packets to meta-frames.",
 ];
 
 export const JargonLoader = () => {
-  let [renderJargon, setRenderJargon] = useState([""]);
+  const jargonRemains = useRef(true);
+  const remainingJargon = useRef(initialJargon);
+  const [renderJargon, setRenderJargon] = useState([""]);
 
   useEffect(() => {
     const timeout = Math.random() * (1000 - 400) + 400;
     console.log("timeout", timeout);
 
     setTimeout(() => {
-      const poppedJargon = technicalJargon.pop() || "no more";
-      const newRenderJargon = [...renderJargon, poppedJargon];
-      console.log(newRenderJargon);
-      setRenderJargon(newRenderJargon);
+      if (remainingJargon.current.length === 0) {
+        jargonRemains.current = false;
+        // And transition to an error state, this has taken too long.
+      }
+      if (jargonRemains.current) {
+        remainingJargon.current = arrayShuffle(remainingJargon.current);
+        const newJargonItem =
+          remainingJargon.current.pop() ||
+          "This will never happen but TypeScript needs it";
+        const newRenderJargon = [...renderJargon, newJargonItem];
+        console.log(newRenderJargon);
+        setRenderJargon(newRenderJargon);
+      }
     }, timeout);
   }, [renderJargon]);
 
