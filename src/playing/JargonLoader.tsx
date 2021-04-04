@@ -23,26 +23,30 @@ export const JargonLoader = () => {
     const timeout = Math.random() * (1000 - 400) + 400;
     console.log("timeout", timeout);
 
-    setTimeout(() => {
-      if (remainingJargon.current.length === 0) {
-        jargonRemains.current = false;
+    if (remainingJargon.current.length === 0) {
+      jargonRemains.current = false;
+      if (renderJargon.length > 1) {
+        // Stick this in here or we just cause a re-render storm. Better way?
         setRenderJargon([""]);
-        // And transition to an error state, this has taken too long.
       }
-      if (jargonRemains.current) {
-        remainingJargon.current = arrayShuffle(remainingJargon.current);
-        const newJargonItem =
-          remainingJargon.current.pop() ||
-          "This will never happen but TypeScript needs it";
-        const newRenderJargon = [...renderJargon, newJargonItem];
-        console.log(newRenderJargon);
-        setRenderJargon(newRenderJargon);
-      }
-    }, timeout);
+      // And transition to an error state, this has taken too long.
+    } else {
+      setTimeout(() => {
+        if (jargonRemains.current) {
+          remainingJargon.current = arrayShuffle(remainingJargon.current);
+          const newJargonItem =
+            remainingJargon.current.pop() ||
+            "This will never happen but TypeScript needs it";
+          const newRenderJargon = [...renderJargon, newJargonItem];
+          console.log(newRenderJargon);
+          setRenderJargon(newRenderJargon);
+        }
+      }, timeout);
+    }
   }, [renderJargon]);
 
   return (
-    <div className="mt-4 text-sm">
+    <div className="mt-4">
       {jargonRemains.current ? (
         renderJargon.map((jargonLine, i) => {
           return <p key={i}>{jargonLine}</p>;
