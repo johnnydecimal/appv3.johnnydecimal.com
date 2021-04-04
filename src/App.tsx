@@ -1,5 +1,5 @@
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { Sandbox } from "./playing/Sandbox";
+// import { Sandbox } from "./playing/Sandbox";
 import { JargonLoader } from "./playing/JargonLoader";
 
 export const App = () => {

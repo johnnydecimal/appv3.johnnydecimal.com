@@ -11,8 +11,8 @@ export const Sandbox = () => {
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors },
+    // watch,
+    // formState: { errors },
   } = useForm<FormData>();
 
   const onSubmit = handleSubmit((data) => console.log(data));
