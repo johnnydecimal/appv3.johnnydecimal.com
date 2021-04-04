@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { useLocation } from "react-router-dom";
+// import { useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -15,7 +15,7 @@ export const Sandbox = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit = (data: FormData) => console.log(data);
+  const onSubmit = handleSubmit((data) => console.log(data));
 
   return (
     <div className="">
@@ -23,7 +23,9 @@ export const Sandbox = () => {
       <p className="">To login, enter your details.</p>
       <p className="mb-6">To sign up, type 'signup'.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <p className="mb-6 blink">Loading...</p>
+
+      <form onSubmit={onSubmit}>
         <p>
           {/* login: <span className="blink">_</span> */}
           login:{" "}

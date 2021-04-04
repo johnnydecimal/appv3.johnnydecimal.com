@@ -1,5 +1,6 @@
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { Sandbox } from "./Sandbox";
+import { Sandbox } from "./playing/Sandbox";
+import { JargonLoader } from "./playing/JargonLoader";
 
 export const App = () => {
   return (
@@ -7,7 +8,8 @@ export const App = () => {
     <div className="mx-2 sm:mx-12">
       {/* Constrain the width, and centre */}
       <div className="max-w-4xl mx-auto mt-2 font-jdcode">
-        <Sandbox />
+        {/* <Sandbox /> */}
+        <JargonLoader />
       </div>
     </div>
   );
