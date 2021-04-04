@@ -8,6 +8,7 @@ export const App = () => {
     <div className="mx-2 sm:mx-12">
       {/* Constrain the width, and centre */}
       <div className="max-w-4xl mx-auto mt-2 font-jdcode">
+        <h1 className="border-b-2 border-green">Johnny&bull;Decimal</h1>
         {/* <Sandbox /> */}
         <JargonLoader />
       </div>

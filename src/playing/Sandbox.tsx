@@ -19,11 +19,8 @@ export const Sandbox = () => {
 
   return (
     <div className="">
-      <p className="mb-6 border-b-2 border-green">Johnny&bull;Decimal</p>
       <p className="">To login, enter your details.</p>
       <p className="mb-6">To sign up, type 'signup'.</p>
-
-      <p className="mb-6 blink">Loading...</p>
 
       <form onSubmit={onSubmit}>
         <p>

@@ -1,5 +1,6 @@
 import arrayShuffle from "array-shuffle";
 import { useEffect, useRef, useState } from "react";
+import { Sandbox } from "./Sandbox";
 
 const initialJargon = [
   "Initialising sub-stack interface.",
@@ -25,6 +26,7 @@ export const JargonLoader = () => {
     setTimeout(() => {
       if (remainingJargon.current.length === 0) {
         jargonRemains.current = false;
+        setRenderJargon([""]);
         // And transition to an error state, this has taken too long.
       }
       if (jargonRemains.current) {
@@ -40,11 +42,14 @@ export const JargonLoader = () => {
   }, [renderJargon]);
 
   return (
-    <div className="text-sm">
-      JargonLoader
-      {renderJargon.map((jargonLine, i) => {
-        return <p key={i}>{jargonLine}</p>;
-      })}
+    <div className="mt-4 text-sm">
+      {jargonRemains.current ? (
+        renderJargon.map((jargonLine, i) => {
+          return <p key={i}>{jargonLine}</p>;
+        })
+      ) : (
+        <Sandbox />
+      )}
     </div>
   );
 };
