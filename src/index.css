@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
+
+body {
+  background-color: #fcfbf8;
+  color: #2f3130;
+}
+
+.blink {
+  animation: blinker 1s ease-in-out infinite;
+}
+
+@keyframes blinker {
+  100% {
+    opacity: 0;
+  }
+}
+
 @tailwind utilities;
