@@ -4,10 +4,10 @@ module.exports = {
   theme: {
     colors: {
       black: {
-        DEFAULT: "#191919",
+        DEFAULT: "#2f3130",
       },
-      green: {
-        DEFAULT: "rgb(40, 254, 20)",
+      white: {
+        DEFAULT: "#fcfbf8",
       },
     },
     extend: {},

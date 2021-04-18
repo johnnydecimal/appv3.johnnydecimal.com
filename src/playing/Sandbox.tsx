@@ -7,23 +7,22 @@ import { GREEN } from "../constants";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const Sandbox = () => {
-  const loginInput = useRef(null);
-
   type FormData = {
     username: string;
   };
   const {
-    register,
+    // register,
     handleSubmit,
     // watch,
     // formState: { errors },
   } = useForm<FormData>();
   const onSubmit = handleSubmit((data) => console.log(data));
 
+  const inputRef = useRef(null);
+
   useEffect(() => {
     // @ts-expect-error
-    loginInput.current.focus();
-    console.log(loginInput);
+    inputRef.current.focus();
   }, []);
 
   return (
@@ -32,21 +31,19 @@ export const Sandbox = () => {
       <p className="mb-6">To sign up, type 'signup'.</p>
 
       <form onSubmit={onSubmit}>
-        <p>
-          {/* login: <span className="blink">_</span> */}
-          login:{" "}
-          <input
-            autoCapitalize="none"
-            autoCorrect="off"
-            autoFocus
-            className="bg-black outline-none focus:outline-none cursor-text"
-            {...register("username")}
-            ref={loginInput}
-            style={{
-              caretColor: GREEN,
-            }}
-          />
-        </p>
+        {/* login: <span className="blink">_</span> */}
+        <label>login: </label>
+        <input
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoFocus={true}
+          className="bg-black outline-none focus:outline-none cursor-text"
+          // {...register("username")}
+          ref={inputRef}
+          style={{
+            caretColor: GREEN,
+          }}
+        />
       </form>
     </div>
   );

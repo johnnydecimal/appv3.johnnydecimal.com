@@ -2,8 +2,8 @@
 @tailwind components;
 
 body {
-  background-color: #191919;
-  color: rgb(40, 254, 20);
+  background-color: #fcfbf8;
+  color: #2f3130;
 }
 
 .blink {
