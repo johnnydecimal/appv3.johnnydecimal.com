@@ -19,3 +19,10 @@ so we add that, and `@xstate/inspect` and other XState stuff, and `userbase-js`
 so we can actually connect to a database.
 
 And don't forget we're doing `npx xstate-codegen "src/**/**.machine.ts"`.
+
+## 2021-04-19 library end
+
+- Did great!
+- Stuck right at the end with sending a `send` back using the `service` which you passed down.
+- Asked the geniuses at
+  [Discord](https://discord.com/channels/795785288994652170/809564589880639548/833568586861379594).

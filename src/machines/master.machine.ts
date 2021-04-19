@@ -3,14 +3,14 @@ import { Machine, assign } from "@xstate/compiled";
 import userbase, { UserResult } from "userbase-js";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-interface TheMachineContext {
+export interface TheMachineContext {
   error?: string;
   user?: UserResult;
 }
 
-type TheMachineEvent =
+export type TheMachineEvent =
   | { type: "TRY_SIGNOUT" }
-  | { type: "TRY_SIGNIN" }
+  | { type: "TRY_SIGNIN"; data: any }
   | { type: "done.invoke.userbaseInit"; data: any };
 // | { type: "done.invoke.userbaseInit"; data: { user: UserResult } };
 
@@ -75,10 +75,6 @@ export const masterMachine = Machine<
   },
   {
     actions: {
-      // assignUserToContext: assign({
-      //   error: () => undefined,
-      //   user: (_, event: { data: { user: UserResult } }) => event.data,
-      // }),
       assignUserToContext: assign<TheMachineContext, TheMachineEvent>({
         user: (_, event) => {
           if (event.type === "done.invoke.userbaseInit") return event.data;

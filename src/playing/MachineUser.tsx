@@ -1,8 +1,9 @@
 import { useMachine } from "@xstate/compiled/react";
 import { masterMachine } from "../machines/master.machine";
+import { SignInForm } from "../signIn";
 
 export const MachineUser = () => {
-  const [state, send] = useMachine(masterMachine, {
+  const [state, send, service] = useMachine(masterMachine, {
     devTools: true,
   });
 
@@ -16,6 +17,15 @@ export const MachineUser = () => {
       <button className="mx-2" onClick={() => send("TRY_SIGNOUT")}>
         TRY_SIGNOUT
       </button>
+      {state.value === "signedOut" ? (
+        <SignInForm masterMachineService={service} />
+      ) : (
+        // <SignInForm masterMachine={{ state, send }} />
+        <div className="p-4 mt-8 border border-black">
+          You're not in a state of <span className="font-bold">signedOut</span>,
+          so you won't see the sign-in form.
+        </div>
+      )}
     </div>
   );
 };

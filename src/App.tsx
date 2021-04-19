@@ -1,8 +1,11 @@
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { inspect } from "@xstate/inspect";
+
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sandbox } from "./playing/Sandbox";
 // import { JargonLoader } from "./playing/JargonLoader";
 import { MachineUser } from "./playing/MachineUser";
-import { inspect } from "@xstate/inspect";
+// import { SignInForm } from "./signIn";
 
 inspect({
   // options
@@ -20,6 +23,7 @@ export const App = () => {
         {/* <JargonLoader /> */}
         {/* <Sandbox /> */}
         <MachineUser />
+        {/* <SignInForm /> */}
       </div>
     </div>
   );
