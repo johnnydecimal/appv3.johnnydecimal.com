@@ -19,7 +19,7 @@ export const SignInForm = ({ masterMachineService }: any) => {
     console.log(formData);
     send({
       type: "TRY_SIGNIN",
-      data: formData,
+      // data: formData,
     });
   });
 

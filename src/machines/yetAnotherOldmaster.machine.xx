@@ -10,8 +10,9 @@ export interface TheMachineContext {
 
 export type TheMachineEvent =
   | { type: "TRY_SIGNOUT" }
-  | { type: "TRY_SIGNIN"; data: any }
-  | { type: "done.invoke.userbaseInit"; data: any };
+  | { type: "xstate.init" }
+  | { type: "TRY_SIGNIN"; data?: UserResult }
+  | { type: "done.invoke.userbaseInit"; data?: UserResult };
 // | { type: "done.invoke.userbaseInit"; data: { user: UserResult } };
 
 export const masterMachine = Machine<
@@ -20,6 +21,7 @@ export const masterMachine = Machine<
   "masterMachine"
 >(
   {
+    id: 'masterMachine',
     initial: "init",
     states: {
       init: {
@@ -77,20 +79,30 @@ export const masterMachine = Machine<
     actions: {
       assignUserToContext: assign<TheMachineContext, TheMachineEvent>({
         user: (_, event) => {
-          if (event.type === "done.invoke.userbaseInit") return event.data;
+          if (event.type === "done.invoke.userbaseInit") {
+            console.log("assignUserToContext: ", event.data);
+            return event.data;
+          }
         },
         error: () => undefined,
       }),
     },
     guards: {
-      isUserReturned: (_, event: { data: { user: UserResult } }) =>
-        Boolean(event.data.user),
+      isUserReturned: (_, event: { data: UserResult }) =>
+        Boolean(event.data.username),
     },
     services: {
-      userbaseInit: (_context, _event) => {
+      userbaseInit: (_context, event) => {
+        console.log("event.type in userbaseInit:", event.type);
         return userbase.init({
           appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
-        });
+        })
+        .then((session) => {
+          if(session.user) {
+            return session.user;
+          }
+        })
+        .catch(e => throw new Error(e));
       },
       trySignIn: (_context, _event) => {
         return userbase.signIn({

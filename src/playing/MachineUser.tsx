@@ -1,9 +1,9 @@
 import { useMachine } from "@xstate/compiled/react";
-import { masterMachine } from "../machines/master.machine";
+import { apr24MasterMachine } from "../machines/apr24Master.machine";
 import { SignInForm } from "../signIn";
 
 export const MachineUser = () => {
-  const [state, send, service] = useMachine(masterMachine, {
+  const [state, send, service] = useMachine(apr24MasterMachine, {
     devTools: true,
   });
 
