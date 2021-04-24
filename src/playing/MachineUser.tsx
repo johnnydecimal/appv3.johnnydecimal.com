@@ -3,7 +3,7 @@ import {
   apr24MasterMachine,
   Apr24MasterContext,
 } from "../machines/apr24Master.machine";
-import { FormData, SignInForm } from "../signIn";
+import { SignInFormData, SignInForm } from "../signIn";
 
 export const MachineUser = () => {
   const [state, send] = useMachine(apr24MasterMachine, {
@@ -15,7 +15,7 @@ export const MachineUser = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree. Ref. video at 52:00.
    */
-  const handleSignIn = (data: FormData) => {
+  const handleSignIn = (data: SignInFormData) => {
     console.log("handleSignIn.data:", data);
     send({
       type: "TRY_SIGNIN",

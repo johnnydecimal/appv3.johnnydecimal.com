@@ -1,7 +1,7 @@
 import { assign, Machine } from "@xstate/compiled";
 import { createContext } from "react";
 import userbase, { UserResult } from "userbase-js";
-import { FormData } from "../signIn";
+import { SignInFormData } from "../signIn";
 
 interface Context {
   error?: any;
@@ -9,7 +9,7 @@ interface Context {
 }
 
 type Event =
-  | { type: "TRY_SIGNIN"; data: FormData }
+  | { type: "TRY_SIGNIN"; data: SignInFormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE"; error?: any }
   | { type: "TRY_SIGNOUT" }
