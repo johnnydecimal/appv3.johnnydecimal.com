@@ -3,8 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 
-import { GREEN } from "../constants";
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const Sandbox = () => {
   type FormData = {
@@ -40,9 +38,6 @@ export const Sandbox = () => {
           className="bg-black outline-none focus:outline-none cursor-text"
           // {...register("username")}
           ref={inputRef}
-          style={{
-            caretColor: GREEN,
-          }}
         />
       </form>
     </div>

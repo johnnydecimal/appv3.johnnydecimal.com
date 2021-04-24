@@ -14,4 +14,12 @@ goes? Install things as you need them.
 # Let's get the machine going
 
 It's nothing without the machine. And we're going to rock `xstate-codegen` right
-from the off.
+from the off. So add it, it complains about `@babel/plugin-transform-typescript`
+so we add that, and `@xstate/inspect` and other XState stuff, and `userbase-js`
+so we can actually connect to a database.
+
+And don't forget we're doing `npx xstate-codegen "src/**/**.machine.ts"`.
+
+# Doing the machine methodically
+
+Let's get a new branch going for this, `methodical-machine`. Sounds like an Ubuntu release.
