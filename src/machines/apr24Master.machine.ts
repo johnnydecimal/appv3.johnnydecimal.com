@@ -1,18 +1,21 @@
 import { Machine } from "@xstate/compiled";
 import { createContext } from "react";
 import userbase, { UserResult } from "userbase-js";
+import { FormData } from "../signIn";
 
-interface Context {}
+interface Context {
+  error?: any;
+  user?: UserResult;
+}
 
 type Event =
-  | { type: "TESTER" }
-  | { type: "TRY_SIGNIN"; data: any }
-  | { type: "TRY_SIGNOUT" }
+  | { type: "TRY_SIGNIN"; data: FormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE" }
+  | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
-  | { type: "WEIRD_ERROR"; error: any };
+  | { type: "CATASTROPHIC_ERROR"; error: any };
 
 export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
   {
@@ -110,7 +113,7 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
              * Now *this* is an error. Something janky happened with the `init`
              * call. We shit the bed at this stage.
              */
-            sendBack({ type: "WEIRD_ERROR", error });
+            sendBack({ type: "CATASTROPHIC_ERROR", error });
           });
       },
 
