@@ -11,7 +11,7 @@ interface Context {
 type Event =
   | { type: "TRY_SIGNIN"; data: SignInFormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
-  | { type: "REPORT_SIGNIN_FAILURE"; error?: any }
+  | { type: "REPORT_SIGNIN_FAILURE"; error: any }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
@@ -153,7 +153,11 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
                * There's no user, but this isn't an error. We just don't have
                * a signed-in user.
                */
-              sendBack({ type: "REPORT_SIGNIN_FAILURE" });
+              sendBack({
+                type: "REPORT_SIGNIN_FAILURE",
+                error:
+                  "Soft failure: userbase.init() call succeeded, but a user is not logged in.",
+              });
             }
           })
           .catch((error) => {
