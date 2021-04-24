@@ -16,8 +16,12 @@ export const MachineUser = () => {
    * ever send `send` down the tree. Ref. video at 52:00.
    */
 
-  const handleSignIn = () => {
-    send("TRY_SIGNIN");
+  const handleSignIn = (data: any) => {
+    console.log("handleSignIn.data:", data);
+    send({
+      type: "TRY_SIGNIN",
+      data,
+    });
   };
   const handleSignOut = () => {
     send("TRY_SIGNOUT");
@@ -28,7 +32,12 @@ export const MachineUser = () => {
       <div>
         <p>Machine User component</p>
         {JSON.stringify(state.value, null, 2)}
-        <button className="mx-2" onClick={() => send("TRY_SIGNIN")}>
+        <button
+          className="mx-2"
+          onClick={() =>
+            handleSignIn({ john: true, lucy: "also true but a string" })
+          }
+        >
           TRY_SIGNIN
         </button>
         <button className="mx-2" onClick={() => send("TRY_SIGNOUT")}>

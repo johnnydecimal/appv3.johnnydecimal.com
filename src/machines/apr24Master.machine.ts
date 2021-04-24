@@ -6,7 +6,7 @@ interface Context {}
 
 type Event =
   | { type: "TESTER" }
-  | { type: "TRY_SIGNIN" }
+  | { type: "TRY_SIGNIN"; data: any }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE" }

@@ -18,7 +18,7 @@ export const SignInForm = () => {
 
   const onSubmit = handleSubmit((formData) => {
     console.log(formData);
-    handleSignIn();
+    handleSignIn(formData);
   });
 
   return (
