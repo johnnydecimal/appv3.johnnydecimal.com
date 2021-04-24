@@ -62,7 +62,10 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
           },
         },
         on: {
-          REPORT_SIGNOUT_SUCCESS: "signedOut",
+          REPORT_SIGNOUT_SUCCESS: {
+            target: "signedOut",
+            actions: ["clearError", "clearUser"],
+          },
           /**
            * // TODO
            * I guess you'd get a failure if the service isn't available? In
@@ -81,25 +84,53 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
         invoke: {
           src: "userbaseSignIn",
           onDone: {
-            actions: assign({
-              user: (_context, event) => event.data,
-            }),
+            // moved from here down there
           },
           onError: {
-            actions: assign({
-              user: (_context, _event) => undefined,
-            }),
+            // moved down there
           },
         },
         on: {
-          REPORT_SIGNIN_SUCCESS: "signedIn",
-          REPORT_SIGNIN_FAILURE: "signedOut",
+          REPORT_SIGNIN_SUCCESS: {
+            target: "signedIn",
+            actions: assign({
+              user: (_context, event) => {
+                return event.user;
+              },
+              error: (_context, _event) => {
+                return undefined;
+              },
+            }),
+          },
+          REPORT_SIGNIN_FAILURE: {
+            target: "signedOut",
+            actions: assign({
+              user: (_context, _event) => {
+                return undefined;
+              },
+              error: (_context, event) => {
+                return event.error;
+              },
+            }),
+          },
         },
       },
       catastrophicError: {},
     },
   },
   {
+    actions: {
+      clearUser: assign({
+        user: (_context, _event) => {
+          return undefined;
+        },
+      }),
+      clearError: assign({
+        error: (_context, _event) => {
+          return undefined;
+        },
+      }),
+    },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       /**
