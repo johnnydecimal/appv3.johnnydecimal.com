@@ -38,13 +38,24 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
         on: {
           REPORT_SIGNIN_SUCCESS: {
             target: "signedIn",
-            actions: assign({
-              user: (_context, event) => {
-                return event.user;
-              },
-            }),
+            actions: ["assignUser", "clearError"],
           },
           REPORT_SIGNIN_FAILURE: "signedOut",
+        },
+      },
+      tryingSignIn: {
+        invoke: {
+          src: "userbaseSignIn",
+        },
+        on: {
+          REPORT_SIGNIN_SUCCESS: {
+            target: "signedIn",
+            actions: ["assignUser", "clearError"],
+          },
+          REPORT_SIGNIN_FAILURE: {
+            target: "signedOut",
+            actions: ["clearUser", "assignError"],
+          },
         },
       },
       signedIn: {
@@ -80,46 +91,21 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
           TRY_SIGNIN: "tryingSignIn",
         },
       },
-      tryingSignIn: {
-        invoke: {
-          src: "userbaseSignIn",
-          onDone: {
-            // moved from here down there
-          },
-          onError: {
-            // moved down there
-          },
-        },
-        on: {
-          REPORT_SIGNIN_SUCCESS: {
-            target: "signedIn",
-            actions: assign({
-              user: (_context, event) => {
-                return event.user;
-              },
-              error: (_context, _event) => {
-                return undefined;
-              },
-            }),
-          },
-          REPORT_SIGNIN_FAILURE: {
-            target: "signedOut",
-            actions: assign({
-              user: (_context, _event) => {
-                return undefined;
-              },
-              error: (_context, event) => {
-                return event.error;
-              },
-            }),
-          },
-        },
-      },
       catastrophicError: {},
     },
   },
   {
     actions: {
+      assignUser: assign({
+        user: (_context, event) => {
+          return event.user;
+        },
+      }),
+      assignError: assign({
+        error: (_context, event) => {
+          return event.error;
+        },
+      }),
       clearUser: assign({
         user: (_context, _event) => {
           return undefined;
