@@ -1,4 +1,4 @@
-import { Machine } from "@xstate/compiled";
+import { assign, Machine } from "@xstate/compiled";
 import { createContext } from "react";
 import userbase, { UserResult } from "userbase-js";
 import { FormData } from "../signIn";
@@ -36,7 +36,14 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
           },
         },
         on: {
-          REPORT_SIGNIN_SUCCESS: "signedIn",
+          REPORT_SIGNIN_SUCCESS: {
+            target: "signedIn",
+            actions: assign({
+              user: (_context, event) => {
+                return event.user;
+              },
+            }),
+          },
           REPORT_SIGNIN_FAILURE: "signedOut",
         },
       },
@@ -92,8 +99,6 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
              * that there is an active user. For that we need `session.user`
              * to contain a user object.
              */
-            console.log(session);
-
             if (session.user) {
               /**
                * We have a user, so a user is signed in.
