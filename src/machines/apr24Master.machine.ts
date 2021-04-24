@@ -1,4 +1,5 @@
 import { Machine } from "@xstate/compiled";
+import { createContext } from "react";
 import userbase, { UserResult } from "userbase-js";
 
 interface Context {}
@@ -21,6 +22,15 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
       init: {
         invoke: {
           src: "userbaseInit",
+          onError: {
+            /**
+             * This almost certainly isn't necessary. This is what happens if
+             * the `userbaseInit` service fails at such a level that it doesn't
+             * even send us an event. I dunno what that would be, given that
+             * TS protects us from things like typos.
+             */
+            target: "catastrophicError",
+          },
         },
         on: {
           REPORT_SIGNIN_SUCCESS: "signedIn",
@@ -40,10 +50,12 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
         },
       },
       notSignedIn: {},
+      catastrophicError: {},
     },
   },
   {
     services: {
+      // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseInit: () => (sendBack: (event: Event) => void) => {
         /**
          * So this is a regular callback. We do the userbase stuff, let it
@@ -60,17 +72,31 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
              * to contain a user object.
              */
             console.log(session);
+
             if (session.user) {
+              /**
+               * We have a user, so a user is signed in.
+               */
               sendBack({ type: "REPORT_SIGNIN_SUCCESS", user: session.user });
             } else {
-              sendBack({ type: "WEIRD_ERROR", error: session });
+              /**
+               * There's no user, but this isn't an error. We just don't have
+               * a signed-in user.
+               */
+              sendBack({ type: "REPORT_SIGNIN_FAILURE" });
             }
           })
           .catch((error) => {
             console.log(error);
-            sendBack({ type: "REPORT_SIGNIN_FAILURE" });
+            /**
+             * Now *this* is an error. Something janky happened with the `init`
+             * call. We shit the bed at this stage.
+             */
+            sendBack({ type: "WEIRD_ERROR", error });
           });
       },
+
+      // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignOut: () => (sendBack: (event: Event) => void) => {
         userbase
           .signOut()
@@ -85,3 +111,5 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
     },
   }
 );
+
+export const Apr24MasterContext = createContext<any>({});
