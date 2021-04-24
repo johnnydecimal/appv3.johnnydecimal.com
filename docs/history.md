@@ -49,3 +49,7 @@ Notes here so you can jump to the key stuff.
     - Where `send` is the function you destructured out of `useMachine`.
   - And now in the child component where you want this, you do a:
     - `const { send } = useContext(AuthStateContext)`
+- [52:00](https://youtu.be/1kJcnFBrk2I?t=52m00s)
+  - His preferred method.
+  - Rather than just shooting `send` down via context, create a function which does a specific thing and send _that_ down.
+  -

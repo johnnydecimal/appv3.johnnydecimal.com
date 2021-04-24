@@ -1,6 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useForm } from "react-hook-form";
-import { useService } from "@xstate/compiled/react";
+import { useContext } from "react";
+import { Apr24MasterContext } from "../machines/apr24Master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface FormData {
@@ -11,16 +12,13 @@ interface FormData {
 // import { TheMachineEvent } from "../machines/master.machine";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const SignInForm = ({ masterMachineService }: any) => {
-  const [state, send] = useService(masterMachineService);
+export const SignInForm = () => {
+  const { handleSignIn, state } = useContext(Apr24MasterContext);
   const { handleSubmit, register } = useForm<FormData>();
 
   const onSubmit = handleSubmit((formData) => {
     console.log(formData);
-    send({
-      type: "TRY_SIGNIN",
-      // data: formData,
-    });
+    handleSignIn();
   });
 
   return (

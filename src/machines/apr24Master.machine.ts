@@ -34,7 +34,7 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
         },
         on: {
           REPORT_SIGNIN_SUCCESS: "signedIn",
-          REPORT_SIGNIN_FAILURE: "notSignedIn",
+          REPORT_SIGNIN_FAILURE: "signedOut",
         },
       },
       signedIn: {
@@ -47,9 +47,27 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
       tryingSignOut: {
         invoke: {
           src: "userbaseSignOut",
+          onError: {
+            target: "catastrophicError",
+          },
+        },
+        on: {
+          REPORT_SIGNOUT_SUCCESS: "signedOut",
+          /**
+           * // TODO
+           * I guess you'd get a failure if the service isn't available? In
+           * which case, what? Perhaps divert via a `forceSignOut` state where
+           * we clear local storage?
+           */
+          REPORT_SIGNOUT_FAILURE: "signedOut",
         },
       },
-      notSignedIn: {},
+      signedOut: {
+        on: {
+          // TODO This is a shim for now.
+          TRY_SIGNIN: "signedIn",
+        },
+      },
       catastrophicError: {},
     },
   },
