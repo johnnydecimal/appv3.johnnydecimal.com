@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { Apr24MasterContext } from "../machines/apr24Master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-interface FormData {
+export interface FormData {
   username: string;
   password: string;
 }

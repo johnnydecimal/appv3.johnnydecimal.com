@@ -3,7 +3,7 @@ import {
   Apr24MasterContext,
   apr24MasterMachine,
 } from "../machines/apr24Master.machine";
-import { SignInForm } from "../signIn";
+import { FormData, SignInForm } from "../signIn";
 
 export const MachineUser = () => {
   const [state, send] = useMachine(apr24MasterMachine, {
@@ -15,8 +15,7 @@ export const MachineUser = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree. Ref. video at 52:00.
    */
-
-  const handleSignIn = (data: any) => {
+  const handleSignIn = (data: FormData) => {
     console.log("handleSignIn.data:", data);
     send({
       type: "TRY_SIGNIN",
@@ -27,15 +26,24 @@ export const MachineUser = () => {
     send("TRY_SIGNOUT");
   };
 
+  const Apr24MasterContextValue = {
+    handleSignIn,
+    handleSignOut,
+    state,
+  };
+
   return (
-    <Apr24MasterContext.Provider value={{ handleSignIn, handleSignOut, state }}>
+    <Apr24MasterContext.Provider value={Apr24MasterContextValue}>
       <div>
         <p>Machine User component</p>
         {JSON.stringify(state.value, null, 2)}
         <button
           className="mx-2"
           onClick={() =>
-            handleSignIn({ john: true, lucy: "also true but a string" })
+            handleSignIn({
+              username: "john",
+              password: "also true but a string",
+            })
           }
         >
           TRY_SIGNIN
