@@ -11,7 +11,7 @@ interface Context {
 type Event =
   | { type: "TRY_SIGNIN"; data: FormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
-  | { type: "REPORT_SIGNIN_FAILURE" }
+  | { type: "REPORT_SIGNIN_FAILURE"; error?: any }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
@@ -74,8 +74,26 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
       },
       signedOut: {
         on: {
-          // TODO This is a shim for now.
-          TRY_SIGNIN: "signedIn",
+          TRY_SIGNIN: "tryingSignIn",
+        },
+      },
+      tryingSignIn: {
+        invoke: {
+          src: "userbaseSignIn",
+          onDone: {
+            actions: assign({
+              user: (_context, event) => event.data,
+            }),
+          },
+          onError: {
+            actions: assign({
+              user: (_context, _event) => undefined,
+            }),
+          },
+        },
+        on: {
+          REPORT_SIGNIN_SUCCESS: "signedIn",
+          REPORT_SIGNIN_FAILURE: "signedOut",
         },
       },
       catastrophicError: {},
@@ -84,6 +102,15 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
   {
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      /**
+       * - This is a function, which returns a function.
+       * - That function has an argument, `sendBack`.
+       * - That argument is a function! So we define its shape.
+       * - It takes an argument, `event`, which is of type `Event`.
+       * - It does not return a value.
+       *
+       * How the fuck you figured this out I do not know.
+       */
       userbaseInit: () => (sendBack: (event: Event) => void) => {
         /**
          * So this is a regular callback. We do the userbase stuff, let it
@@ -132,6 +159,24 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
           .catch((error) => {
             console.log(error);
             sendBack({ type: "REPORT_SIGNOUT_FAILURE" });
+          });
+      },
+
+      // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseSignIn: (_, event) => (sendBack: (event: Event) => void) => {
+        userbase
+          .signIn({
+            username: event.data.username,
+            password: event.data.password,
+            rememberMe: "local",
+          })
+          .then((user) => {
+            console.log("userbaseSignIn.user:", user);
+            sendBack({ type: "REPORT_SIGNIN_SUCCESS", user });
+          })
+          .catch((error) => {
+            console.log(error);
+            sendBack({ type: "REPORT_SIGNIN_FAILURE", error });
           });
       },
     },
