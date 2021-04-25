@@ -118,7 +118,7 @@ const newSignInStateMachine = Machine<SignInContext, SignInSchema, SignInEvent>(
 						 If we've ended up here, something truly weird is happening and it
 						 needs your attention.
 						
-						 TODO: put some error code in this event so you can show the user
+						 : put some error code in this event so you can show the user
 						       and do something about it. */
               target: "error",
             },
@@ -151,9 +151,9 @@ const newSignInStateMachine = Machine<SignInContext, SignInSchema, SignInEvent>(
             target: "signedIn",
             actions: [
               assign({ user: (_context, event) => event.data }),
-              // TODO: don't think this clearing-of-error is actually working.
+              // : don't think this clearing-of-error is actually working.
 
-              // TODO: commented this out until we figure out how to do a
+              // : commented this out until we figure out how to do a
               // `navigate` using `history.push`.
               // assign({ error: (_context, _event) => undefined }),
               // () => navigate("/"),

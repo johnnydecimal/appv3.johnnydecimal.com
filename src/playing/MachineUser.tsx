@@ -1,12 +1,16 @@
 import { useMachine } from "@xstate/compiled/react";
 import {
-  apr24MasterMachine,
-  Apr24MasterContext,
-} from "../machines/apr24Master.machine";
+  masterMachine,
+  MasterMachineContext,
+} from "../machines/master.machine";
+// import {
+//   apr24MasterMachine,
+//   Apr24MasterContext,
+// } from "../machines/apr24Master.machine";
 import { SignInFormData, SignInForm } from "../signIn";
 
 export const MachineUser = () => {
-  const [state, send] = useMachine(apr24MasterMachine, {
+  const [state, send] = useMachine(masterMachine, {
     devTools: true,
   });
 
@@ -16,39 +20,65 @@ export const MachineUser = () => {
    * ever send `send` down the tree. Ref. video at 52:00.
    */
   const handleSignIn = (data: SignInFormData) => {
-    console.log("handleSignIn.data:", data);
     send({
       type: "TRY_SIGNIN",
       data,
     });
   };
+
   const handleSignOut = () => {
     send("TRY_SIGNOUT");
   };
 
-  const Apr24MasterContextValue = {
+  const devSignInSuccess = () => {
+    send({
+      type: "TRY_SIGNIN",
+      data: {
+        username: "john",
+        password: "test123",
+      },
+    });
+  };
+
+  const devSignInFailure = () => {
+    send({
+      type: "TRY_SIGNIN",
+      data: {
+        username: "john",
+        password: "tekljsdkst123",
+      },
+    });
+  };
+
+  const MasterContextValue = {
+    // devSignInFailure,
+    // devSignInSuccess,
     handleSignIn,
     handleSignOut,
     state,
   };
 
   return (
-    <Apr24MasterContext.Provider value={Apr24MasterContextValue}>
-      <div>
+    <MasterMachineContext.Provider value={MasterContextValue}>
+      <div className="p-2 border border-black">
         <p>Machine User component</p>
         {JSON.stringify(state.value, null, 2)}
         <button
-          className="mx-2"
-          onClick={() =>
-            handleSignIn({
-              username: "john",
-              password: "also true but a string",
-            })
-          }
+          className="p-2 m-2 border border-black"
+          onClick={() => devSignInSuccess()}
         >
-          TRY_SIGNIN
+          TRY_SIGNIN (with valid credentials)
         </button>
-        <button className="mx-2" onClick={() => send("TRY_SIGNOUT")}>
+        <button
+          className="p-2 m-2 border border-black"
+          onClick={() => devSignInFailure()}
+        >
+          TRY_SIGNIN (with invalid credentials)
+        </button>
+        <button
+          className="p-2 m-2 border border-black"
+          onClick={() => handleSignOut()}
+        >
           TRY_SIGNOUT
         </button>
         {state.value === "signedOut" ? (
@@ -62,6 +92,6 @@ export const MachineUser = () => {
           </div>
         )}
       </div>
-    </Apr24MasterContext.Provider>
+    </MasterMachineContext.Provider>
   );
 };

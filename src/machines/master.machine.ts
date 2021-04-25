@@ -1,6 +1,10 @@
-import { assign, Machine } from "@xstate/compiled";
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { createContext } from "react";
-import userbase, { UserResult } from "userbase-js";
+import userbase from "userbase-js";
+import { Machine, assign } from "@xstate/compiled";
+
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { UserResult } from "userbase-js";
 import { SignInFormData } from "../signIn";
 
 interface Context {
@@ -13,13 +17,12 @@ type Event =
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE"; error: any }
   | { type: "TRY_SIGNOUT" }
-  | { type: "REPORT_SIGNOUT_SUCCESS" }
-  | { type: "REPORT_SIGNOUT_FAILURE" }
   | { type: "CATASTROPHIC_ERROR"; error: any };
 
-export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
+// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+export const masterMachine = Machine<Context, Event, "masterMachine">(
   {
-    id: "apr24MasterMachine",
+    id: "master",
     initial: "init",
     states: {
       init: {
@@ -40,23 +43,20 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
             target: "signedIn",
             actions: ["assignUser", "clearError"],
           },
-          REPORT_SIGNIN_FAILURE: "signedOut",
-        },
-      },
-      signedIn: {
-        on: {
-          TRY_SIGNOUT: {
-            target: "#apr24MasterMachine.determiningSignInState.tryingSignOut",
+          REPORT_SIGNIN_FAILURE: {
+            target: "signedOut",
+            actions: ["assignError", "clearUser"],
           },
         },
       },
+      signedIn: {},
       signedOut: {
-        on: {
-          TRY_SIGNIN: "#apr24MasterMachine.determiningSignInState.tryingSignIn",
-        },
-      },
-      determiningSignInState: {
         type: "compound",
+        on: {
+          TRY_SIGNIN: {
+            target: ".tryingSignIn",
+          },
+        },
         states: {
           tryingSignIn: {
             invoke: {
@@ -64,36 +64,17 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
             },
             on: {
               REPORT_SIGNIN_SUCCESS: {
-                target: "#apr24MasterMachine.signedIn",
+                target: "#master.signedIn",
                 actions: ["assignUser", "clearError"],
               },
               REPORT_SIGNIN_FAILURE: {
-                target: "#apr24MasterMachine.signedOut",
+                target: "#master.signedOut",
                 actions: ["clearUser", "assignError"],
               },
             },
           },
-          tryingSignOut: {
-            invoke: {
-              src: "userbaseSignOut",
-              onError: {
-                target: "#apr24MasterMachine.catastrophicError",
-              },
-            },
-            on: {
-              REPORT_SIGNOUT_SUCCESS: {
-                target: "#apr24MasterMachine.signedOut",
-                actions: ["clearError", "clearUser"],
-              },
-              /**
-               * // TODO
-               * I guess you'd get a failure if the service isn't available? In
-               * which case, what? Perhaps divert via a `forceSignOut` state where
-               * we clear local storage?
-               */
-              REPORT_SIGNOUT_FAILURE: "#apr24MasterMachine.signedOut",
-            },
-          },
+          tryingSignUp: {},
+          tryingSignOut: {},
         },
       },
       catastrophicError: {},
@@ -161,30 +142,17 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
               sendBack({
                 type: "REPORT_SIGNIN_FAILURE",
                 error:
-                  "Soft failure: userbase.init() call succeeded, but a user is not logged in.",
+                  "Info: userbase.init() call succeeded, but a user is not logged in.",
               });
             }
           })
           .catch((error) => {
-            console.log(error);
             /**
              * Now *this* is an error. Something janky happened with the `init`
              * call. We shit the bed at this stage.
+             * // TODO: test this, can you loopback the userbase URL?
              */
             sendBack({ type: "CATASTROPHIC_ERROR", error });
-          });
-      },
-
-      // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      userbaseSignOut: () => (sendBack: (event: Event) => void) => {
-        userbase
-          .signOut()
-          .then(() => {
-            sendBack({ type: "REPORT_SIGNOUT_SUCCESS" });
-          })
-          .catch((error) => {
-            console.log(error);
-            sendBack({ type: "REPORT_SIGNOUT_FAILURE" });
           });
       },
 
@@ -209,4 +177,4 @@ export const apr24MasterMachine = Machine<Context, Event, "apr24MasterMachine">(
   }
 );
 
-export const Apr24MasterContext = createContext<any>({});
+export const MasterMachineContext = createContext<any>({});
