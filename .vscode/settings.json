@@ -1,3 +1,8 @@
 {
-  "workbench.editor.labelFormat": "medium"
+  "workbench.editor.labelFormat": "medium",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#300A89",
+    "titleBar.activeBackground": "#430FC0",
+    "titleBar.activeForeground": "#FCFAFF"
+  }
 }
