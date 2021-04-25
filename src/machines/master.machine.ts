@@ -17,6 +17,8 @@ type Event =
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE"; error: any }
   | { type: "TRY_SIGNOUT" }
+  | { type: "REPORT_SIGNOUT_SUCCESS" }
+  | { type: "REPORT_SIGNOUT_FAILURE" }
   | { type: "CATASTROPHIC_ERROR"; error: any };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -49,7 +51,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
         },
       },
-      signedIn: {},
+      signedIn: {
+        on: {
+          TRY_SIGNOUT: {
+            target: "#master.signedOut.tryingSignOut",
+          },
+        },
+      },
       signedOut: {
         type: "compound",
         on: {
@@ -58,6 +66,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
         },
         states: {
+          init: {},
           tryingSignIn: {
             invoke: {
               src: "userbaseSignIn",
@@ -68,13 +77,43 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 actions: ["assignUser", "clearError"],
               },
               REPORT_SIGNIN_FAILURE: {
-                target: "#master.signedOut",
+                target: "#master.signedOut.init",
                 actions: ["clearUser", "assignError"],
               },
             },
           },
           tryingSignUp: {},
-          tryingSignOut: {},
+          tryingSignOut: {
+            invoke: {
+              src: "userbaseSignOut",
+            },
+            on: {
+              REPORT_SIGNOUT_SUCCESS: {
+                /**
+                 * userbase.signOut() did its job, so it's gracefully set the
+                 * localStorage item to `signedIn: false`.
+                 */
+                target: "#master.signedOut",
+                internal: false,
+              },
+              REPORT_SIGNOUT_FAILURE: {
+                /**
+                 * userbase.signOut() couldn't do its job, so to be sure we
+                 * remove the localStorage item ourselves. Not as graceful.
+                 */
+                target: "#master.signedOut",
+                internal: false,
+                actions: "forceSignOut",
+              },
+              TRY_SIGNIN: {
+                /**
+                 * Catch this event and make it do nothing, as it's also an
+                 * event on the parent which we don't want triggered from here.
+                 */
+                target: undefined,
+              },
+            },
+          },
         },
       },
       catastrophicError: {},
@@ -102,6 +141,9 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           return undefined;
         },
       }),
+      forceSignOut: (_context, _event) => {
+        window.localStorage.removeItem("userbaseCurrentSession");
+      },
     },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -171,6 +213,21 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           .catch((error) => {
             console.log(error);
             sendBack({ type: "REPORT_SIGNIN_FAILURE", error });
+          });
+      },
+
+      // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseSignOut: () => (sendBack: (event: Event) => void) => {
+        console.log("Just about to try signing out.");
+        userbase
+          .signOut()
+          .then(() => {
+            console.log("Signed out!");
+            sendBack({ type: "REPORT_SIGNOUT_SUCCESS" });
+          })
+          .catch((error) => {
+            console.log("Sign out failed!");
+            sendBack({ type: "REPORT_SIGNOUT_FAILURE" });
           });
       },
     },
