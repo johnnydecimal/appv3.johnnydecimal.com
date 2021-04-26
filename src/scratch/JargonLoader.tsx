@@ -21,7 +21,6 @@ export const JargonLoader = () => {
 
   useEffect(() => {
     const timeout = Math.random() * (1000 - 400) + 400;
-    console.log("timeout", timeout);
 
     if (remainingJargon.current.length === 0) {
       jargonRemains.current = false;
@@ -38,7 +37,6 @@ export const JargonLoader = () => {
             remainingJargon.current.pop() ||
             "This will never happen but TypeScript needs it";
           const newRenderJargon = [...renderJargon, newJargonItem];
-          console.log(newRenderJargon);
           setRenderJargon(newRenderJargon);
         }
       }, timeout);

@@ -17,7 +17,6 @@ export const SignInForm = () => {
   const { handleSubmit, register } = useForm<ISignInFormData>();
 
   const onSubmit = handleSubmit((formData) => {
-    console.log(formData);
     handleSignIn(formData);
   });
 

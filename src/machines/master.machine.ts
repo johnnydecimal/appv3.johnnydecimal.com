@@ -228,26 +228,21 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             rememberMe: "local",
           })
           .then((user) => {
-            console.log("userbaseSignIn.user:", user);
             sendBack({ type: "REPORT_SIGNIN_SUCCESS", user });
           })
           .catch((error) => {
-            console.log(error);
             sendBack({ type: "REPORT_SIGNIN_FAILURE", error });
           });
       },
 
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignOut: () => (sendBack: (event: Event) => void) => {
-        console.log("Just about to try signing out.");
         userbase
           .signOut()
           .then(() => {
-            console.log("Signed out!");
             sendBack({ type: "REPORT_SIGNOUT_SUCCESS" });
           })
           .catch((error) => {
-            console.log("Sign out failed!");
             sendBack({ type: "REPORT_SIGNOUT_FAILURE" });
           });
       },

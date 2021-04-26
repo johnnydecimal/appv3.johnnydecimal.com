@@ -19,6 +19,7 @@ export const Sandbox = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
+    // @ts-ignore
     inputRef.current.focus();
   }, []);
 
