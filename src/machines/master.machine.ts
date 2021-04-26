@@ -5,7 +5,7 @@ import { Machine, assign } from "@xstate/compiled";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
-import { SignInFormData } from "../signIn";
+import { ISignInFormData } from "../signIn";
 
 interface Context {
   error?: any;
@@ -13,7 +13,7 @@ interface Context {
 }
 
 type Event =
-  | { type: "TRY_SIGNIN"; data: SignInFormData }
+  | { type: "TRY_SIGNIN"; data: ISignInFormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE"; error: any }
   | { type: "TRY_SIGNOUT" }

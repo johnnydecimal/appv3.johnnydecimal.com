@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { MasterMachineContext } from "../machines/master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export interface SignInFormData {
+export interface ISignInFormData {
   username: string;
   password: string;
 }
@@ -14,7 +14,7 @@ export interface SignInFormData {
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const SignInForm = () => {
   const { handleSignIn, state } = useContext(MasterMachineContext);
-  const { handleSubmit, register } = useForm<SignInFormData>();
+  const { handleSubmit, register } = useForm<ISignInFormData>();
 
   const onSubmit = handleSubmit((formData) => {
     console.log(formData);

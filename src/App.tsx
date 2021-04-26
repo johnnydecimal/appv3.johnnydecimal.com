@@ -4,7 +4,7 @@ import { inspect } from "@xstate/inspect";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sandbox } from "./playing/Sandbox";
 // import { JargonLoader } from "./playing/JargonLoader";
-import { MachineUser } from "./playing/MachineUser";
+import { MasterMachine } from "./components/MasterMachine";
 // import { SignInForm } from "./signIn";
 
 inspect({
@@ -22,7 +22,7 @@ export const App = () => {
         <h1 className="border-b-2 border-black">Johnny&bull;Decimal</h1>
         {/* <JargonLoader /> */}
         {/* <Sandbox /> */}
-        <MachineUser />
+        <MasterMachine />
         {/* <SignInForm /> */}
       </div>
     </div>
