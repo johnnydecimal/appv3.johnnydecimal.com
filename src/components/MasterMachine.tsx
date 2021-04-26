@@ -1,6 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useMachine } from "@xstate/compiled/react";
-import React from "react";
 import { useLocation } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -45,38 +44,55 @@ export const MasterMachine = () => {
     state,
   };
 
-  const MasterMachineContextWrapper: React.FC = ({ children }) => {
-    return (
-      <MasterMachineContext.Provider value={MasterContextValue}>
-        {children}
-      </MasterMachineContext.Provider>
-    );
+  /**
+   * Declare our routing object.
+   */
+
+  const routingObject = {
+    init: {
+      "/": <FourOhFour />,
+    },
+    signedOut: {
+      "/": <SignInForm />,
+      "/404": <FourOhFour />,
+    },
+    signedIn: {
+      "/": <JDApp />,
+    },
   };
 
-  switch (state.toStrings()[0]) {
-    case "init":
-      return (
-        <MasterMachineContextWrapper>
-          {state.toStrings()[0]}
-        </MasterMachineContextWrapper>
-      );
-    case "signedOut":
-      return (
-        <MasterMachineContextWrapper>
-          <SignInForm />
-        </MasterMachineContextWrapper>
-      );
-    case "signedIn":
-      return (
-        <MasterMachineContextWrapper>
-          {state.toStrings()[0]}
-        </MasterMachineContextWrapper>
-      );
-    default:
-      return (
-        <MasterMachineContextWrapper>
-          {state.toStrings()[0]}
-        </MasterMachineContextWrapper>
-      );
+  const jsxThing = <SignInForm />;
+  console.log(typeof jsxThing);
+
+  const topLevelState = state.toStrings()[0];
+  // @ts-expect-error
+  if (typeof routingObject[topLevelState][pathname] === "object") {
+    return (
+      <MasterMachineContext.Provider value={MasterContextValue}>
+        {/* @ts-expect-error */}
+        {routingObject[topLevelState][pathname]}
+      </MasterMachineContext.Provider>
+    );
+  } else {
+    return <div>error</div>;
   }
+
+  // == Render   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+  /*
+  try {
+    console.log("topLevelState, pathname:", topLevelState, pathname);
+    // @ts-expect-error
+    console.log("trying: ", routingObject[topLevelState][pathname]);
+    // @ts-expect-error
+    const renderJSX = routingObject[topLevelState][pathname]();
+    return (
+      <MasterMachineContext.Provider value={MasterContextValue}>
+        {renderJSX}
+      </MasterMachineContext.Provider>
+    );
+  } catch (error) {
+    console.log(error);
+    return <div>error, see console</div>;
+  }
+  */
 };
