@@ -61,38 +61,19 @@ export const MasterMachine = () => {
     },
   };
 
-  const jsxThing = <SignInForm />;
-  console.log(typeof jsxThing);
+  const firstLevelState = state.toStrings()[0];
 
-  const topLevelState = state.toStrings()[0];
   // @ts-expect-error
-  if (typeof routingObject[topLevelState][pathname] === "object") {
+  if (typeof routingObject[firstLevelState][pathname] === "object") {
+    // If we find an object, it's a JSX item. Render it.
     return (
       <MasterMachineContext.Provider value={MasterContextValue}>
         {/* @ts-expect-error */}
-        {routingObject[topLevelState][pathname]}
+        {routingObject[firstLevelState][pathname]}
       </MasterMachineContext.Provider>
     );
   } else {
+    // If we don't, return some sort of error (TBC).
     return <div>error</div>;
   }
-
-  // == Render   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-  /*
-  try {
-    console.log("topLevelState, pathname:", topLevelState, pathname);
-    // @ts-expect-error
-    console.log("trying: ", routingObject[topLevelState][pathname]);
-    // @ts-expect-error
-    const renderJSX = routingObject[topLevelState][pathname]();
-    return (
-      <MasterMachineContext.Provider value={MasterContextValue}>
-        {renderJSX}
-      </MasterMachineContext.Provider>
-    );
-  } catch (error) {
-    console.log(error);
-    return <div>error, see console</div>;
-  }
-  */
 };

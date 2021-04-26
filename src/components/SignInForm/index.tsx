@@ -24,7 +24,7 @@ export const SignInForm = () => {
   return (
     <div className="p-4 mt-8 border border-black">
       <p>This is SignInForm</p>
-      <p>state.value: {state.value}</p>
+      <p>state.value: {state.toStrings()[0]}</p>
       <form onSubmit={onSubmit}>
         <label>login: </label>
         <input
