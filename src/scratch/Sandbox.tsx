@@ -19,7 +19,6 @@ export const Sandbox = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // @ts-expect-error
     inputRef.current.focus();
   }, []);
 

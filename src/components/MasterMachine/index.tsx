@@ -6,8 +6,8 @@ import { useLocation } from "react-router-dom";
 import {
   masterMachine,
   MasterMachineContext,
-} from "../machines/master.machine";
-import { SignInForm, ISignInFormData } from "./SignInForm";
+} from "../../machines/master.machine";
+import { SignInForm, ISignInFormData } from "../SignInForm";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
@@ -61,7 +61,12 @@ export const MasterMachine = () => {
     },
   };
 
-  const firstLevelState = state.toStrings()[0];
+  const firstLevelState: string = state.toStrings()[0]; // "signedOut"
+
+  // const firstLevel = "signedOut";
+  // const secondLevel = "/";
+  // const anything1 = routingObject[firstLevel][secondLevel];
+  // const anything2 = routingObject[firstLevelState][secondLevel];
 
   // @ts-expect-error
   if (typeof routingObject[firstLevelState][pathname] === "object") {

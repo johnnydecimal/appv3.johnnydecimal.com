@@ -1,6 +1,8 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { useForm } from "react-hook-form";
 import { useContext } from "react";
+import { useForm } from "react-hook-form";
+
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { MasterMachineContext } from "../../machines/master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -8,8 +10,6 @@ export interface ISignInFormData {
   username: string;
   password: string;
 }
-
-// import { TheMachineEvent } from "../machines/master.machine";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const SignInForm = () => {
