@@ -36,48 +36,45 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
              * the `userbaseInit` service fails at such a level that it doesn't
              * even send us an event. I dunno what that would be, given that
              * TS protects us from things like typos.
+             *
+             * Everything else is handled in the `userbaseInit` service.
              */
             target: "catastrophicError",
           },
         },
         on: {
           REPORT_SIGNIN_SUCCESS: {
-            target: "signedIn",
+            target: "#master.signedIn.idle",
             actions: ["assignUser", "clearError"],
           },
           REPORT_SIGNIN_FAILURE: {
-            target: "signedOut",
+            target: "#master.signedOut.idle",
             actions: ["assignError", "clearUser"],
-          },
-        },
-      },
-      signedIn: {
-        on: {
-          TRY_SIGNOUT: {
-            target: "#master.signedOut.tryingSignOut",
           },
         },
       },
       signedOut: {
         type: "compound",
-        on: {
-          TRY_SIGNIN: {
-            target: ".tryingSignIn",
-          },
-        },
+        initial: "idle",
         states: {
-          init: {},
+          idle: {
+            on: {
+              TRY_SIGNIN: {
+                target: "tryingSignIn",
+              },
+            },
+          },
           tryingSignIn: {
             invoke: {
               src: "userbaseSignIn",
             },
             on: {
               REPORT_SIGNIN_SUCCESS: {
-                target: "#master.signedIn",
+                target: "#master.signedIn.idle",
                 actions: ["assignUser", "clearError"],
               },
               REPORT_SIGNIN_FAILURE: {
-                target: "#master.signedOut.init",
+                target: "#master.signedOut.idle",
                 actions: ["clearUser", "assignError"],
               },
             },
@@ -90,19 +87,19 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               REPORT_SIGNOUT_SUCCESS: {
                 /**
-                 * userbase.signOut() did its job, so it's gracefully set the
+                 * userbase.signOut() did its job, so it has gracefully set the
                  * localStorage item to `signedIn: false`.
                  */
                 target: "#master.signedOut",
-                internal: false,
+                actions: ["clearError", "clearUser"],
               },
               REPORT_SIGNOUT_FAILURE: {
                 /**
                  * userbase.signOut() couldn't do its job, so to be sure we
-                 * remove the localStorage item ourselves. Not as graceful.
+                 * remove the localStorage item ourselves. Not as graceful, so
+                 * we don't do it by default.
                  */
                 target: "#master.signedOut",
-                internal: false,
                 actions: "forceSignOut",
               },
               TRY_SIGNIN: {
@@ -113,6 +110,18 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 target: undefined,
               },
             },
+          },
+        },
+      },
+      signedIn: {
+        type: "compound",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
+        on: {
+          TRY_SIGNOUT: {
+            target: "signedOut.tryingSignOut",
           },
         },
       },
@@ -200,6 +209,18 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignIn: (_, event) => (sendBack: (event: Event) => void) => {
+        /**
+         * If we're testing this using the inspector, the button-click isn't
+         * sending any event.data. Pick that up, and load some dummy values.
+         * // TODO: this is just for testing, pull it out in prod.
+         */
+        if (!event.data) {
+          event.data = {
+            username: "john",
+            password: "test123",
+          };
+        }
+
         userbase
           .signIn({
             username: event.data.username,

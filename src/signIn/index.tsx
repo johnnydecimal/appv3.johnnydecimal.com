@@ -1,7 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useForm } from "react-hook-form";
 import { useContext } from "react";
-import { Apr24MasterContext } from "../machines/apr24Master.machine";
+import { MasterMachineContext } from "../machines/master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface SignInFormData {
@@ -13,7 +13,7 @@ export interface SignInFormData {
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const SignInForm = () => {
-  const { handleSignIn, state } = useContext(Apr24MasterContext);
+  const { handleSignIn, state } = useContext(MasterMachineContext);
   const { handleSubmit, register } = useForm<SignInFormData>();
 
   const onSubmit = handleSubmit((formData) => {
