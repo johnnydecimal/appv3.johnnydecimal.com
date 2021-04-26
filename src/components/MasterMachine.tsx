@@ -7,11 +7,11 @@ import {
   masterMachine,
   MasterMachineContext,
 } from "../machines/master.machine";
-import { ISignInFormData } from "../signIn";
+import { SignInForm, ISignInFormData } from "./SignInForm";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
-const SignInForm = () => <div>SignInForm</div>;
+// const SignInForm = () => <div>SignInForm</div>;
 const JDApp = () => <div>JD App</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -50,28 +50,31 @@ export const MasterMachine = () => {
 
   const routingObject = {
     init: {
-      "/": FourOhFour,
+      "/": <FourOhFour />,
     },
     signedOut: {
-      "/": SignInForm,
-      "/404": FourOhFour,
+      "/": <SignInForm />,
+      "/404": <FourOhFour />,
     },
     signedIn: {
-      "/": JDApp,
+      "/": <JDApp />,
     },
   };
 
+  const jsxThing = <SignInForm />;
+  console.log(typeof jsxThing);
+
   const topLevelState = state.toStrings()[0];
   // @ts-expect-error
-  if (typeof routingObject[topLevelState][pathname] !== "function") {
-    return <div>error</div>;
-  } else {
+  if (typeof routingObject[topLevelState][pathname] === "object") {
     return (
       <MasterMachineContext.Provider value={MasterContextValue}>
         {/* @ts-expect-error */}
-        {routingObject[topLevelState][pathname]()}
+        {routingObject[topLevelState][pathname]}
       </MasterMachineContext.Provider>
     );
+  } else {
+    return <div>error</div>;
   }
 
   // == Render   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==

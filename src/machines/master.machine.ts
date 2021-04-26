@@ -5,7 +5,7 @@ import { Machine, assign } from "@xstate/compiled";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
-import { ISignInFormData } from "../signIn";
+import { ISignInFormData } from "../components/SignInForm";
 
 interface Context {
   error?: any;

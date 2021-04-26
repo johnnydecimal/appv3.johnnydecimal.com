@@ -1,7 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useForm } from "react-hook-form";
 import { useContext } from "react";
-import { MasterMachineContext } from "../machines/master.machine";
+import { MasterMachineContext } from "../../machines/master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignInFormData {
