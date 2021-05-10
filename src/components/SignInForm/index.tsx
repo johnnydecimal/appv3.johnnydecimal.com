@@ -22,6 +22,9 @@ export const SignInForm = () => {
    * Then the submit handler for that form just stores the username in state.
    * And now we have a username in state, so we can show the second form
    * which is the password form. And *its* handler can actually do the submit.
+   *
+   * Of course, this totally breaks password manager auto-fill. Which is kinda
+   * suboptimal.
    */
 
   const [userCredentials, setUserCredentials] = useState<ISignInFormData>();
