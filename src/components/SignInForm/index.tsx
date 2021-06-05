@@ -1,9 +1,9 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { useContext, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { MasterMachineContext } from "../../machines/master.machine";
+import { MasterMachineContext } from "../MasterMachine/master.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignInFormData {
@@ -14,86 +14,82 @@ export interface ISignInFormData {
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const SignInForm = () => {
   /**
-   * If you want to make this the sort of form that looks like a shell prompt -
-   * so you type your login, you hit return, then the password field appears -
-   * how would you do that?
-   *
-   * First, show the login field. It has to be its own form, I guess?
-   * Then the submit handler for that form just stores the username in state.
-   * And now we have a username in state, so we can show the second form
-   * which is the password form. And *its* handler can actually do the submit.
-   *
-   * Of course, this totally breaks password manager auto-fill. Which is kinda
-   * suboptimal.
+   * Grab `handleSignIn` from context. This sends the `TRY_SIGNIN` event along
+   * with `data`.
    */
-
-  const [userCredentials, setUserCredentials] = useState<ISignInFormData>();
-
   const { handleSignIn } = useContext(MasterMachineContext);
-  // const { handleSubmit, register } = useForm<ISignInFormData>();
 
   /**
-   * Set up the username form and its associated submit handlers.
+   * Set up react-hook-form.
    */
-  const {
-    handleSubmit: handleUsernameSubmit,
-    register: registerUsername,
-  } = useForm<any>();
-
-  const onUsernameSubmit = handleUsernameSubmit((formData: any) => {
-    setUserCredentials({
-      username: formData.username,
-      password: "",
-    });
-  });
+  const { handleSubmit, register, setFocus } = useForm<ISignInFormData>();
 
   /**
-   * Set up the password form and its associated submit handlers.
+   * NEXT: 2021-05-31 16:43:00
+   *
+   * You want to make this fun, which means the old login form. But of course
+   * it has to work with a password manager.
+   *
+   * So test just hiding the password element with CSS until it's required.
+   * Get the state of `username` from RHF and ... hmm no, you have to wait for
+   * the user to carriage-return, don't you? Which a password manager won't do.
+   *
+   * But a password manager will fill both fields simultaneously. So if there's
+   * a value in `password`, show it. Otherwise, wait for the user to press
+   * return.
+   *
+   * Why? Because you want to. This is a bit of a silly waste of time, yes. But
+   * it's fun, and you need something fun to get you back in to this.
+   *
+   * -- You've just put the onKeyDown handler there to detect the 'Return',
+   *    which works.
    */
-  const {
-    handleSubmit: handlePasswordSubmit,
-    register: registerPassword,
-  } = useForm<any>();
+  useEffect(() => {
+    setFocus("username");
+  }, [setFocus]);
 
-  const onPasswordSubmit = handlePasswordSubmit((formData: any) => {
-    handleSignIn({
-      username: userCredentials?.username,
-      password: formData.password,
-    });
-  });
-
-  if (!userCredentials?.username) {
-    // The `login:` prompt
-    return (
-      <div>
-        <form onSubmit={onUsernameSubmit}>
-          <label>login: </label>
+  return (
+    <div>
+      <p className="my-4">SignInForm</p>
+      <form
+        id="login-form"
+        onSubmit={handleSubmit((data) => handleSignIn(data))}
+      >
+        <label>
+          login:{" "}
           <input
-            autoCapitalize="none"
-            autoCorrect="off"
-            autoFocus={true}
-            className="bg-white outline-none"
-            {...registerUsername("username", { required: true })}
+            autoCapitalize="off"
+            autoComplete="off"
+            autoFocus
+            className="bg-white focus:outline-none"
+            id="input-field"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === "Tab") {
+                document
+                  .getElementById("password-wrapper")
+                  ?.classList.remove("hidden");
+                setTimeout(() => {
+                  document.getElementById("password-input")?.focus();
+                }, 20);
+              }
+            }}
+            type="text"
+            {...register("username", { required: true })}
           />
-        </form>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <div>login: {userCredentials.username}</div>
-        <form onSubmit={onPasswordSubmit}>
-          <label>password: </label>
-          <input
-            autoCapitalize="none"
-            autoCorrect="off"
-            autoFocus={true}
-            className="bg-white outline-none"
-            type="password"
-            {...registerPassword("password", { required: true })}
-          />
-        </form>
-      </div>
-    );
-  }
+        </label>
+        <div className="text-white" id="password-wrapper">
+          <label>
+            password:{" "}
+            <input
+              className="bg-white focus:outline-none"
+              id="password-input"
+              type="password"
+              {...register("password", { required: true })}
+            />
+          </label>
+          <input className="hidden" type="submit" />
+        </div>
+      </form>
+    </div>
+  );
 };

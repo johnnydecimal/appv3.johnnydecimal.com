@@ -3,10 +3,7 @@ import { useMachine } from "@xstate/compiled/react";
 import { useLocation } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  masterMachine,
-  MasterMachineContext,
-} from "../../machines/master.machine";
+import { masterMachine, MasterMachineContext } from "./master.machine";
 import { SignInForm, ISignInFormData } from "../SignInForm";
 
 // === TEST ===
@@ -16,16 +13,23 @@ const JDApp = () => <div>JD App</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const MasterMachine = () => {
+  /**
+   * Start the machine.
+   */
   const [state, send] = useMachine(masterMachine, {
     devTools: true,
   });
 
+  /**
+   * We render a component based on state + route. Get the current pathname
+   * so we can use it later.
+   */
   const { pathname } = useLocation();
 
   /**
    * Declare the functions which are the things we're going to pass down to our
    * child components. These are the functions which send events, so we don't
-   * ever send `send` down the tree. Ref. video at 52:00.
+   * ever send `send` down the tree.
    */
   const handleSignIn = (data: ISignInFormData) => {
     send({
@@ -38,6 +42,10 @@ export const MasterMachine = () => {
     send("TRY_SIGNOUT");
   };
 
+  /**
+   * Wrap these functions and `state` in an object which we'll use as context
+   * value, passing it down to child components.
+   */
   const MasterContextValue = {
     handleSignIn,
     handleSignOut,
@@ -47,7 +55,6 @@ export const MasterMachine = () => {
   /**
    * Declare our routing object.
    */
-
   const routingObject = {
     init: {
       "/": <FourOhFour />,
@@ -61,12 +68,11 @@ export const MasterMachine = () => {
     },
   };
 
+  /**
+   * Our state is nested, but for routing we only care about the first-level
+   * value.
+   */
   const firstLevelState: string = state.toStrings()[0]; // "signedOut"
-
-  // const firstLevel = "signedOut";
-  // const secondLevel = "/";
-  // const anything1 = routingObject[firstLevel][secondLevel];
-  // const anything2 = routingObject[firstLevelState][secondLevel];
 
   // @ts-expect-error
   if (typeof routingObject[firstLevelState][pathname] === "object") {

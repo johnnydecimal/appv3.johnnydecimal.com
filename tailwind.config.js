@@ -9,6 +9,10 @@ module.exports = {
       white: {
         DEFAULT: "#fcfbf8",
       },
+      grey: {
+        light: "#dfdfdf",
+        DEFAULT: "#bebebe",
+      },
     },
     extend: {},
     fontFamily: {

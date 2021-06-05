@@ -5,7 +5,7 @@ import { Machine, assign } from "@xstate/compiled";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
-import { ISignInFormData } from "../components/SignInForm";
+import { ISignInFormData } from "../SignInForm";
 
 interface Context {
   error?: any;
@@ -208,6 +208,8 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       },
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      // TODO: figure out why this is needed - appeared after a `yarn upgrade`
+      // @ts-ignore
       userbaseSignIn: (_, event) => (sendBack: (event: Event) => void) => {
         /**
          * If we're testing this using the inspector, the button-click isn't
@@ -236,6 +238,8 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       },
 
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      // TODO: figure out why this is needed - appeared after a `yarn upgrade`
+      // @ts-ignore
       userbaseSignOut: () => (sendBack: (event: Event) => void) => {
         userbase
           .signOut()
