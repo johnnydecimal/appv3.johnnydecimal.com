@@ -9,6 +9,7 @@ import { ISignInFormData } from "../SignInForm";
 
 interface Context {
   error?: any;
+  log: string[];
   user?: UserResult;
 }
 
@@ -26,6 +27,9 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
   {
     id: "master",
     initial: "init",
+    context: {
+      log: [`${new Date().toISOString()}: Connection established.`],
+    },
     states: {
       init: {
         invoke: {
@@ -48,6 +52,11 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             actions: ["assignUser", "clearError"],
           },
           REPORT_SIGNIN_FAILURE: {
+            /**
+             * From idle, if we aren't signed in we just go to the idle
+             * signedOut state, not signedOut.signInFailure. Because this isn't
+             * a failure that we need to tell the user about.
+             */
             target: "#master.signedOut.idle",
             actions: ["assignError", "clearUser"],
           },
@@ -64,6 +73,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               },
             },
           },
+          signInFailed: {
+            on: {
+              TRY_SIGNIN: {
+                target: "tryingSignIn",
+              },
+            },
+          },
           tryingSignIn: {
             invoke: {
               src: "userbaseSignIn",
@@ -74,7 +90,12 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 actions: ["assignUser", "clearError"],
               },
               REPORT_SIGNIN_FAILURE: {
-                target: "#master.signedOut.idle",
+                /**
+                 * If we just tried to sign in, and it failed, go to the special
+                 * signedOut.signInFailed state. We use this to report things to
+                 * the hapless user.
+                 */
+                target: "#master.signedOut.signInFailed",
                 actions: ["clearUser", "assignError"],
               },
             },
@@ -222,6 +243,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             password: "test123",
           };
         }
+
+        /**
+         * Clear any errors.
+         */
 
         userbase
           .signIn({

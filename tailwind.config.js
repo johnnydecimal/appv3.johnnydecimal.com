@@ -13,6 +13,9 @@ module.exports = {
         light: "#dfdfdf",
         DEFAULT: "#bebebe",
       },
+      red: {
+        DEFAULT: "#ff0000",
+      },
     },
     extend: {},
     fontFamily: {

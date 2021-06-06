@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -17,79 +17,66 @@ export const SignInForm = () => {
    * Grab `handleSignIn` from context. This sends the `TRY_SIGNIN` event along
    * with `data`.
    */
-  const { handleSignIn } = useContext(MasterMachineContext);
+  const { handleSignIn, state } = useContext(MasterMachineContext);
 
   /**
    * Set up react-hook-form.
    */
-  const { handleSubmit, register, setFocus } = useForm<ISignInFormData>();
+  const { handleSubmit, register } = useForm<ISignInFormData>();
 
   /**
    * NEXT: 2021-05-31 16:43:00
    *
-   * You want to make this fun, which means the old login form. But of course
-   * it has to work with a password manager.
+   * Okay, you tried the old-school login form and it didn't work. See the notes
+   * in the commit `fb2a5f5b ❌ Abandoned Unix-style login is here`.
    *
-   * So test just hiding the password element with CSS until it's required.
-   * Get the state of `username` from RHF and ... hmm no, you have to wait for
-   * the user to carriage-return, don't you? Which a password manager won't do.
-   *
-   * But a password manager will fill both fields simultaneously. So if there's
-   * a value in `password`, show it. Otherwise, wait for the user to press
-   * return.
-   *
-   * Why? Because you want to. This is a bit of a silly waste of time, yes. But
-   * it's fun, and you need something fun to get you back in to this.
-   *
-   * -- You've just put the onKeyDown handler there to detect the 'Return',
-   *    which works.
+   * So let's go with a funky-box approach instead. Just a bit of fun!
    */
-  useEffect(() => {
-    setFocus("username");
-  }, [setFocus]);
+
+  /**
+   * Construct the interface.
+   */
+  let inputBorders;
+  if (state.value.signedOut !== "signInFailed") {
+    inputBorders = "bg-white border-b-2 border-black focus:outline-none";
+  } else {
+    inputBorders = "bg-white border-b-2 border-red focus:outline-none";
+  }
 
   return (
-    <div>
-      <p className="my-4">SignInForm</p>
-      <form
-        id="login-form"
-        onSubmit={handleSubmit((data) => handleSignIn(data))}
-      >
-        <label>
-          login:{" "}
+    <div className="mt-24">
+      <form onSubmit={handleSubmit((data) => handleSignIn(data))}>
+        <div className="">
+          <label htmlFor="username">Username: </label>
           <input
             autoCapitalize="off"
             autoComplete="off"
             autoFocus
-            className="bg-white focus:outline-none"
-            id="input-field"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === "Tab") {
-                document
-                  .getElementById("password-wrapper")
-                  ?.classList.remove("hidden");
-                setTimeout(() => {
-                  document.getElementById("password-input")?.focus();
-                }, 20);
-              }
-            }}
+            className={inputBorders}
             type="text"
             {...register("username", { required: true })}
           />
-        </label>
-        <div className="text-white" id="password-wrapper">
-          <label>
-            password:{" "}
-            <input
-              className="bg-white focus:outline-none"
-              id="password-input"
-              type="password"
-              {...register("password", { required: true })}
-            />
-          </label>
-          <input className="hidden" type="submit" />
         </div>
+        <div className="mt-8">
+          <label htmlFor="password">Password: </label>
+          <input
+            className={inputBorders}
+            type="password"
+            {...register("password", { required: true })}
+          />
+        </div>
+        <button
+          className="px-4 py-2 mt-12 border-2 border-black focus:outline-none"
+          type="submit"
+        >
+          Sign in
+        </button>
       </form>
+      <div className="mt-8 text-sm">
+        {state.context.log.map((entry: string, i: number) => (
+          <p key={i}>{entry}</p>
+        ))}
+      </div>
     </div>
   );
 };
