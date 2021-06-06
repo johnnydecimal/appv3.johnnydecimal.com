@@ -74,7 +74,12 @@ export const SignInForm = () => {
       </form>
       <div className="mt-8 text-sm">
         {state.context.log.map((entry: string, i: number) => (
-          <p key={i}>{entry}</p>
+          <p
+            className="mt-1"
+            dangerouslySetInnerHTML={{ __html: entry }}
+            key={i}
+            style={{ paddingLeft: "26ch", textIndent: "-26ch" }}
+          ></p>
         ))}
       </div>
     </div>

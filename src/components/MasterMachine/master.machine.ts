@@ -160,6 +160,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         error: (_context, event) => {
           return event.error;
         },
+        log: (context, event) => {
+          const tempLog = context.log;
+          tempLog.unshift(
+            `${new Date().toISOString()}: <span class="">${event.error}</span>`
+          );
+          return tempLog;
+        },
       }),
       clearUser: assign({
         user: (_context, _event) => {
