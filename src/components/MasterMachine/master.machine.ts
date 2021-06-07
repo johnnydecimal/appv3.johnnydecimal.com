@@ -9,6 +9,7 @@ import { ISignInFormData } from "../SignInForm";
 
 interface Context {
   error?: any;
+  event?: any;
   log: string[];
   user?: UserResult;
 }
@@ -17,6 +18,7 @@ type Event =
   | { type: "TRY_SIGNIN"; data: ISignInFormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
   | { type: "REPORT_SIGNIN_FAILURE"; error: any }
+  | { type: "REPORT_NO_USER_SIGNED_IN"; event: any }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
@@ -219,8 +221,8 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                * a signed-in user.
                */
               sendBack({
-                type: "REPORT_SIGNIN_FAILURE",
-                error:
+                type: "REPORT_NO_USER_SIGNED_IN",
+                event:
                   "Info: userbase.init() call succeeded, but a user is not logged in.",
               });
             }
@@ -229,9 +231,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             /**
              * Now *this* is an error. Something janky happened with the `init`
              * call. We shit the bed at this stage.
-             * // TODO: test this, can you loopback the userbase URL?
+             *
+             * Update: change from CATASTROPHIC_ERROR to a regular error. Hmm
+             * no. What we need to do is examine the error, and depending on
+             * which one it is, act accordingly. They're all documented.
+             *
+             * // TODO: sort this out.
              */
-            sendBack({ type: "CATASTROPHIC_ERROR", error });
+            sendBack({ type: "REPORT_SIGNIN_FAILURE", error });
           });
       },
 
