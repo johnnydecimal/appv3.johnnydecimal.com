@@ -8,21 +8,65 @@ import { UserResult } from "userbase-js";
 import { ISignInFormData } from "../SignInForm";
 
 interface Context {
-  error?: any;
-  event?: any;
+  /**
+   * The most recent error.
+   */
+  error?: string;
+  /**
+   * The most recent information (not called 'event' to avoid confusion).
+   *
+   * We separate the two to allow us to log them differently
+   * (e.g. errors appear in red).
+   */
+  info?: string;
+  /**
+   * The log is the list of errors and events as they occurred.
+   *
+   * Each action should log to the log as it handles the error/event.
+   */
   log: string[];
   user?: UserResult;
 }
 
 type Event =
   | { type: "TRY_SIGNIN"; data: ISignInFormData }
-  | { type: "REPORT_SIGNIN_SUCCESS"; user: UserResult }
-  | { type: "REPORT_SIGNIN_FAILURE"; error: any }
-  | { type: "REPORT_NO_USER_SIGNED_IN"; event: any }
+  | { type: "REPORT_SIGNIN_SUCCESS"; info: string; user: UserResult }
+  | { type: "REPORT_SIGNIN_FAILURE"; error: string }
+  | { type: "REPORT_NO_USER_SIGNED_IN"; info: string }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
-  | { type: "CATASTROPHIC_ERROR"; error: any };
+  | { type: "CATASTROPHIC_ERROR"; error: string };
+
+// === Utility functions    ===-===-===-===-===-===-===-===-===-===-===-===-===
+/**
+ * A standard function to write to the log, which is the thing that appears
+ * on-screen as you're signing in/up.
+ */
+const addToLog = (
+  context: Context, // Current machine context.
+  message: string, // The new message to write to the log.
+  className?: string // Optional className to style the event.
+): string[] => {
+  const tempLog = context.log;
+  tempLog.unshift(
+    `${new Date()
+      .toTimeString()
+      .slice(0, 8)}: <span class=${className}>${message}</span>`
+  );
+  return tempLog;
+};
+
+/**
+ * Userbase messages/errors look like:
+ * `ShortErrorCode: A longer description of the error.`
+ *
+ * We usually want the second half of the message to display to the user. This
+ * function just splits on `: `, returning an array with the two parts.
+ */
+const splitUserbaseMessage = (userbaseMessage: string): string[] => {
+  return userbaseMessage.split(": ");
+};
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const masterMachine = Machine<Context, Event, "masterMachine">(
@@ -30,7 +74,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     id: "master",
     initial: "init",
     context: {
-      log: [`${new Date().toISOString()}: Connection established.`],
+      log: [`${new Date().toTimeString().slice(0, 8)}: Initialised.`],
     },
     states: {
       init: {
@@ -62,6 +106,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             target: "#master.signedOut.idle",
             actions: ["assignError", "clearUser"],
           },
+          REPORT_NO_USER_SIGNED_IN: {
+            target: "#master.signedOut.idle",
+            actions: ["assignInfo", "clearError"],
+          },
         },
       },
       signedOut: {
@@ -83,6 +131,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             },
           },
           tryingSignIn: {
+            entry: ["logTryingSignIn"],
             invoke: {
               src: "userbaseSignIn",
             },
@@ -158,17 +207,20 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           return event.user;
         },
       }),
+      logTryingSignIn: assign({
+        log: (context, _event) => addToLog(context, "Trying signin."),
+      }),
       assignError: assign({
         error: (_context, event) => {
           return event.error;
         },
-        log: (context, event) => {
-          const tempLog = context.log;
-          tempLog.unshift(
-            `${new Date().toISOString()}: <span class="">${event.error}</span>`
-          );
-          return tempLog;
+        log: (context, event) => addToLog(context, event.error, "text-red"),
+      }),
+      assignInfo: assign({
+        info: (_context, event) => {
+          return event.info;
         },
+        log: (context, event) => addToLog(context, event.info),
       }),
       clearUser: assign({
         user: (_context, _event) => {
@@ -205,6 +257,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
           })
           .then((session) => {
+            console.log(session);
             /**
              * This only tells us that the SDK initialised successfully, *not*
              * that there is an active user. For that we need `session.user`
@@ -214,7 +267,11 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               /**
                * We have a user, so a user is signed in.
                */
-              sendBack({ type: "REPORT_SIGNIN_SUCCESS", user: session.user });
+              sendBack({
+                type: "REPORT_SIGNIN_SUCCESS",
+                info: "Signin success.",
+                user: session.user,
+              });
             } else {
               /**
                * There's no user, but this isn't an error. We just don't have
@@ -222,8 +279,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                */
               sendBack({
                 type: "REPORT_NO_USER_SIGNED_IN",
-                event:
-                  "Info: userbase.init() call succeeded, but a user is not logged in.",
+                info: "Database connection established. No user signed in.",
               });
             }
           })
@@ -269,7 +325,11 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             rememberMe: "local",
           })
           .then((user) => {
-            sendBack({ type: "REPORT_SIGNIN_SUCCESS", user });
+            sendBack({
+              type: "REPORT_SIGNIN_SUCCESS",
+              info: "Signin success.",
+              user,
+            });
           })
           .catch((error) => {
             sendBack({ type: "REPORT_SIGNIN_FAILURE", error });

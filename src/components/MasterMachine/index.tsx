@@ -5,11 +5,11 @@ import { useLocation } from "react-router-dom";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { masterMachine, MasterMachineContext } from "./master.machine";
 import { SignInForm, ISignInFormData } from "../SignInForm";
+import { JDApp } from "../JDApp";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
 // const SignInForm = () => <div>SignInForm</div>;
-const JDApp = () => <div>JD App</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const MasterMachine = () => {

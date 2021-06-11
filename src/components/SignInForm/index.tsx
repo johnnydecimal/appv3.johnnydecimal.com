@@ -34,43 +34,76 @@ export const SignInForm = () => {
    */
 
   /**
-   * Construct the interface.
+   * Construct it better.
    */
-  let inputBorders;
-  if (state.value.signedOut !== "signInFailed") {
-    inputBorders = "bg-white border-b-2 border-black focus:outline-none";
-  } else {
-    inputBorders = "bg-white border-b-2 border-red focus:outline-none";
+  const UI = {
+    disabled: false,
+    buttonClass: "",
+    inputClass: "",
+  };
+  const buttonClassBase =
+    "px-4 py-2 font-bold shadow-inner justify-self-stretch border-2 border-black focus:outline-none";
+  const inputClassBase = "rounded-none flex-grow bg-white focus:outline-none";
+  switch (true) {
+    case state.matches({ signedOut: "idle" }):
+      UI.disabled = false;
+      UI.buttonClass = `${buttonClassBase}`;
+      UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
+      break;
+    case state.matches({ signedOut: "tryingSignIn" }):
+      UI.disabled = true;
+      UI.buttonClass = `${buttonClassBase} cursor-wait`;
+      UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
+      break;
+    case state.matches({ signedOut: "signInFailed" }):
+      UI.disabled = false;
+      UI.buttonClass = `${buttonClassBase}`;
+      UI.inputClass = `${inputClassBase} border-b-2 border-red focus:outline-none`;
+      break;
+    default:
+      break;
   }
 
   return (
-    <div className="mt-24">
+    <>
       <form onSubmit={handleSubmit((data) => handleSignIn(data))}>
-        <div className="">
-          <label htmlFor="username">Username: </label>
-          <input
-            autoCapitalize="off"
-            autoComplete="off"
-            autoFocus
-            className={inputBorders}
-            type="text"
-            {...register("username", { required: true })}
-          />
+        <div className="max-w-sm mt-24">
+          <div className="flex">
+            <label htmlFor="username">Username:&nbsp;</label>
+            <input
+              autoCapitalize="off"
+              autoComplete="off"
+              autoFocus
+              className={UI.inputClass}
+              disabled={UI.disabled}
+              type="text"
+              {...register("username", { required: true })}
+            />
+          </div>
+          <div className="flex mt-8">
+            <label htmlFor="password">Password:&nbsp;</label>
+            <input
+              className={UI.inputClass}
+              type="password"
+              {...register("password", { required: true })}
+            />
+          </div>
+          <div className="grid grid-flow-col grid-cols-2 gap-2 mt-12">
+            <button
+              className={UI.buttonClass}
+              disabled={UI.disabled}
+              type="submit"
+            >
+              {state.value.signedOut === "tryingSignIn" ? "Wait..." : "Sign in"}
+            </button>
+            <button
+              className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
+              onClick={() => alert("yo")}
+            >
+              Sign up
+            </button>
+          </div>
         </div>
-        <div className="mt-8">
-          <label htmlFor="password">Password: </label>
-          <input
-            className={inputBorders}
-            type="password"
-            {...register("password", { required: true })}
-          />
-        </div>
-        <button
-          className="px-4 py-2 mt-12 border-2 border-black focus:outline-none"
-          type="submit"
-        >
-          Sign in
-        </button>
       </form>
       <div className="mt-8 text-sm">
         {state.context.log.map((entry: string, i: number) => (
@@ -78,10 +111,10 @@ export const SignInForm = () => {
             className="mt-1"
             dangerouslySetInnerHTML={{ __html: entry }}
             key={i}
-            style={{ paddingLeft: "26ch", textIndent: "-26ch" }}
+            style={{ paddingLeft: "10ch", textIndent: "-10ch" }}
           ></p>
         ))}
       </div>
-    </div>
+    </>
   );
 };
