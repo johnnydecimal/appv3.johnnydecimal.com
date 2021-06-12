@@ -7,9 +7,15 @@ import { Machine, assign } from "@xstate/compiled";
 import { UserResult } from "userbase-js";
 import { ISignInFormData } from "../SignInForm";
 
+interface UserbaseError {
+  name: string; // UsernameOrPasswordMismatch
+  message: string; // Username or password mismatch.
+  status: number; // 401
+}
+
 interface Context {
   /**
-   * The most recent error.
+   * The most recent error. (This is the `message` part of `UserbaseError`.)
    */
   error?: string;
   /**
@@ -25,18 +31,21 @@ interface Context {
    * Each action should log to the log as it handles the error/event.
    */
   log: string[];
+  /**
+   * The user object, if signed in.
+   */
   user?: UserResult;
 }
 
 type Event =
   | { type: "TRY_SIGNIN"; data: ISignInFormData }
   | { type: "REPORT_SIGNIN_SUCCESS"; info: string; user: UserResult }
-  | { type: "REPORT_SIGNIN_FAILURE"; error: string }
+  | { type: "REPORT_SIGNIN_FAILURE"; error: UserbaseError }
   | { type: "REPORT_NO_USER_SIGNED_IN"; info: string }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
-  | { type: "CATASTROPHIC_ERROR"; error: string };
+  | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
 // === Utility functions    ===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
@@ -48,24 +57,10 @@ const addToLog = (
   message: string, // The new message to write to the log.
   className?: string // Optional className to style the event.
 ): string[] => {
-  const tempLog = context.log;
-  tempLog.unshift(
-    `${new Date()
-      .toTimeString()
-      .slice(0, 8)}: <span class=${className}>${message}</span>`
-  );
-  return tempLog;
-};
-
-/**
- * Userbase messages/errors look like:
- * `ShortErrorCode: A longer description of the error.`
- *
- * We usually want the second half of the message to display to the user. This
- * function just splits on `: `, returning an array with the two parts.
- */
-const splitUserbaseMessage = (userbaseMessage: string): string[] => {
-  return userbaseMessage.split(": ");
+  const newLog = context.log;
+  const time = new Date().toTimeString().slice(0, 8);
+  newLog.unshift(`${time}: <span class=${className}>${message}</span>`);
+  return newLog;
 };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -104,11 +99,11 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
              * a failure that we need to tell the user about.
              */
             target: "#master.signedOut.idle",
-            actions: ["assignError", "clearUser"],
+            actions: ["assignAndLogError", "clearUser"],
           },
           REPORT_NO_USER_SIGNED_IN: {
             target: "#master.signedOut.idle",
-            actions: ["assignInfo", "clearError"],
+            actions: ["assignAndLogInfo", "clearError"],
           },
         },
       },
@@ -138,7 +133,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               REPORT_SIGNIN_SUCCESS: {
                 target: "#master.signedIn.idle",
-                actions: ["assignUser", "clearError"],
+                actions: ["assignUser", "clearError", "logSignInSuccess"],
               },
               REPORT_SIGNIN_FAILURE: {
                 /**
@@ -147,12 +142,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                  * the hapless user.
                  */
                 target: "#master.signedOut.signInFailed",
-                actions: ["clearUser", "assignError"],
+                actions: ["clearUser", "assignAndLogError"],
               },
             },
           },
           tryingSignUp: {},
           tryingSignOut: {
+            entry: ["logTryingSignOut"],
+            exit: ["logSignOutSuccess"], // We force it either way
             invoke: {
               src: "userbaseSignOut",
             },
@@ -203,34 +200,34 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
   {
     actions: {
       assignUser: assign({
-        user: (_context, event) => {
-          return event.user;
-        },
+        user: (_context, event) => event.user,
+      }),
+      logSignInSuccess: assign({
+        log: (context, _event) => addToLog(context, "Sign in successful."),
       }),
       logTryingSignIn: assign({
-        log: (context, _event) => addToLog(context, "Trying signin."),
+        log: (context, _event) => addToLog(context, "Trying sign in."),
       }),
-      assignError: assign({
-        error: (_context, event) => {
-          return event.error;
-        },
-        log: (context, event) => addToLog(context, event.error, "text-red"),
+      logTryingSignOut: assign({
+        log: (context, _event) => addToLog(context, "Trying sign out."),
       }),
-      assignInfo: assign({
-        info: (_context, event) => {
-          return event.info;
-        },
+      logSignOutSuccess: assign({
+        log: (context, _event) => addToLog(context, "Signed out."),
+      }),
+      assignAndLogError: assign({
+        error: (_context, event) => event.error.message,
+        log: (context, event) =>
+          addToLog(context, event.error.message, "text-red"),
+      }),
+      assignAndLogInfo: assign({
+        info: (_context, event) => event.info,
         log: (context, event) => addToLog(context, event.info),
       }),
       clearUser: assign({
-        user: (_context, _event) => {
-          return undefined;
-        },
+        user: (_context, _event) => undefined,
       }),
       clearError: assign({
-        error: (_context, _event) => {
-          return undefined;
-        },
+        error: (_context, _event) => undefined,
       }),
       forceSignOut: (_context, _event) => {
         window.localStorage.removeItem("userbaseCurrentSession");
@@ -269,7 +266,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                */
               sendBack({
                 type: "REPORT_SIGNIN_SUCCESS",
-                info: "Signin success.",
+                info: "Sign in success.",
                 user: session.user,
               });
             } else {
@@ -314,10 +311,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           };
         }
 
-        /**
-         * Clear any errors.
-         */
-
         userbase
           .signIn({
             username: event.data.username,
@@ -327,7 +320,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           .then((user) => {
             sendBack({
               type: "REPORT_SIGNIN_SUCCESS",
-              info: "Signin success.",
+              info: "Sign in success.",
               user,
             });
           })

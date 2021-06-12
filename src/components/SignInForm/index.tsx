@@ -46,6 +46,7 @@ export const SignInForm = () => {
   const inputClassBase = "rounded-none flex-grow bg-white focus:outline-none";
   switch (true) {
     case state.matches({ signedOut: "idle" }):
+    case state.matches({ signedOut: "tryingSignOut" }):
       UI.disabled = false;
       UI.buttonClass = `${buttonClassBase}`;
       UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
@@ -96,10 +97,7 @@ export const SignInForm = () => {
             >
               {state.value.signedOut === "tryingSignIn" ? "Wait..." : "Sign in"}
             </button>
-            <button
-              className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
-              onClick={() => alert("yo")}
-            >
+            <button className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none">
               Sign up
             </button>
           </div>
