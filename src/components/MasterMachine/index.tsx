@@ -5,10 +5,12 @@ import { useLocation } from "react-router-dom";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { masterMachine, MasterMachineContext } from "./master.machine";
 import { SignInForm, ISignInFormData } from "../SignInForm";
+import { SignUpForm, ISignUpFormData } from "../SignUpForm";
 import { JDApp } from "../JDApp";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
+const WaitOne = () => <div>Wait one. Doing networks.</div>;
 // const SignInForm = () => <div>SignInForm</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -38,6 +40,13 @@ export const MasterMachine = () => {
     });
   };
 
+  const handleSignUp = (data: ISignUpFormData) => {
+    send({
+      type: "TRY_SIGNUP",
+      data,
+    });
+  };
+
   const handleSignOut = () => {
     send("TRY_SIGNOUT");
   };
@@ -49,6 +58,7 @@ export const MasterMachine = () => {
   const MasterContextValue = {
     handleSignIn,
     handleSignOut,
+    handleSignUp,
     state,
   };
 
@@ -57,10 +67,11 @@ export const MasterMachine = () => {
    */
   const routingObject = {
     init: {
-      "/": <FourOhFour />,
+      "/": <WaitOne />,
     },
     signedOut: {
       "/": <SignInForm />,
+      "/signup": <SignUpForm />,
       "/404": <FourOhFour />,
     },
     signedIn: {

@@ -6,6 +6,7 @@ import { Machine, assign } from "@xstate/compiled";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
 import { ISignInFormData } from "../SignInForm";
+import { ISignUpFormData } from "../SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
@@ -45,6 +46,7 @@ type Event =
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
+  | { type: "TRY_SIGNUP"; data: ISignUpFormData }
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
 // === Utility functions    ===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -115,6 +117,9 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               TRY_SIGNIN: {
                 target: "tryingSignIn",
+              },
+              TRY_SIGNUP: {
+                target: "tryingSignUp",
               },
             },
           },
@@ -202,17 +207,17 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       assignUser: assign({
         user: (_context, event) => event.user,
       }),
-      logSignInSuccess: assign({
-        log: (context, _event) => addToLog(context, "Sign in successful."),
-      }),
       logTryingSignIn: assign({
         log: (context, _event) => addToLog(context, "Trying sign in."),
+      }),
+      logSignInSuccess: assign({
+        log: (context, _event) => addToLog(context, "Sign in successful."),
       }),
       logTryingSignOut: assign({
         log: (context, _event) => addToLog(context, "Trying sign out."),
       }),
       logSignOutSuccess: assign({
-        log: (context, _event) => addToLog(context, "Signed out."),
+        log: (context, _event) => addToLog(context, "Sign out successful."),
       }),
       assignAndLogError: assign({
         error: (_context, event) => event.error.message,
@@ -249,6 +254,8 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
          * So this is a regular callback. We do the userbase stuff, let it
          * resolve, then use `sendBack` to send an event to the machine.
          */
+
+        alert(window.location.pathname);
         userbase
           .init({
             appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
