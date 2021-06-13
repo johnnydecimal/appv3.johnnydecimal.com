@@ -1,6 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useMachine } from "@xstate/compiled/react";
-import { useLocation } from "react-router-dom";
+import { Redirect, useLocation } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { masterMachine, MasterMachineContext } from "./master.machine";
@@ -64,18 +64,27 @@ export const MasterMachine = () => {
 
   /**
    * Declare our routing object.
+   *
+   * So our primary concern is state: what state are we in? From there, what
+   * path are we at? If it's something valid, render the result.
+   *
+   * The routing logic below has a fallback built-in: if a state matches but a
+   * path does not, render a `<Redirect to="/" />.
    */
   const routingObject = {
     init: {
       "/": <WaitOne />,
+      "/signup": <WaitOne />,
     },
     signedOut: {
       "/": <SignInForm />,
-      "/signup": <SignUpForm />,
       "/404": <FourOhFour />,
     },
     signedIn: {
       "/": <JDApp />,
+    },
+    signUp: {
+      "/signup": <SignUpForm />,
     },
   };
 
@@ -95,7 +104,7 @@ export const MasterMachine = () => {
       </MasterMachineContext.Provider>
     );
   } else {
-    // If we don't, return some sort of error (TBC).
-    return <div>error</div>;
+    // Nothing matched: if in doubt, just redirect back to the home screen.
+    return <Redirect to="/" />;
   }
 };

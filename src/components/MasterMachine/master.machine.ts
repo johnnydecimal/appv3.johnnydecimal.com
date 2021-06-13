@@ -46,6 +46,7 @@ type Event =
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
+  | { type: "REPORT_SIGNUP_PAGE" } // We detect that we're at `/signup`
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -75,6 +76,8 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     },
     states: {
       init: {
+        // entry: ["check if path is /signup"],
+        entry: ["clearUser", "check path"],
         invoke: {
           src: "userbaseInit",
           onError: {
@@ -107,6 +110,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             target: "#master.signedOut.idle",
             actions: ["assignAndLogInfo", "clearError"],
           },
+          REPORT_SIGNUP_PAGE: {
+            target: "#master.signUp",
+            actions: ["clearError", "clearUser"],
+          },
         },
       },
       signedOut: {
@@ -117,9 +124,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               TRY_SIGNIN: {
                 target: "tryingSignIn",
-              },
-              TRY_SIGNUP: {
-                target: "tryingSignUp",
               },
             },
           },
@@ -151,7 +155,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               },
             },
           },
-          tryingSignUp: {},
           tryingSignOut: {
             entry: ["logTryingSignOut"],
             exit: ["logSignOutSuccess"], // We force it either way
@@ -187,6 +190,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
         },
       },
+      signUp: {},
       signedIn: {
         type: "compound",
         initial: "idle",
@@ -237,6 +241,16 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       forceSignOut: (_context, _event) => {
         window.localStorage.removeItem("userbaseCurrentSession");
       },
+      "check path": () => {
+        console.log("yo");
+      },
+      // "check if path is /signup": (_context, _event) => {
+      //   if (window.location.pathname.indexOf("signup") > 0) {
+      //     send({
+      //       type: "REPORT_SIGNUP_PAGE",
+      //     });
+      //   }
+      // },
     },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -255,7 +269,19 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
          * resolve, then use `sendBack` to send an event to the machine.
          */
 
-        alert(window.location.pathname);
+        /**
+         * In the special case where the user has arrived directly at `/signup`,
+         * send them to the part of the machine that handles that.
+         */
+        if (window.location.pathname.indexOf("signup") > 0) {
+          sendBack({
+            type: "REPORT_SIGNUP_PAGE",
+          });
+        }
+
+        /**
+         * Otherwise check sign in status with Userbase and react accordingly.
+         */
         userbase
           .init({
             appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
