@@ -1,7 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { createContext } from "react";
 import userbase from "userbase-js";
-import { Machine, assign } from "@xstate/compiled";
+import { Machine, assign, send } from "@xstate/compiled";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -46,7 +46,7 @@ type Event =
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
-  | { type: "REPORT_SIGNUP_PAGE" } // We detect that we're at `/signup`
+  | { type: "REPORT_SIGNUP_URL" } // We detect that we're at `/signup`
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -76,8 +76,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     },
     states: {
       init: {
-        // entry: ["check if path is /signup"],
-        entry: ["clearUser", "check path"],
+        entry: ["checkPathForSignup"],
         invoke: {
           src: "userbaseInit",
           onError: {
@@ -110,7 +109,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             target: "#master.signedOut.idle",
             actions: ["assignAndLogInfo", "clearError"],
           },
-          REPORT_SIGNUP_PAGE: {
+          REPORT_SIGNUP_URL: {
             target: "#master.signUp",
             actions: ["clearError", "clearUser"],
           },
@@ -241,16 +240,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       forceSignOut: (_context, _event) => {
         window.localStorage.removeItem("userbaseCurrentSession");
       },
-      "check path": () => {
-        console.log("yo");
+      checkPathForSignup: () => {
+        console.log("👩🏽‍🎤 checkPathForSignup");
+        if (window.location.pathname === "/signup") {
+          send({
+            type: "REPORT_SIGNUP_URL",
+          });
+        }
       },
-      // "check if path is /signup": (_context, _event) => {
-      //   if (window.location.pathname.indexOf("signup") > 0) {
-      //     send({
-      //       type: "REPORT_SIGNUP_PAGE",
-      //     });
-      //   }
-      // },
     },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -275,7 +272,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
          */
         if (window.location.pathname.indexOf("signup") > 0) {
           sendBack({
-            type: "REPORT_SIGNUP_PAGE",
+            type: "REPORT_SIGNUP_URL",
           });
         }
 
