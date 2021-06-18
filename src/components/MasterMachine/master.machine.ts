@@ -1,7 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { createContext } from "react";
 import userbase from "userbase-js";
-import { Machine, assign, send } from "@xstate/compiled";
+import { Machine, assign } from "@xstate/compiled";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -39,14 +39,13 @@ interface Context {
 }
 
 type Event =
+  | { type: "a user is signed in"; info: string; user: UserResult }
+  | { type: "no user is signed in"; info: string }
+  | { type: "userbase.init() raised an error"; error: UserbaseError }
   | { type: "TRY_SIGNIN"; data: ISignInFormData }
-  | { type: "REPORT_SIGNIN_SUCCESS"; info: string; user: UserResult }
-  | { type: "REPORT_SIGNIN_FAILURE"; error: UserbaseError }
-  | { type: "REPORT_NO_USER_SIGNED_IN"; info: string }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
-  | { type: "REPORT_SIGNUP_URL" } // We detect that we're at `/signup`
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -76,7 +75,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     },
     states: {
       init: {
-        entry: ["checkPathForSignup"],
+        // entry: ["checkPathForSignup"],
         invoke: {
           src: "userbaseInit",
           onError: {
@@ -92,11 +91,15 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
         },
         on: {
-          REPORT_SIGNIN_SUCCESS: {
+          "a user is signed in": {
             target: "#master.signedIn.idle",
             actions: ["assignUser", "clearError"],
           },
-          REPORT_SIGNIN_FAILURE: {
+          "no user is signed in": {
+            target: "#master.signedOut.idle",
+            actions: ["assignAndLogInfo", "clearError"],
+          },
+          "userbase.init() raised an error": {
             /**
              * From idle, if we aren't signed in we just go to the idle
              * signedOut state, not signedOut.signInFailure. Because this isn't
@@ -104,14 +107,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
              */
             target: "#master.signedOut.idle",
             actions: ["assignAndLogError", "clearUser"],
-          },
-          REPORT_NO_USER_SIGNED_IN: {
-            target: "#master.signedOut.idle",
-            actions: ["assignAndLogInfo", "clearError"],
-          },
-          REPORT_SIGNUP_URL: {
-            target: "#master.signUp",
-            actions: ["clearError", "clearUser"],
           },
         },
       },
@@ -139,11 +134,11 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               src: "userbaseSignIn",
             },
             on: {
-              REPORT_SIGNIN_SUCCESS: {
+              "a user is signed in": {
                 target: "#master.signedIn.idle",
                 actions: ["assignUser", "clearError", "logSignInSuccess"],
               },
-              REPORT_SIGNIN_FAILURE: {
+              "userbase.init() raised an error": {
                 /**
                  * If we just tried to sign in, and it failed, go to the special
                  * signedOut.signInFailed state. We use this to report things to
@@ -240,14 +235,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       forceSignOut: (_context, _event) => {
         window.localStorage.removeItem("userbaseCurrentSession");
       },
-      checkPathForSignup: () => {
-        console.log("👩🏽‍🎤 checkPathForSignup");
-        if (window.location.pathname === "/signup") {
-          send({
-            type: "REPORT_SIGNUP_URL",
-          });
-        }
-      },
+      // checkPathForSignup: () => {
+      //   console.log("👩🏽‍🎤 checkPathForSignup");
+      //   if (window.location.pathname === "/signup") {
+      //     send({
+      //       type: "REPORT_SIGNUP_URL",
+      //     });
+      //   }
+      // },
     },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -269,12 +264,12 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         /**
          * In the special case where the user has arrived directly at `/signup`,
          * send them to the part of the machine that handles that.
-         */
-        if (window.location.pathname.indexOf("signup") > 0) {
-          sendBack({
-            type: "REPORT_SIGNUP_URL",
-          });
-        }
+         if (window.location.pathname.indexOf("signup") > 0) {
+           sendBack({
+             type: "REPORT_SIGNUP_URL",
+            });
+          }
+        */
 
         /**
          * Otherwise check sign in status with Userbase and react accordingly.
@@ -295,7 +290,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                * We have a user, so a user is signed in.
                */
               sendBack({
-                type: "REPORT_SIGNIN_SUCCESS",
+                type: "a user is signed in",
                 info: "Sign in success.",
                 user: session.user,
               });
@@ -305,7 +300,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                * a signed-in user.
                */
               sendBack({
-                type: "REPORT_NO_USER_SIGNED_IN",
+                type: "no user is signed in",
                 info: "Database connection established. No user signed in.",
               });
             }
@@ -321,7 +316,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
              *
              * // TODO: sort this out.
              */
-            sendBack({ type: "REPORT_SIGNIN_FAILURE", error });
+            sendBack({ type: "userbase.init() raised an error", error });
           });
       },
 
@@ -349,13 +344,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           })
           .then((user) => {
             sendBack({
-              type: "REPORT_SIGNIN_SUCCESS",
+              type: "a user is signed in",
               info: "Sign in success.",
               user,
             });
           })
           .catch((error) => {
-            sendBack({ type: "REPORT_SIGNIN_FAILURE", error });
+            sendBack({ type: "userbase.init() raised an error", error });
           });
       },
 
