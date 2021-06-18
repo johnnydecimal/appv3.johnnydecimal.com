@@ -44,7 +44,7 @@ type Event =
   | { type: "userbase.init() raised an error"; error: UserbaseError }
   | { type: "attempt signin"; data: ISignInFormData }
   | { type: "userbase.signIn() raised an error"; error: UserbaseError }
-  | { type: "TRY_SIGNOUT" }
+  | { type: "attempt signout" }
   | { type: "the user was signed out" }
   | { type: "signout failed, so we force it anyway" }
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
@@ -137,7 +137,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "a user is signed in": {
                 target: "#master.signedIn.idle",
-                actions: ["assignUser", "clearError", "logSignInSuccess"],
+                actions: ["assignUser", "clearError"],
               },
               "userbase.signIn() raised an error": {
                 /**
@@ -174,13 +174,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 target: "#master.signedOut",
                 actions: ["clearError", "clearUser", "forceSignOut"],
               },
-              "attempt signin": {
-                /**
-                 * Catch this event and make it do nothing, as it's also an
-                 * event on the parent which we don't want triggered from here.
-                 */
-                target: undefined,
-              },
             },
           },
         },
@@ -190,10 +183,12 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         type: "compound",
         initial: "idle",
         states: {
-          idle: {},
+          idle: {
+            entry: ["logSignInSuccess"],
+          },
         },
         on: {
-          TRY_SIGNOUT: {
+          "attempt signout": {
             target: "signedOut.tryingSignOut",
           },
         },

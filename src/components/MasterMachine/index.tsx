@@ -48,7 +48,7 @@ export const MasterMachine = () => {
   };
 
   const handleSignOut = () => {
-    send("TRY_SIGNOUT");
+    send("attempt signout");
   };
 
   /**
