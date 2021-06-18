@@ -35,7 +35,7 @@ export const MasterMachine = () => {
    */
   const handleSignIn = (data: ISignInFormData) => {
     send({
-      type: "TRY_SIGNIN",
+      type: "attempt signin",
       data,
     });
   };

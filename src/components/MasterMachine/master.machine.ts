@@ -42,7 +42,8 @@ type Event =
   | { type: "a user is signed in"; info: string; user: UserResult }
   | { type: "no user is signed in"; info: string }
   | { type: "userbase.init() raised an error"; error: UserbaseError }
-  | { type: "TRY_SIGNIN"; data: ISignInFormData }
+  | { type: "attempt signin"; data: ISignInFormData }
+  | { type: "userbase.signIn() raised an error"; error: UserbaseError }
   | { type: "TRY_SIGNOUT" }
   | { type: "REPORT_SIGNOUT_SUCCESS" }
   | { type: "REPORT_SIGNOUT_FAILURE" }
@@ -116,14 +117,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         states: {
           idle: {
             on: {
-              TRY_SIGNIN: {
+              "attempt signin": {
                 target: "tryingSignIn",
               },
             },
           },
           signInFailed: {
             on: {
-              TRY_SIGNIN: {
+              "attempt signin": {
                 target: "tryingSignIn",
               },
             },
@@ -138,7 +139,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 target: "#master.signedIn.idle",
                 actions: ["assignUser", "clearError", "logSignInSuccess"],
               },
-              "userbase.init() raised an error": {
+              "userbase.signIn() raised an error": {
                 /**
                  * If we just tried to sign in, and it failed, go to the special
                  * signedOut.signInFailed state. We use this to report things to
@@ -173,7 +174,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 target: "#master.signedOut",
                 actions: "forceSignOut",
               },
-              TRY_SIGNIN: {
+              "attempt signin": {
                 /**
                  * Catch this event and make it do nothing, as it's also an
                  * event on the parent which we don't want triggered from here.
@@ -350,7 +351,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             });
           })
           .catch((error) => {
-            sendBack({ type: "userbase.init() raised an error", error });
+            sendBack({ type: "userbase.signIn() raised an error", error });
           });
       },
 
