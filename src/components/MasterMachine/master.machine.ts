@@ -45,8 +45,8 @@ type Event =
   | { type: "attempt signin"; data: ISignInFormData }
   | { type: "userbase.signIn() raised an error"; error: UserbaseError }
   | { type: "TRY_SIGNOUT" }
-  | { type: "REPORT_SIGNOUT_SUCCESS" }
-  | { type: "REPORT_SIGNOUT_FAILURE" }
+  | { type: "the user was signed out" }
+  | { type: "signout failed, so we force it anyway" }
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -152,12 +152,12 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
           tryingSignOut: {
             entry: ["logTryingSignOut"],
-            exit: ["logSignOutSuccess"], // We force it either way
             invoke: {
               src: "userbaseSignOut",
             },
+            exit: ["logSignOutSuccess"],
             on: {
-              REPORT_SIGNOUT_SUCCESS: {
+              "the user was signed out": {
                 /**
                  * userbase.signOut() did its job, so it has gracefully set the
                  * localStorage item to `signedIn: false`.
@@ -165,14 +165,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 target: "#master.signedOut",
                 actions: ["clearError", "clearUser"],
               },
-              REPORT_SIGNOUT_FAILURE: {
+              "signout failed, so we force it anyway": {
                 /**
                  * userbase.signOut() couldn't do its job, so to be sure we
                  * remove the localStorage item ourselves. Not as graceful, so
                  * we don't do it by default.
                  */
                 target: "#master.signedOut",
-                actions: "forceSignOut",
+                actions: ["clearError", "clearUser", "forceSignOut"],
               },
               "attempt signin": {
                 /**
@@ -362,10 +362,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         userbase
           .signOut()
           .then(() => {
-            sendBack({ type: "REPORT_SIGNOUT_SUCCESS" });
+            sendBack({ type: "the user was signed out" });
           })
           .catch((error) => {
-            sendBack({ type: "REPORT_SIGNOUT_FAILURE" });
+            sendBack({ type: "signout failed, so we force it anyway" });
           });
       },
     },
