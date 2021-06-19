@@ -40,7 +40,7 @@ interface Context {
 
 type Event =
   // Initialising the machine
-  | { type: "a user is signed in"; info: string; user: UserResult }
+  | { type: "a user is signed in"; user: UserResult }
   | { type: "no user is signed in"; info: string }
   | { type: "userbase.init() raised an error"; error: UserbaseError }
   // Signing in
@@ -115,7 +115,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
           "no user is signed in": {
             target: "#master.signedOut.idle",
-            actions: ["assignAndLogInfo", "clearError"],
+            actions: [
+              "clearError",
+              send({
+                type: "write to the log",
+                log: "Database connection established. No user logged in.",
+              }),
+            ],
           },
           "userbase.init() raised an error": {
             /**
@@ -154,7 +160,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             },
           },
           tryingSignIn: {
-            entry: ["logTryingSignIn"],
+            entry: [send({ type: "write to the log", log: "Trying sign in." })],
             invoke: {
               src: "userbaseSignIn",
             },
@@ -175,11 +181,15 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             },
           },
           tryingSignOut: {
-            entry: ["logTryingSignOut"],
+            entry: [
+              send({ type: "write to the log", log: "Trying sign out." }),
+            ],
             invoke: {
               src: "userbaseSignOut",
             },
-            exit: ["logSignOutSuccess"],
+            exit: [
+              send({ type: "write to the log", log: "Sign out successful." }),
+            ],
             on: {
               "the user was signed out": {
                 /**
@@ -268,6 +278,12 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "signup was successful": {
                 target: "#master.signedIn.idle",
+                actions: [
+                  send({
+                    type: "write to the log",
+                    log: "Sign up successful.",
+                  }),
+                ],
               },
               "signup failed": {
                 target: "#master.signUp.signUpFailed",
@@ -292,7 +308,9 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         initial: "idle",
         states: {
           idle: {
-            entry: ["logSignInSuccess"],
+            entry: [
+              send({ type: "write to the log", log: "Sign in successful." }),
+            ],
           },
         },
         on: {
@@ -309,29 +327,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       assignUser: assign({
         user: (_context, event) => event.user,
       }),
-      logTryingSignIn: assign({
-        log: (context, _event) => addToLog(context, "Trying sign in."),
-      }),
-      logSignInSuccess: assign({
-        log: (context, _event) => addToLog(context, "Sign in successful."),
-      }),
-      logTryingSignOut: assign({
-        log: (context, _event) => addToLog(context, "Trying sign out."),
-      }),
-      logSignOutSuccess: assign({
-        log: (context, _event) => addToLog(context, "Sign out successful."),
-      }),
-      // logEventDotLog: assign({
-      //   log: (context, event) => addToLog(context, event.log),
-      // }),
       assignAndLogError: assign({
         error: (_context, event) => event.error.message,
         log: (context, event) =>
           addToLog(context, event.error.message, "text-red"),
-      }),
-      assignAndLogInfo: assign({
-        info: (_context, event) => event.info,
-        log: (context, event) => addToLog(context, event.info),
       }),
       clearUser: assign({
         user: (_context, _event) => undefined,
@@ -342,14 +341,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       forceSignOut: (_context, _event) => {
         window.localStorage.removeItem("userbaseCurrentSession");
       },
-      // checkPathForSignup: () => {
-      //   console.log("👩🏽‍🎤 checkPathForSignup");
-      //   if (window.location.pathname === "/signup") {
-      //     send({
-      //       type: "REPORT_SIGNUP_URL",
-      //     });
-      //   }
-      // },
     },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -399,7 +390,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                */
               sendBack({
                 type: "a user is signed in",
-                info: "Sign in success.",
                 user: session.user,
               });
             } else {
@@ -454,7 +444,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             .then((user) => {
               sendBack({
                 type: "a user is signed in",
-                info: "Sign in success.",
                 user,
               });
             })
