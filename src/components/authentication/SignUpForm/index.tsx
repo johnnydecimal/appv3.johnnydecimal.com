@@ -1,7 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { MasterMachineContext } from "../AuthMachine/auth.machine";
@@ -18,22 +17,17 @@ export const SignUpForm = () => {
    * Grab `handleSignIn` from context. This sends the `TRY_SIGNIN` event along
    * with `data`.
    */
-  const { handleSignUp, state } = useContext(MasterMachineContext);
+  const {
+    handleAcknowledgeDireWarningAboutE2EEncryption,
+    handleSignUp,
+    state,
+    switchToSignIn,
+  } = useContext(MasterMachineContext);
 
   /**
    * Set up react-hook-form.
    */
   const { handleSubmit, register } = useForm<ISignUpFormData>();
-
-  /**
-   * Set up history so we can navigate.
-   */
-  const history = useHistory();
-
-  /**
-   * Set up the warning box that scares you in to remembering your password.
-   */
-  const [warningHasBeenSeen, setWarningHasBeenSeen] = useState(false);
 
   /**
    * Construct the UI.
@@ -45,23 +39,32 @@ export const SignUpForm = () => {
   };
   const buttonClassBase =
     "px-4 py-2 font-bold shadow-inner justify-self-stretch border-2 border-black focus:outline-none";
-  const inputClassBase = "rounded-none flex-grow bg-white focus:outline-none";
+  const inputClassBase =
+    "rounded-none flex-grow bg-white border-b-2 focus:outline-none";
   switch (true) {
-    case state.matches({ signedOut: "idle" }):
-    case state.matches({ signedOut: "tryingSignOut" }):
+    case state.matches({
+      signUp: "direWarningAboutE2EEncryptionNotAcknowledged",
+    }):
+      UI.disabled = true;
+      UI.buttonClass = `${buttonClassBase}`;
+      UI.inputClass = `${inputClassBase} border-black`;
+      break;
+    case state.matches({
+      signUp: "okayToTrySignUp",
+    }):
       UI.disabled = false;
       UI.buttonClass = `${buttonClassBase}`;
-      UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
+      UI.inputClass = `${inputClassBase} border-black`;
       break;
-    case state.matches({ signedOut: "tryingSignIn" }):
+    case state.matches({ signUp: "tryingSignUp" }):
       UI.disabled = true;
       UI.buttonClass = `${buttonClassBase} cursor-wait`;
-      UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
+      UI.inputClass = `${inputClassBase} border-black text-grey`;
       break;
-    case state.matches({ signedOut: "signInFailed" }):
+    case state.matches({ signedUp: "signUpFailed" }):
       UI.disabled = false;
       UI.buttonClass = `${buttonClassBase}`;
-      UI.inputClass = `${inputClassBase} border-b-2 border-red focus:outline-none`;
+      UI.inputClass = `${inputClassBase} border-red text-red`;
       break;
     default:
       break;
@@ -70,7 +73,10 @@ export const SignUpForm = () => {
   return (
     <>
       <form onSubmit={handleSubmit((data) => handleSignUp(data))}>
-        <div className="max-w-sm mt-24">
+        <div className="max-w-sm mt-20">
+          <h1 className="mb-10 text-3xl font-bold border-b-4 border-black">
+            Sign up
+          </h1>
           <div className="flex">
             <label htmlFor="username">Username:&nbsp;</label>
             <input
@@ -87,6 +93,7 @@ export const SignUpForm = () => {
             <label htmlFor="password">Password:&nbsp;</label>
             <input
               className={UI.inputClass}
+              disabled={UI.disabled}
               type="password"
               {...register("password", { required: true })}
             />
@@ -94,7 +101,7 @@ export const SignUpForm = () => {
           <div className="grid grid-flow-col grid-cols-2 gap-2 mt-12">
             <button
               className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
-              onClick={() => history.push("/")}
+              onClick={switchToSignIn}
             >
               Sign in
             </button>
@@ -103,27 +110,30 @@ export const SignUpForm = () => {
               disabled={UI.disabled}
               type="submit"
             >
-              Sign up
+              {state.value.signUp === "tryingSignUp" ? "Wait..." : "Sign up"}
             </button>
           </div>
         </div>
       </form>
-      {!warningHasBeenSeen ? (
+      {state.matches("signUp.direWarningAboutE2EEncryptionNotAcknowledged") ? (
         <div
-          className="mt-8 text-sm"
-          onClick={() => setWarningHasBeenSeen(true)}
+          className="p-2 mt-8 text-sm border cursor-pointer border-red"
+          onClick={() => handleAcknowledgeDireWarningAboutE2EEncryption()}
         >
-          <h2 className="font-semibold underline">Really important message</h2>
-          <p>
+          <h2 className="font-bold underline text-red">
+            Really important message
+          </h2>
+          <p className="my-2">
             Your data is end-to-end encrypted. I can't see it, ever, under any
             circumstances.
           </p>
-          <p>
-            As a result, it is critically important that you remember your
-            password. If you forget it, I can't reset it. Your data will be
-            lost. As in lost-lost, forever-encrypted lost.
+          <p className="my-2">
+            As a result, it is{" "}
+            <span className="font-semibold">critically important</span> that you
+            remember your password. If you forget it, I can't reset it. Your
+            data will be lost. As in lost-lost, forever-encrypted lost.
           </p>
-          <p>
+          <p className="mt-2">
             Click this message to make it go away. The 'Sign up' button will
             then become active.
           </p>

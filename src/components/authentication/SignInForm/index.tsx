@@ -96,7 +96,7 @@ export const SignInForm = () => {
             </button>
             <button
               className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
-              onClick={() => switchToSignUp()}
+              onClick={switchToSignUp}
             >
               Sign up
             </button>

@@ -14,7 +14,7 @@ module.exports = {
         DEFAULT: "#bebebe",
       },
       red: {
-        DEFAULT: "#ff0000",
+        DEFAULT: "#FA2520",
       },
     },
     extend: {},

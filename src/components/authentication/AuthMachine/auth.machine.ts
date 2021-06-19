@@ -46,8 +46,10 @@ type Event =
   | { type: "userbase.signIn() raised an error"; error: UserbaseError }
   | { type: "attempt signout" }
   | { type: "switch to the signup page" }
+  | { type: "switch to the signin page" }
   | { type: "the user was signed out" }
   | { type: "signout failed, so we force it anyway" }
+  | { type: "acknowledge dire warning about e2e encryption" }
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -182,7 +184,31 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
           },
         },
       },
-      signUp: {},
+      signUp: {
+        type: "compound",
+        initial: "direWarningAboutE2EEncryptionNotAcknowledged",
+        states: {
+          direWarningAboutE2EEncryptionNotAcknowledged: {
+            on: {
+              "acknowledge dire warning about e2e encryption": {
+                target: "#master.signUp.okayToTrySignUp",
+              },
+              "switch to the signin page": {
+                target: "#master.signedOut.idle",
+              },
+            },
+          },
+          okayToTrySignUp: {
+            on: {
+              "switch to the signin page": {
+                target: "#master.signedOut.idle",
+              },
+            },
+          },
+          tryingSignUp: {},
+          signUpFailed: {},
+        },
+      },
       signedIn: {
         type: "compound",
         initial: "idle",

@@ -1,6 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useMachine } from "@xstate/compiled/react";
-import { Redirect, useLocation } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { masterMachine, MasterMachineContext } from "./auth.machine";
@@ -21,12 +20,6 @@ export const MasterMachine = () => {
   const [state, send] = useMachine(masterMachine, {
     devTools: true,
   });
-
-  /**
-   * We render a component based on state + route. Get the current pathname
-   * so we can use it later.
-   */
-  const { pathname } = useLocation();
 
   /**
    * Declare the functions which are the things we're going to pass down to our
@@ -51,8 +44,16 @@ export const MasterMachine = () => {
     send("attempt signout");
   };
 
+  const switchToSignIn = () => {
+    send("switch to the signin page");
+  };
+
   const switchToSignUp = () => {
     send("switch to the signup page");
+  };
+
+  const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
+    send("acknowledge dire warning about e2e encryption");
   };
 
   /**
@@ -60,10 +61,12 @@ export const MasterMachine = () => {
    * value, passing it down to child components.
    */
   const MasterContextValue = {
+    handleAcknowledgeDireWarningAboutE2EEncryption,
     handleSignIn,
     handleSignOut,
     handleSignUp,
     state,
+    switchToSignIn,
     switchToSignUp,
   };
 
@@ -82,7 +85,7 @@ export const MasterMachine = () => {
       RenderComponent = <JDApp />;
       break;
     default:
-      RenderComponent = <div>Whoops</div>;
+      RenderComponent = <FourOhFour />;
       break;
   }
 
