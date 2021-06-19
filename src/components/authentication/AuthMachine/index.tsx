@@ -67,49 +67,29 @@ export const MasterMachine = () => {
     switchToSignUp,
   };
 
-  /**
-   * Declare our routing object.
-   *
-   * So our primary concern is state: what state are we in? From there, what
-   * path are we at? If it's something valid, render the result.
-   *
-   * The routing logic below has a fallback built-in: if a state matches but a
-   * path does not, render a `<Redirect to="/" />.
-   */
-  const routingObject = {
-    init: {
-      "/": <WaitOne />,
-      "/signup": <WaitOne />,
-    },
-    signedOut: {
-      "/": <SignInForm />,
-      "/404": <FourOhFour />,
-    },
-    signedIn: {
-      "/": <JDApp />,
-    },
-    signUp: {
-      "/signup": <SignUpForm />,
-    },
-  };
-
-  /**
-   * Our state is nested, but for routing we only care about the first-level
-   * value.
-   */
-  const firstLevelState: string = state.toStrings()[0]; // "signedOut"
-
-  // @ts-expect-error
-  if (typeof routingObject[firstLevelState][pathname] === "object") {
-    // If we find an object, it's a JSX item. Render it.
-    return (
-      <MasterMachineContext.Provider value={MasterContextValue}>
-        {/* @ts-expect-error */}
-        {routingObject[firstLevelState][pathname]}
-      </MasterMachineContext.Provider>
-    );
-  } else {
-    // Nothing matched: if in doubt, just redirect back to the home screen.
-    return <Redirect to="/" />;
+  let RenderComponent;
+  switch (true) {
+    case state.matches("init"):
+      RenderComponent = <WaitOne />;
+      break;
+    case state.matches("signedOut"):
+      RenderComponent = <SignInForm />;
+      break;
+    case state.matches("signUp"):
+      RenderComponent = <SignUpForm />;
+      break;
+    case state.matches("signedIn"):
+      RenderComponent = <JDApp />;
+      break;
+    default:
+      RenderComponent = <div>Whoops</div>;
+      break;
   }
+
+  return (
+    <MasterMachineContext.Provider
+      children={RenderComponent}
+      value={MasterContextValue}
+    />
+  );
 };
