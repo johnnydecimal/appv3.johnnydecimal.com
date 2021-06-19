@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MasterMachineContext } from "../MasterMachine/master.machine";
+import { MasterMachineContext } from "../AuthMachine/auth.machine";
 
 export const JDApp = () => {
   const { handleSignOut } = useContext(MasterMachineContext);

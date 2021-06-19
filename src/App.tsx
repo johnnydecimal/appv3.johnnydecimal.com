@@ -4,7 +4,7 @@ import { inspect } from "@xstate/inspect";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sandbox } from "./playing/Sandbox";
 // import { JargonLoader } from "./playing/JargonLoader";
-import { MasterMachine } from "./components/MasterMachine";
+import { MasterMachine } from "./components/authentication/AuthMachine";
 // import { SignInForm } from "./signIn";
 
 /**

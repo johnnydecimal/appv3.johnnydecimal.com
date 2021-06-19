@@ -3,7 +3,7 @@ import { useMachine } from "@xstate/compiled/react";
 import { Redirect, useLocation } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { masterMachine, MasterMachineContext } from "./master.machine";
+import { masterMachine, MasterMachineContext } from "./auth.machine";
 import { SignInForm, ISignInFormData } from "../SignInForm";
 import { SignUpForm, ISignUpFormData } from "../SignUpForm";
 import { JDApp } from "../JDApp";
@@ -51,6 +51,10 @@ export const MasterMachine = () => {
     send("attempt signout");
   };
 
+  const switchToSignUp = () => {
+    send("switch to the signup page");
+  };
+
   /**
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
@@ -60,6 +64,7 @@ export const MasterMachine = () => {
     handleSignOut,
     handleSignUp,
     state,
+    switchToSignUp,
   };
 
   /**

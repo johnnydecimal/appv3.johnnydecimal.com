@@ -1,7 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { createContext } from "react";
-import userbase from "userbase-js";
 import { Machine, assign } from "@xstate/compiled";
+import userbase from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -45,6 +45,7 @@ type Event =
   | { type: "attempt signin"; data: ISignInFormData }
   | { type: "userbase.signIn() raised an error"; error: UserbaseError }
   | { type: "attempt signout" }
+  | { type: "switch to the signup page" }
   | { type: "the user was signed out" }
   | { type: "signout failed, so we force it anyway" }
   | { type: "TRY_SIGNUP"; data: ISignUpFormData }
@@ -119,6 +120,9 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "attempt signin": {
                 target: "tryingSignIn",
+              },
+              "switch to the signup page": {
+                target: "#master.signUp",
               },
             },
           },

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { MasterMachineContext } from "../MasterMachine/master.machine";
+import { MasterMachineContext } from "../AuthMachine/auth.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignUpFormData {

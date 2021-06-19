@@ -1,10 +1,9 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useContext } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router-dom";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { MasterMachineContext } from "../MasterMachine/master.machine";
+import { MasterMachineContext } from "../AuthMachine/auth.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignInFormData {
@@ -15,20 +14,16 @@ export interface ISignInFormData {
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const SignInForm = () => {
   /**
-   * Grab `handleSignIn` from context. This sends the `TRY_SIGNIN` event along
-   * with `data`.
+   * Grab `handleSignIn` from context. This sends the `attempt signin` event
+   * along with `data`.
    */
-  const { handleSignIn, state } = useContext(MasterMachineContext);
+  const { handleSignIn, state, switchToSignUp } =
+    useContext(MasterMachineContext);
 
   /**
    * Set up react-hook-form.
    */
   const { handleSubmit, register } = useForm<ISignInFormData>();
-
-  /**
-   * Set up history so we can navigate.
-   */
-  const history = useHistory();
 
   /**
    * Construct the UI.
@@ -40,23 +35,24 @@ export const SignInForm = () => {
   };
   const buttonClassBase =
     "px-4 py-2 font-bold shadow-inner justify-self-stretch border-2 border-black focus:outline-none";
-  const inputClassBase = "rounded-none flex-grow bg-white focus:outline-none";
+  const inputClassBase =
+    "rounded-none flex-grow bg-white border-b-2 focus:outline-none";
   switch (true) {
     case state.matches({ signedOut: "idle" }):
     case state.matches({ signedOut: "tryingSignOut" }):
       UI.disabled = false;
       UI.buttonClass = `${buttonClassBase}`;
-      UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
+      UI.inputClass = `${inputClassBase} border-black`;
       break;
     case state.matches({ signedOut: "tryingSignIn" }):
       UI.disabled = true;
       UI.buttonClass = `${buttonClassBase} cursor-wait`;
-      UI.inputClass = `${inputClassBase} bg-white border-b-2 border-black focus:outline-none`;
+      UI.inputClass = `${inputClassBase} border-black text-grey`;
       break;
     case state.matches({ signedOut: "signInFailed" }):
       UI.disabled = false;
       UI.buttonClass = `${buttonClassBase}`;
-      UI.inputClass = `${inputClassBase} border-b-2 border-red focus:outline-none`;
+      UI.inputClass = `${inputClassBase} border-red text-red`;
       break;
     default:
       break;
@@ -65,7 +61,10 @@ export const SignInForm = () => {
   return (
     <>
       <form onSubmit={handleSubmit((data) => handleSignIn(data))}>
-        <div className="max-w-sm mt-24">
+        <div className="max-w-sm mt-20">
+          <h1 className="mb-10 text-3xl font-bold border-b-4 border-black">
+            Sign in
+          </h1>
           <div className="flex">
             <label htmlFor="username">Username:&nbsp;</label>
             <input
@@ -82,6 +81,7 @@ export const SignInForm = () => {
             <label htmlFor="password">Password:&nbsp;</label>
             <input
               className={UI.inputClass}
+              disabled={UI.disabled}
               type="password"
               {...register("password", { required: true })}
             />
@@ -96,7 +96,7 @@ export const SignInForm = () => {
             </button>
             <button
               className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
-              onClick={() => history.push("/signup")}
+              onClick={() => switchToSignUp()}
             >
               Sign up
             </button>
