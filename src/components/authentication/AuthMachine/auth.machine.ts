@@ -419,7 +419,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       },
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      // TODO: figure out why this is needed - appeared after a `yarn upgrade`
       // @ts-ignore
       userbaseSignIn:
         (_context, event) => (sendBack: (event: Event) => void) => {
