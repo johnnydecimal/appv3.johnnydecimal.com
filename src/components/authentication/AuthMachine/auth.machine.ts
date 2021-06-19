@@ -57,7 +57,7 @@ type Event =
   | { type: "acknowledge dire warning about e2e encryption" }
   | { type: "attempt signup"; data: ISignUpFormData }
   | { type: "signup was successful"; user: UserResult }
-  | { type: "signup failed" }
+  | { type: "signup failed"; error: UserbaseError }
   // Helpers
   | { type: "write to the log"; log: string }
   // Errors
@@ -70,7 +70,7 @@ type Event =
  */
 const addToLog = (
   context: Context, // Current machine context.
-  message: string, // The new message to write to the log.
+  message: string = "addToLog() was called without a `message` parameter.", // The new message to write to the log.
   className?: string // Optional className to style the event.
 ): string[] => {
   const newLog = context.log;
@@ -146,6 +146,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "attempt signin": {
                 target: "tryingSignIn",
+              },
+              "switch to the signup page": {
+                target:
+                  "#master.signUp.direWarningAboutE2EEncryptionNotAcknowledged",
               },
             },
           },
@@ -270,7 +274,17 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               },
             },
           },
-          signUpFailed: {},
+          signUpFailed: {
+            entry: ["assignAndLogError"],
+            on: {
+              "attempt signup": {
+                target: "#master.signUp.tryingSignUp",
+              },
+              "switch to the signin page": {
+                target: "#master.signedOut.idle",
+              },
+            },
+          },
         },
       },
       signedIn: {
@@ -461,8 +475,8 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             .then((user) => {
               sendBack({ type: "signup was successful", user });
             })
-            .catch((e) => {
-              sendBack({ type: "signup failed" });
+            .catch((error) => {
+              sendBack({ type: "signup failed", error });
             });
         },
 
