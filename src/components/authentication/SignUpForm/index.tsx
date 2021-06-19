@@ -61,7 +61,7 @@ export const SignUpForm = () => {
       UI.buttonClass = `${buttonClassBase} cursor-wait`;
       UI.inputClass = `${inputClassBase} border-black text-grey`;
       break;
-    case state.matches({ signedUp: "signUpFailed" }):
+    case state.matches({ signUp: "signUpFailed" }):
       UI.disabled = false;
       UI.buttonClass = `${buttonClassBase}`;
       UI.inputClass = `${inputClassBase} border-red text-red`;
@@ -107,14 +107,14 @@ export const SignUpForm = () => {
             />
           </div>
           <div className="grid grid-flow-col grid-cols-2 gap-2 mt-12">
-            <input
+            <button
               className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
               onClick={switchToSignIn}
               type="button"
               value="Sign in"
-            />
-            {/* Sign in */}
-            {/* </input> */}
+            >
+              Sign in
+            </button>
             <button
               className={UI.buttonClass}
               disabled={UI.disabled}

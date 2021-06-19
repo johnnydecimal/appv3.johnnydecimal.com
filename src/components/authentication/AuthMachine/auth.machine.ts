@@ -210,7 +210,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             entry: [
               send({
                 type: "write to the log",
-                log: 'Switch to sign up page. User needs to accept dire warning about end-to-end encryption. More information can be found <a href="#" class="underline text-red">here</a>.',
+                log: 'Switch to sign up page. User needs to accept dire warning about end-to-end encryption. More information can be found <a href="https://userbase.com/docs/faq/" class="underline text-red">here</a>.',
               }),
             ],
             on: {
