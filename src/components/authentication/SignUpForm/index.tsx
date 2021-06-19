@@ -85,6 +85,14 @@ export const SignUpForm = () => {
               autoFocus
               className={UI.inputClass}
               disabled={UI.disabled}
+              id="username"
+              placeholder={
+                state.matches(
+                  "signUp.direWarningAboutE2EEncryptionNotAcknowledged"
+                )
+                  ? "Form disabled — see warning"
+                  : ""
+              }
               type="text"
               {...register("username", { required: true })}
             />
@@ -99,12 +107,14 @@ export const SignUpForm = () => {
             />
           </div>
           <div className="grid grid-flow-col grid-cols-2 gap-2 mt-12">
-            <button
+            <input
               className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
               onClick={switchToSignIn}
-            >
-              Sign in
-            </button>
+              type="button"
+              value="Sign in"
+            />
+            {/* Sign in */}
+            {/* </input> */}
             <button
               className={UI.buttonClass}
               disabled={UI.disabled}
@@ -128,14 +138,14 @@ export const SignUpForm = () => {
             circumstances.
           </p>
           <p className="my-2">
-            As a result, it is{" "}
+            Because of this, it is{" "}
             <span className="font-semibold">critically important</span> that you
             remember your password. If you forget it, I can't reset it. Your
             data will be lost. As in lost-lost, forever-encrypted lost.
           </p>
           <p className="mt-2">
-            Click this message to make it go away. The 'Sign up' button will
-            then become active.
+            Click this message to make it go away. The form above will then
+            become active.
           </p>
         </div>
       ) : null}

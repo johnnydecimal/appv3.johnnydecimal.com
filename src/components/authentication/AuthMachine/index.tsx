@@ -35,7 +35,7 @@ export const MasterMachine = () => {
 
   const handleSignUp = (data: ISignUpFormData) => {
     send({
-      type: "TRY_SIGNUP",
+      type: "attempt signup",
       data,
     });
   };

@@ -1,6 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { createContext } from "react";
-import { Machine, assign } from "@xstate/compiled";
+import { Machine, assign, send } from "@xstate/compiled";
 import userbase from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -39,18 +39,28 @@ interface Context {
 }
 
 type Event =
+  // Initialising the machine
   | { type: "a user is signed in"; info: string; user: UserResult }
   | { type: "no user is signed in"; info: string }
   | { type: "userbase.init() raised an error"; error: UserbaseError }
+  // Signing in
   | { type: "attempt signin"; data: ISignInFormData }
   | { type: "userbase.signIn() raised an error"; error: UserbaseError }
+  // Signing out
   | { type: "attempt signout" }
-  | { type: "switch to the signup page" }
-  | { type: "switch to the signin page" }
   | { type: "the user was signed out" }
   | { type: "signout failed, so we force it anyway" }
+  // Moving around the interface
+  | { type: "switch to the signin page" }
+  | { type: "switch to the signup page" }
+  // Signing up
   | { type: "acknowledge dire warning about e2e encryption" }
-  | { type: "TRY_SIGNUP"; data: ISignUpFormData }
+  | { type: "attempt signup"; data: ISignUpFormData }
+  | { type: "signup was successful"; user: UserResult }
+  | { type: "signup failed" }
+  // Helpers
+  | { type: "write to the log"; log: string }
+  // Errors
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
 // === Utility functions    ===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -77,9 +87,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     context: {
       log: [`${new Date().toTimeString().slice(0, 8)}: Initialised.`],
     },
+    on: {
+      "write to the log": {
+        actions: [(context, event) => addToLog(context, event.log)],
+      },
+    },
     states: {
       init: {
-        // entry: ["checkPathForSignup"],
         invoke: {
           src: "userbaseInit",
           onError: {
@@ -189,23 +203,73 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         initial: "direWarningAboutE2EEncryptionNotAcknowledged",
         states: {
           direWarningAboutE2EEncryptionNotAcknowledged: {
+            entry: [
+              send({
+                type: "write to the log",
+                log: 'Switch to sign up page. User needs to accept dire warning about end-to-end encryption. More information can be found <a href="#" class="underline text-red">here</a>.',
+              }),
+            ],
             on: {
               "acknowledge dire warning about e2e encryption": {
                 target: "#master.signUp.okayToTrySignUp",
               },
               "switch to the signin page": {
                 target: "#master.signedOut.idle",
+                actions: [
+                  send({
+                    type: "write to the log",
+                    log: "Switch to sign in page.",
+                  }),
+                ],
               },
             },
           },
           okayToTrySignUp: {
+            entry: [
+              send({
+                type: "write to the log",
+                log: 'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
+              }),
+              () => {
+                setTimeout(() => {
+                  document.getElementById("username")?.focus();
+                }, 50);
+              },
+            ],
             on: {
+              "attempt signup": {
+                target: "tryingSignUp",
+              },
               "switch to the signin page": {
                 target: "#master.signedOut.idle",
+                actions: [
+                  send({
+                    type: "write to the log",
+                    log: "Switch to sign in page.",
+                  }),
+                ],
               },
             },
           },
-          tryingSignUp: {},
+          tryingSignUp: {
+            entry: [
+              send({
+                type: "write to the log",
+                log: "Attempting sign up.",
+              }),
+            ],
+            invoke: {
+              src: "userbaseSignUp",
+            },
+            on: {
+              "signup was successful": {
+                target: "#master.signedIn.idle",
+              },
+              "signup failed": {
+                target: "#master.signUp.signUpFailed",
+              },
+            },
+          },
           signUpFailed: {},
         },
       },
@@ -243,6 +307,9 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       logSignOutSuccess: assign({
         log: (context, _event) => addToLog(context, "Sign out successful."),
       }),
+      // logEventDotLog: assign({
+      //   log: (context, event) => addToLog(context, event.log),
+      // }),
       assignAndLogError: assign({
         error: (_context, event) => event.error.message,
         log: (context, event) =>
@@ -281,6 +348,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
        *
        * How the fuck you figured this out I do not know.
        */
+      // @ts-ignore
       userbaseInit: () => (sendBack: (event: Event) => void) => {
         /**
          * So this is a regular callback. We do the userbase stuff, let it
@@ -349,36 +417,54 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // TODO: figure out why this is needed - appeared after a `yarn upgrade`
       // @ts-ignore
-      userbaseSignIn: (_, event) => (sendBack: (event: Event) => void) => {
-        /**
-         * If we're testing this using the inspector, the button-click isn't
-         * sending any event.data. Pick that up, and load some dummy values.
-         * // TODO: this is just for testing, pull it out in prod.
-         */
-        if (!event.data) {
-          event.data = {
-            username: "john",
-            password: "test123",
-          };
-        }
+      userbaseSignIn:
+        (_context, event) => (sendBack: (event: Event) => void) => {
+          /**
+           * If we're testing this using the inspector, the button-click isn't
+           * sending any event.data. Pick that up, and load some dummy values.
+           * // TODO: this is just for testing, pull it out in prod.
+           */
+          if (!event.data) {
+            event.data = {
+              username: "john",
+              password: "test123",
+            };
+          }
 
-        userbase
-          .signIn({
-            username: event.data.username,
-            password: event.data.password,
-            rememberMe: "local",
-          })
-          .then((user) => {
-            sendBack({
-              type: "a user is signed in",
-              info: "Sign in success.",
-              user,
+          userbase
+            .signIn({
+              username: event.data.username,
+              password: event.data.password,
+              rememberMe: "local",
+            })
+            .then((user) => {
+              sendBack({
+                type: "a user is signed in",
+                info: "Sign in success.",
+                user,
+              });
+            })
+            .catch((error) => {
+              sendBack({ type: "userbase.signIn() raised an error", error });
             });
-          })
-          .catch((error) => {
-            sendBack({ type: "userbase.signIn() raised an error", error });
-          });
-      },
+        },
+
+      // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      // @ts-ignore
+      userbaseSignUp:
+        (_context, event) => (sendBack: (event: Event) => void) => {
+          userbase
+            .signUp({
+              username: event.data.username,
+              password: event.data.password,
+            })
+            .then((user) => {
+              sendBack({ type: "signup was successful", user });
+            })
+            .catch((e) => {
+              sendBack({ type: "signup failed" });
+            });
+        },
 
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // TODO: figure out why this is needed - appeared after a `yarn upgrade`
