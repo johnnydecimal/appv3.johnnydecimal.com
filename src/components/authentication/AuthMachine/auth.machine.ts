@@ -111,7 +111,14 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         on: {
           "a user is signed in": {
             target: "#master.signedIn.idle",
-            actions: ["assignUser", "clearError"],
+            actions: [
+              "assignUser",
+              "clearError",
+              send({
+                type: "write to the log",
+                log: "Previous user still signed in.",
+              }),
+            ],
           },
           "no user is signed in": {
             target: "#master.signedOut.idle",

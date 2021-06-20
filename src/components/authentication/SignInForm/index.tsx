@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { MasterMachineContext } from "../AuthMachine/auth.machine";
+import { LogViewer } from "../LogViewer";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignInFormData {
@@ -103,15 +104,8 @@ export const SignInForm = () => {
           </div>
         </div>
       </form>
-      <div className="mt-8 text-sm">
-        {state.context.log.map((entry: string, i: number) => (
-          <p
-            className="mt-1"
-            dangerouslySetInnerHTML={{ __html: entry }}
-            key={i}
-            style={{ paddingLeft: "10ch", textIndent: "-10ch" }}
-          ></p>
-        ))}
+      <div className="my-8 text-sm">
+        <LogViewer log={state.context.log} />
       </div>
     </>
   );
