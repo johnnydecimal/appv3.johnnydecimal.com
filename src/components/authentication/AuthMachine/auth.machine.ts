@@ -3,6 +3,9 @@ import { createContext } from "react";
 import { Machine, assign, send } from "@xstate/compiled";
 import userbase from "userbase-js";
 
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { appMachine } from "../../app/AppMachine/app.machine";
+
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
 import { ISignInFormData } from "../SignInForm";
@@ -315,6 +318,10 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         initial: "idle",
         states: {
           idle: {
+            invoke: {
+              id: "appMachine",
+              src: appMachine,
+            },
             entry: [
               send({ type: "write to the log", log: "Sign in successful." }),
             ],
