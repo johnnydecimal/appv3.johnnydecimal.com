@@ -1,37 +1,48 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { assign } from "xstate";
 import { Machine } from "@xstate/compiled";
-import userbase from "userbase-js";
+import userbase, { Database, DatabasesResult } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface Context {
-  databases: {};
+  databases?: Database[];
 }
 
-type Event = { type: "databases received"; databases: {} } | { type: "SEND" };
+type Event =
+  | { type: "databases received"; databases: Database[] }
+  | { type: "database object empty" };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const appMachine = Machine<Context, Event, "appMachine">(
   {
     id: "appMachine",
-    initial: "init",
+    initial: "gettingDatabases",
     context: {
-      databases: {},
+      databases: undefined,
     },
     states: {
-      init: {
+      gettingDatabases: {
         invoke: {
-          src: "userbaseGetDatabases",
+          src: "ubGetDatabases",
         },
         on: {
-          SEND: "next",
           "databases received": {
-            target: "next",
+            target: "next.dbReceived",
             actions: ["assignDatabases"],
+          },
+          "database object empty": {
+            target: "next.noDBs",
           },
         },
       },
-      next: {},
+      next: {
+        type: "compound",
+        initial: "dbReceived",
+        states: {
+          dbReceived: {},
+          noDBs: {},
+        },
+      },
     },
   },
   {
@@ -41,15 +52,21 @@ export const appMachine = Machine<Context, Event, "appMachine">(
       }),
     },
     services: {
-      userbaseGetDatabases: () => (sendBack: (event: Event) => void) => {
+      ubGetDatabases: () => (sendBack: (event: Event) => void) => {
         userbase
           .getDatabases()
-          .then((databases) => {
-            console.log("databases:", databases);
-            sendBack({
-              type: "databases received",
-              databases,
-            });
+          .then((result: DatabasesResult) => {
+            console.log("result", result);
+            if (result.databases.length > 0) {
+              sendBack({
+                type: "databases received",
+                databases: result.databases,
+              });
+            } else {
+              sendBack({
+                type: "database object empty",
+              });
+            }
           })
           .catch((error) => {});
       },
