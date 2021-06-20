@@ -39,6 +39,11 @@ interface Context {
    * The user object, if signed in.
    */
   user?: UserResult;
+  /**
+   * A reference to the invoked `appMachine`.
+   * // TODO: clean up the any.
+   */
+  appMachine?: any;
 }
 
 type Event =
@@ -129,7 +134,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               "clearError",
               send({
                 type: "write to the log",
-                log: "Database connection established. No user logged in.",
+                log: "Database connection established. No user signed in.",
               }),
             ],
           },
@@ -318,13 +323,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         initial: "idle",
         states: {
           idle: {
+            entry: [
+              send({ type: "write to the log", log: "Sign in successful." }),
+            ],
             invoke: {
               id: "appMachine",
               src: appMachine,
             },
-            entry: [
-              send({ type: "write to the log", log: "Sign in successful." }),
-            ],
           },
         },
         on: {
