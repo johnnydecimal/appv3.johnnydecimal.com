@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { MasterMachineContext } from "../AuthMachine/auth.machine";
-import { useActor } from "@xstate/react";
+import { useService } from "@xstate/react";
 import { Sender } from "@xstate/react/lib/types";
 import { EventObject } from "xstate";
 
@@ -8,7 +8,7 @@ export const JDApp = () => {
   const { handleSignOut, state } = useContext(MasterMachineContext);
 
   // TODO: fix this `any` typing.
-  const [appState, sendApp]: [any, Sender<EventObject>] = useActor(
+  const [appState, sendApp]: [any, Sender<EventObject>] = useService(
     state.children.appMachine
   );
 
@@ -16,6 +16,8 @@ export const JDApp = () => {
    * NEXT: set up some context like MasterMachineContext. Use this component
    *       as the master for the app and start building it out.
    */
+
+  // TODO: Careful, state isn't typed here. Fix.
 
   return (
     <div>
@@ -29,13 +31,6 @@ export const JDApp = () => {
       >
         appMachine SEND
       </button>
-
-      {appState.matches("next.dbReceived") ? (
-        <div>
-          You have {appState.context.databases.length} database
-          {appState.context.databases.length > 1 ? "s" : null}.
-        </div>
-      ) : null}
     </div>
   );
 };
