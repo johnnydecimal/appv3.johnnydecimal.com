@@ -1684,7 +1684,7 @@
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
 
-"@tailwindcss/postcss7-compat@^2.0.4", "@tailwindcss/postcss7-compat@npm:@tailwindcss/postcss7-compat", "tailwindcss@npm:@tailwindcss/postcss7-compat":
+"@tailwindcss/postcss7-compat@npm:@tailwindcss/postcss7-compat", "tailwindcss@npm:@tailwindcss/postcss7-compat":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@tailwindcss/postcss7-compat/-/postcss7-compat-2.1.4.tgz#427a2fd1837a3d9a54a296cc8b86a3f76b1452a7"
   integrity sha512-KYRj/AGNwE4tPf02IvT+J36Twlrwg/OJJuSckSupX2T+xIOHSXPugNJZ7Stn9F67hh/qH+2Y2HXK6vpBadW6qw==
