@@ -1,7 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { assign, Machine } from "@xstate/compiled";
 import userbase, { Database, Item } from "userbase-js";
-import { send } from "xstate";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface AppMachineContext {
@@ -10,12 +9,13 @@ interface AppMachineContext {
 }
 
 type AppMachineEvent =
-  | { type: "DATABASE ITEMS UPDATED"; items: any }
-  | { type: "CHECK FOR PROJECT" }
+  // Sent by userbase `changeHandler` when the database is updated.
+  | { type: "DATABASE ITEMS UPDATED"; items: Item[] }
+  // Opening the database and checking that a project exists.
+  | { type: "CHECK FOR FIRST PROJECT" }
   | { type: "PROJECT EXISTS" }
   | { type: "PROJECT DOES NOT EXIST" }
-  | { type: "NULL" } // for testing
-  | { type: "TEST"; message: string } // for testing
+  // Errors
   | { type: "ERROR"; error: UserbaseError };
 
 interface UserbaseError {
@@ -41,17 +41,6 @@ const projectExists = (items: Item[]): Boolean => {
   return exists;
 };
 
-const sendToAppMachine = () => console.log("sendToAppMachine");
-send(
-  {
-    type: "TEST",
-    message: "woohoo",
-  },
-  {
-    to: "appMachine",
-  }
-);
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const appMachine = Machine<
   AppMachineContext,
@@ -60,15 +49,12 @@ export const appMachine = Machine<
 >(
   {
     id: "appMachine",
-    initial: "openingDatabase",
+    initial: "openDatabase",
     context: {
       databases: undefined,
       items: [],
     },
     on: {
-      TEST: {
-        actions: [(context, event) => alert(event.message)],
-      },
       "DATABASE ITEMS UPDATED": {
         /**
          * ubOpenDatabase.changeHandler sends this event whenever it receives
@@ -87,39 +73,39 @@ export const appMachine = Machine<
       },
     },
     states: {
-      openingDatabase: {
+      openDatabase: {
+        type: "compound",
+        initial: "init",
         invoke: {
           src: "ubOpenDatabase",
         },
-        on: {
-          "CHECK FOR PROJECT": {
-            target: "#appMachine.checkingForProject",
+        states: {
+          init: {
+            on: {
+              "CHECK FOR FIRST PROJECT": "checkingForProject",
+            },
           },
-        },
-      },
-      checkingForProject: {
-        /**
-         * On first run, we create a project `001` for the user. Check that it
-         * exists, and create it if it doesn't.
-         */
-        invoke: {
-          src: "checkForProject",
-        },
-        on: {
-          "PROJECT EXISTS": "projectFound",
-          "PROJECT DOES NOT EXIST": "projectNotFound",
-        },
-      },
-      projectFound: {},
-      projectNotFound: {},
-      creatingFirstProject: {
-        invoke: {
-          src: "createFirstProject",
-        },
-        on: {
-          "CHECK FOR PROJECT": {
-            target: "#appMachine.checkingForProject",
+          checkingForProject: {
+            invoke: {
+              src: "checkForProject",
+            },
+            on: {
+              "PROJECT EXISTS": "ready",
+              "PROJECT DOES NOT EXIST": "creatingFirstProject",
+            },
           },
+          creatingFirstProject: {
+            invoke: {
+              src: "createFirstProject",
+            },
+            on: {
+              /**
+               * Success just sends us back to the start.
+               */
+              "CHECK FOR FIRST PROJECT": "checkingForProject",
+            },
+          },
+          ready: {},
         },
       },
       error: {
@@ -143,11 +129,14 @@ export const appMachine = Machine<
             databaseName: "johnnydecimal",
             changeHandler: (items) => {
               console.log("👷‍♀️ userbase:changeHandler:items:", items);
-              sendToAppMachine();
+              sendBack({
+                type: "DATABASE ITEMS UPDATED",
+                items,
+              });
             },
           })
           .then(() => {
-            sendBack({ type: "CHECK FOR PROJECT" });
+            sendBack({ type: "CHECK FOR FIRST PROJECT" });
           })
           .catch((error) => {
             sendBack({ type: "ERROR", error });
@@ -171,8 +160,11 @@ export const appMachine = Machine<
             },
           })
           .then(() => {
+            /**
+             * Success just sends us back to the start.
+             */
             sendBack({
-              type: "CHECK FOR PROJECT",
+              type: "CHECK FOR FIRST PROJECT",
             });
           })
           .catch((error) =>
