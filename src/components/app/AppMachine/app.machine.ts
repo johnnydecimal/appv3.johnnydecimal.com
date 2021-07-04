@@ -3,12 +3,12 @@ import { assign, Machine } from "@xstate/compiled";
 import userbase, { Database, Item } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-interface AppMachineContext {
+interface DatabaseMachineContext {
   databases?: Database[];
   items: Item[];
 }
 
-type AppMachineEvent =
+type DatabaseMachineEvent =
   // Sent by userbase `changeHandler` when the database is updated.
   | { type: "DATABASE ITEMS UPDATED"; items: Item[] }
   // Opening the database and checking that a project exists. These do the same
@@ -44,8 +44,8 @@ const projectExists = (items: Item[]): Boolean => {
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const appMachine = Machine<
-  AppMachineContext,
-  AppMachineEvent,
+  DatabaseMachineContext,
+  DatabaseMachineEvent,
   "appMachine"
 >(
   {
@@ -143,7 +143,7 @@ export const appMachine = Machine<
             sendBack({ type: "ERROR", error });
           });
       },
-      checkForProject: (context: AppMachineContext) => (sendBack: any) => {
+      checkForProject: (context: DatabaseMachineContext) => (sendBack: any) => {
         if (projectExists(context.items)) {
           sendBack({ type: "PROJECT EXISTS" });
         } else {
