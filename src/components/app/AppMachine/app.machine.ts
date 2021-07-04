@@ -30,12 +30,13 @@ interface UserbaseError {
  * Breaks on the first found.
  */
 const projectExists = (items: Item[]): Boolean => {
+  let exists = false;
   for (let item of items) {
     if (item.item.jdType === "project") {
-      return true;
+      exists = true;
     }
   }
-  return false;
+  return exists;
 };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -84,15 +85,24 @@ export const appMachine = Machine<
          * exists, and create it if it doesn't.
          */
         invoke: {
-          src: "checkItemsForProject",
+          src: "checkForProject",
         },
         on: {
           "PROJECT EXISTS": "projectFound",
-          "PROJECT DOES NOT EXIST": "projectNotFound",
+          "PROJECT DOES NOT EXIST": "creatingFirstProject",
         },
       },
       projectFound: {},
-      projectNotFound: {},
+      creatingFirstProject: {
+        invoke: {
+          src: "createFirstProject",
+        },
+        on: {
+          "CHECK FOR PROJECT": {
+            target: "#appMachine.checkingForProject",
+          },
+        },
+      },
       error: {
         /**
          * Top-level error state. Calling ERROR anywhere will bring us here.
@@ -120,15 +130,37 @@ export const appMachine = Machine<
             sendBack({ type: "CHECK FOR PROJECT" });
           })
           .catch((error) => {
-            sendBack({ type: "error", error });
+            sendBack({ type: "ERROR", error });
           });
       },
-      checkItemsForProject: (context: AppMachineContext) => (sendBack: any) => {
+      checkForProject: (context: AppMachineContext) => (sendBack: any) => {
         if (projectExists(context.items)) {
           sendBack({ type: "PROJECT EXISTS" });
         } else {
           sendBack({ type: "PROJECT DOES NOT EXIST" });
         }
+      },
+      createFirstProject: () => (sendBack: any) => {
+        userbase
+          .insertItem({
+            databaseName: "johnnydecimal",
+            item: {
+              jdType: "project",
+              jdNumber: "001",
+              jdTitle: "Default project (system created)",
+            },
+          })
+          .then(() => {
+            sendBack({
+              type: "CHECK FOR PROJECT",
+            });
+          })
+          .catch((error) =>
+            sendBack({
+              type: "ERROR",
+              error,
+            })
+          );
       },
     },
   }
