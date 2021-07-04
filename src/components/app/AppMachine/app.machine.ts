@@ -14,7 +14,6 @@ type AppMachineEvent =
   // Opening the database and checking that a project exists. These do the same
   // thing and are duplicated for machine readability.
   | { type: "DATABASE OPENED" }
-  | { type: "CHECK FOR FIRST PROJECT" }
   | { type: "PROJECT EXISTS" }
   | { type: "PROJECT DOES NOT EXIST" }
   // Errors
@@ -85,7 +84,6 @@ export const appMachine = Machine<
           init: {
             on: {
               "DATABASE OPENED": "checkingForProject",
-              "CHECK FOR FIRST PROJECT": "checkingForProject",
             },
           },
           checkingForProject: {
@@ -105,7 +103,7 @@ export const appMachine = Machine<
               /**
                * Success just sends us back to the start.
                */
-              "CHECK FOR FIRST PROJECT": "checkingForProject",
+              "DATABASE OPENED": "checkingForProject",
             },
           },
           ready: {},
