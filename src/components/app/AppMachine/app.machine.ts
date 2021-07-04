@@ -1,6 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { assign, Machine } from "@xstate/compiled";
 import userbase, { Database, Item } from "userbase-js";
+import { send } from "xstate";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface AppMachineContext {
@@ -14,6 +15,7 @@ type AppMachineEvent =
   | { type: "PROJECT EXISTS" }
   | { type: "PROJECT DOES NOT EXIST" }
   | { type: "NULL" } // for testing
+  | { type: "TEST"; message: string } // for testing
   | { type: "ERROR"; error: UserbaseError };
 
 interface UserbaseError {
@@ -39,6 +41,17 @@ const projectExists = (items: Item[]): Boolean => {
   return exists;
 };
 
+const sendToAppMachine = () => console.log("sendToAppMachine");
+send(
+  {
+    type: "TEST",
+    message: "woohoo",
+  },
+  {
+    to: "appMachine",
+  }
+);
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const appMachine = Machine<
   AppMachineContext,
@@ -53,12 +66,17 @@ export const appMachine = Machine<
       items: [],
     },
     on: {
+      TEST: {
+        actions: [(context, event) => alert(event.message)],
+      },
       "DATABASE ITEMS UPDATED": {
         /**
          * ubOpenDatabase.changeHandler sends this event whenever it receives
          * updated data.
          */
         actions: [
+          (context, event) =>
+            console.log("DATABASE ITEMS UPDATED:actions:event:", event),
           assign({
             items: (context, event) => event.items,
           }),
@@ -89,10 +107,11 @@ export const appMachine = Machine<
         },
         on: {
           "PROJECT EXISTS": "projectFound",
-          "PROJECT DOES NOT EXIST": "creatingFirstProject",
+          "PROJECT DOES NOT EXIST": "projectNotFound",
         },
       },
       projectFound: {},
+      projectNotFound: {},
       creatingFirstProject: {
         invoke: {
           src: "createFirstProject",
@@ -123,7 +142,8 @@ export const appMachine = Machine<
           .openDatabase({
             databaseName: "johnnydecimal",
             changeHandler: (items) => {
-              sendBack({ type: "DATABASE ITEMS UPDATED", items });
+              console.log("👷‍♀️ userbase:changeHandler:items:", items);
+              sendToAppMachine();
             },
           })
           .then(() => {

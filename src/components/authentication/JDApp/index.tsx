@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { MasterMachineContext } from "../AuthMachine/auth.machine";
-import { useService } from "@xstate/react";
+import { useActor } from "@xstate/react";
 import { Sender } from "@xstate/react/lib/types";
 import { EventObject } from "xstate";
 
@@ -15,7 +15,7 @@ export const JDApp = () => {
   const { handleSignOut, state } = useContext(MasterMachineContext);
 
   // TODO: fix this `any` typing.
-  const [appState, sendApp]: [any, Sender<EventObject>] = useService(
+  const [appState, sendApp]: [any, Sender<EventObject>] = useActor(
     state.children.appMachine
   );
 

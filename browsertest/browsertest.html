@@ -21,28 +21,40 @@
         })
         .then((session) => {
           console.debug("userbase.init response (session):", session);
-          userbase
-            .signIn({
-              username: "john",
-              password: "test123",
-              rememberMe: "local",
-            })
-            .then((user) => {
-              // We are logged in here
-              // userbase.getDatabases()
-              // 	.then(databases => console.debug('databases:', databases))
-              // 	.catch(e => console.error('userbase.getDatabases:', e));
-              // console.debug(user);
-              userbase
-                .openDatabase({
-                  databaseName: "johnnydecimal",
-                  changeHandler: (items) =>
-                    console.debug("database changed, is now:", items),
-                })
-                .then()
-                .catch();
-            })
-            .catch((e) => console.error("userbase.signIn:", e));
+          if (session.user) {
+            // logged in
+            userbase
+              .openDatabase({
+                databaseName: "johnnydecimal",
+                changeHandler: (items) =>
+                  console.debug("database changed, is now:", items),
+              })
+              .then()
+              .catch();
+          } else {
+            userbase
+              .signIn({
+                username: "john",
+                password: "test123",
+                rememberMe: "local",
+              })
+              .then((user) => {
+                // We are logged in here
+                // userbase.getDatabases()
+                // 	.then(databases => console.debug('databases:', databases))
+                // 	.catch(e => console.error('userbase.getDatabases:', e));
+                // console.debug(user);
+                userbase
+                  .openDatabase({
+                    databaseName: "johnnydecimal",
+                    changeHandler: (items) =>
+                      console.debug("database changed, is now:", items),
+                  })
+                  .then()
+                  .catch();
+              })
+              .catch((e) => console.error("userbase.signIn:", e));
+          }
         })
         .catch();
     </script>
