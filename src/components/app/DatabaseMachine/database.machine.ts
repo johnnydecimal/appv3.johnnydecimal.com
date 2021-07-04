@@ -43,7 +43,7 @@ const projectExists = (items: Item[]): Boolean => {
 };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const appMachine = Machine<
+export const databaseMachine = Machine<
   DatabaseMachineContext,
   DatabaseMachineEvent,
   "appMachine"

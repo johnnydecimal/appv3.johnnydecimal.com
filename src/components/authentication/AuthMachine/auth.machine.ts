@@ -4,7 +4,7 @@ import { Machine, assign, send } from "@xstate/compiled";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { appMachine } from "../../app/AppMachine/app.machine";
+import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -332,7 +332,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             ],
             invoke: {
               id: "appMachine",
-              src: appMachine,
+              src: databaseMachine,
             },
           },
         },
