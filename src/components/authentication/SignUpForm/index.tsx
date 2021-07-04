@@ -75,9 +75,7 @@ export const SignUpForm = () => {
     <>
       <form onSubmit={handleSubmit((data) => handleSignUp(data))}>
         <div className="max-w-sm mt-20">
-          <h1 className="mb-10 text-3xl font-bold border-b-4 border-black">
-            Sign up
-          </h1>
+          <h1 className="mb-10 text-3xl font-bold">Sign up</h1>
           <div className="flex">
             <label htmlFor="username">Username:&nbsp;</label>
             <input
@@ -87,13 +85,6 @@ export const SignUpForm = () => {
               className={UI.inputClass}
               disabled={UI.disabled}
               id="username"
-              placeholder={
-                state.matches(
-                  "signUp.direWarningAboutE2EEncryptionNotAcknowledged"
-                )
-                  ? "Form disabled — see warning"
-                  : ""
-              }
               type="text"
               {...register("username", { required: true })}
             />
@@ -121,19 +112,22 @@ export const SignUpForm = () => {
               disabled={UI.disabled}
               type="submit"
             >
-              {state.value.signUp === "tryingSignUp" ? "Wait..." : "Sign up"}
+              {state.value.signUp ===
+              "direWarningAboutE2EEncryptionNotAcknowledged"
+                ? "↓ Read below ↓"
+                : state.value.signUp === "tryingSignUp"
+                ? "Wait..."
+                : "Sign up"}
             </button>
           </div>
         </div>
       </form>
       {state.matches("signUp.direWarningAboutE2EEncryptionNotAcknowledged") ? (
         <div
-          className="p-2 mt-8 text-sm border cursor-pointer border-red"
+          className="p-4 mt-8 text-sm border cursor-pointer border-red"
           onClick={() => handleAcknowledgeDireWarningAboutE2EEncryption()}
         >
-          <h2 className="font-bold underline text-red">
-            Really important message
-          </h2>
+          <h2 className="font-bold text-red">Really important message</h2>
           <p className="my-2">
             Your data is end-to-end encrypted. I can't see it, ever, under any
             circumstances.
@@ -142,11 +136,12 @@ export const SignUpForm = () => {
             Because of this, it is{" "}
             <span className="font-semibold">critically important</span> that you
             remember your password. If you forget it, I can't reset it. Your
-            data will be lost. As in lost-lost, forever-encrypted lost.
+            data will be lost. As in lost-lost, forever-encrypted-much-sadness
+            lost.
           </p>
           <p className="mt-2">
-            Click this message to make it go away. The form above will then
-            become active.
+            Click anywhere on this message to make it go away. The form above
+            will then become active.
           </p>
         </div>
       ) : null}

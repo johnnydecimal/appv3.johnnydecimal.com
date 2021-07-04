@@ -68,6 +68,7 @@ type Event =
   | { type: "signup failed"; error: UserbaseError }
   // Helpers
   | { type: "write to the log"; log: string }
+  | { type: "clear the log" }
   // Errors
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -98,6 +99,13 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     on: {
       "write to the log": {
         actions: [(context, event) => addToLog(context, event.log)],
+      },
+      "clear the log": {
+        actions: [
+          assign({
+            log: (_context, _event) => [],
+          }),
+        ],
       },
     },
     states: {
@@ -230,9 +238,26 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       signUp: {
         type: "compound",
         initial: "direWarningAboutE2EEncryptionNotAcknowledged",
+        on: {
+          "switch to the signin page": {
+            target: "#master.signedOut.idle",
+            actions: [
+              send({
+                type: "clear the log",
+              }),
+              send({
+                type: "write to the log",
+                log: "Switch to sign in page.",
+              }),
+            ],
+          },
+        },
         states: {
           direWarningAboutE2EEncryptionNotAcknowledged: {
             entry: [
+              send({
+                type: "clear the log",
+              }),
               send({
                 type: "write to the log",
                 log: 'Switch to sign up page. User needs to accept dire warning about end-to-end encryption. More information can be found <a href="https://userbase.com/docs/faq/" class="underline text-red">here</a>.',
@@ -241,15 +266,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "acknowledge dire warning about e2e encryption": {
                 target: "#master.signUp.okayToTrySignUp",
-              },
-              "switch to the signin page": {
-                target: "#master.signedOut.idle",
-                actions: [
-                  send({
-                    type: "write to the log",
-                    log: "Switch to sign in page.",
-                  }),
-                ],
               },
             },
           },
@@ -268,15 +284,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "attempt signup": {
                 target: "tryingSignUp",
-              },
-              "switch to the signin page": {
-                target: "#master.signedOut.idle",
-                actions: [
-                  send({
-                    type: "write to the log",
-                    log: "Switch to sign in page.",
-                  }),
-                ],
               },
             },
           },
@@ -310,9 +317,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             on: {
               "attempt signup": {
                 target: "#master.signUp.tryingSignUp",
-              },
-              "switch to the signin page": {
-                target: "#master.signedOut.idle",
               },
             },
           },

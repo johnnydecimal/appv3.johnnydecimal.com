@@ -63,9 +63,7 @@ export const SignInForm = () => {
     <>
       <form onSubmit={handleSubmit((data) => handleSignIn(data))}>
         <div className="max-w-sm mt-20">
-          <h1 className="mb-10 text-3xl font-bold border-b-4 border-black">
-            Sign in
-          </h1>
+          <h1 className="mb-10 text-3xl font-bold">Sign in</h1>
           <div className="flex">
             <label htmlFor="username">Username:&nbsp;</label>
             <input
