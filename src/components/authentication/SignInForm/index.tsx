@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { MasterMachineContext } from "../AuthMachine/auth.machine";
+import { AuthMachineReactContext } from "../AuthMachine/context";
 import { LogViewer } from "../LogViewer";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -18,8 +18,9 @@ export const SignInForm = () => {
    * Grab `handleSignIn` from context. This sends the `attempt signin` event
    * along with `data`.
    */
-  const { handleSignIn, state, switchToSignUp } =
-    useContext(MasterMachineContext);
+  const { handleSignIn, state, switchToSignUp } = useContext(
+    AuthMachineReactContext
+  );
 
   /**
    * Set up react-hook-form.

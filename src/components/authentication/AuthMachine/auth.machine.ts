@@ -1,5 +1,4 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { createContext } from "react";
 import { Machine, assign, send } from "@xstate/compiled";
 import userbase from "userbase-js";
 
@@ -17,7 +16,7 @@ interface UserbaseError {
   status: number; // 401
 }
 
-interface Context {
+interface AuthMachineContext {
   /**
    * The most recent error. (This is the `message` part of `UserbaseError`.)
    */
@@ -46,7 +45,7 @@ interface Context {
   appMachine?: any;
 }
 
-type Event =
+type AuthMachineEvent =
   // Initialising the machine
   | { type: "a user is signed in"; user: UserResult }
   | { type: "no user is signed in"; info: string }
@@ -78,7 +77,7 @@ type Event =
  * on-screen as you're signing in/up.
  */
 const addToLog = (
-  context: Context, // Current machine context.
+  context: AuthMachineContext, // Current machine context.
   message: string = "addToLog() was called without a `message` parameter.", // The new message to write to the log.
   className?: string // Optional className to style the event.
 ): string[] => {
@@ -89,9 +88,13 @@ const addToLog = (
 };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const masterMachine = Machine<Context, Event, "masterMachine">(
+export const authMachine = Machine<
+  AuthMachineContext,
+  AuthMachineEvent,
+  "authMachine"
+>(
   {
-    id: "master",
+    id: "authMachine",
     initial: "init",
     context: {
       log: [`${new Date().toTimeString().slice(0, 8)}: Initialised.`],
@@ -126,7 +129,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         },
         on: {
           "a user is signed in": {
-            target: "#master.signedIn.idle",
+            target: "#authMachine.signedIn.idle",
             actions: [
               "assignUser",
               "clearError",
@@ -137,7 +140,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             ],
           },
           "no user is signed in": {
-            target: "#master.signedOut.idle",
+            target: "#authMachine.signedOut.idle",
             actions: [
               "clearError",
               send({
@@ -152,7 +155,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
              * signedOut state, not signedOut.signInFailure. Because this isn't
              * a failure that we need to tell the user about.
              */
-            target: "#master.signedOut.idle",
+            target: "#authMachine.signedOut.idle",
             actions: ["assignAndLogError", "clearUser"],
           },
         },
@@ -167,7 +170,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 target: "tryingSignIn",
               },
               "switch to the signup page": {
-                target: "#master.signUp",
+                target: "#authMachine.signUp",
               },
             },
           },
@@ -178,7 +181,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
               },
               "switch to the signup page": {
                 target:
-                  "#master.signUp.direWarningAboutE2EEncryptionNotAcknowledged",
+                  "#authMachine.signUp.direWarningAboutE2EEncryptionNotAcknowledged",
               },
             },
           },
@@ -189,7 +192,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             },
             on: {
               "a user is signed in": {
-                target: "#master.signedIn.idle",
+                target: "#authMachine.signedIn.idle",
                 actions: ["assignUser", "clearError"],
               },
               "userbase.signIn() raised an error": {
@@ -198,7 +201,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                  * signedOut.signInFailed state. We use this to report things to
                  * the hapless user.
                  */
-                target: "#master.signedOut.signInFailed",
+                target: "#authMachine.signedOut.signInFailed",
                 actions: ["clearUser", "assignAndLogError"],
               },
             },
@@ -219,7 +222,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                  * userbase.signOut() did its job, so it has gracefully set the
                  * localStorage item to `signedIn: false`.
                  */
-                target: "#master.signedOut",
+                target: "#authMachine.signedOut",
                 actions: ["clearError", "clearUser"],
               },
               "signout failed, so we force it anyway": {
@@ -228,7 +231,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                  * remove the localStorage item ourselves. Not as graceful, so
                  * we don't do it by default.
                  */
-                target: "#master.signedOut",
+                target: "#authMachine.signedOut",
                 actions: ["clearError", "clearUser", "forceSignOut"],
               },
             },
@@ -240,7 +243,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
         initial: "direWarningAboutE2EEncryptionNotAcknowledged",
         on: {
           "switch to the signin page": {
-            target: "#master.signedOut.idle",
+            target: "#authMachine.signedOut.idle",
             actions: [
               send({
                 type: "clear the log",
@@ -265,7 +268,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             ],
             on: {
               "acknowledge dire warning about e2e encryption": {
-                target: "#master.signUp.okayToTrySignUp",
+                target: "#authMachine.signUp.okayToTrySignUp",
               },
             },
           },
@@ -299,7 +302,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             },
             on: {
               "signup was successful": {
-                target: "#master.signedIn.idle",
+                target: "#authMachine.signedIn.idle",
                 actions: [
                   send({
                     type: "write to the log",
@@ -308,7 +311,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
                 ],
               },
               "signup failed": {
-                target: "#master.signUp.signUpFailed",
+                target: "#authMachine.signUp.signUpFailed",
               },
             },
           },
@@ -316,7 +319,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             entry: ["assignAndLogError"],
             on: {
               "attempt signup": {
-                target: "#master.signUp.tryingSignUp",
+                target: "#authMachine.signUp.tryingSignUp",
               },
             },
           },
@@ -377,7 +380,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
        * How the fuck you figured this out I do not know.
        */
       // @ts-ignore
-      userbaseInit: () => (sendBack: (event: Event) => void) => {
+      userbaseInit: () => (sendBack: (event: AuthMachineEvent) => void) => {
         /**
          * So this is a regular callback. We do the userbase stuff, let it
          * resolve, then use `sendBack` to send an event to the machine.
@@ -443,7 +446,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       userbaseSignIn:
-        (_context, event) => (sendBack: (event: Event) => void) => {
+        (_context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
           /**
            * If we're testing this using the inspector, the button-click isn't
            * sending any event.data. Pick that up, and load some dummy values.
@@ -476,7 +479,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       userbaseSignUp:
-        (_context, event) => (sendBack: (event: Event) => void) => {
+        (_context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
           userbase
             .signUp({
               username: event.data.username,
@@ -493,7 +496,7 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // TODO: figure out why this is needed - appeared after a `yarn upgrade`
       // @ts-ignore
-      userbaseSignOut: () => (sendBack: (event: Event) => void) => {
+      userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {
         userbase
           .signOut()
           .then(() => {
@@ -506,5 +509,3 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
     },
   }
 );
-
-export const MasterMachineContext = createContext<any>({});

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MasterMachineContext } from "../AuthMachine/auth.machine";
+import { AuthMachineReactContext } from "../../authentication/AuthMachine/context";
 import { useActor } from "@xstate/react";
 import { Sender } from "@xstate/react/lib/types";
 import { EventObject } from "xstate";
@@ -11,8 +11,8 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
-export const JDApp = () => {
-  const { handleSignOut, state } = useContext(MasterMachineContext);
+export const DatabaseMachine = () => {
+  const { handleSignOut, state } = useContext(AuthMachineReactContext);
 
   // TODO: fix this `any` typing.
   const [appState, sendApp]: [any, Sender<EventObject>] = useActor(
@@ -20,7 +20,7 @@ export const JDApp = () => {
   );
 
   /**
-   * NEXT: set up some context like MasterMachineContext. Use this component
+   * NEXT: set up some context like AuthMachineContext. Use this component
    *       as the master for the app and start building it out.
    */
 

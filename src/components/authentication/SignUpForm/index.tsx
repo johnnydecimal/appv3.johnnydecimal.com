@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { MasterMachineContext } from "../AuthMachine/auth.machine";
+import { AuthMachineReactContext } from "../AuthMachine/context";
 import { LogViewer } from "../LogViewer";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -23,7 +23,7 @@ export const SignUpForm = () => {
     handleSignUp,
     state,
     switchToSignIn,
-  } = useContext(MasterMachineContext);
+  } = useContext(AuthMachineReactContext);
 
   /**
    * Set up react-hook-form.
