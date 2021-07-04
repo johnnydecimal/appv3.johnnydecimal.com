@@ -34,10 +34,10 @@ export const JDApp = () => {
       <Log value={appState.context} />
       <button
         onClick={() => {
-          sendApp({ type: "SEND" });
+          sendApp({ type: "ADD TEST ITEM TO DATABASE" });
         }}
       >
-        appMachine SEND
+        ADD TEST ITEM TO DATABASE
       </button>
     </div>
   );
