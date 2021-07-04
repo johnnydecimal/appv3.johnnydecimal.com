@@ -401,7 +401,6 @@ export const masterMachine = Machine<Context, Event, "masterMachine">(
             appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
           })
           .then((session) => {
-            console.log(session);
             /**
              * This only tells us that the SDK initialised successfully, *not*
              * that there is an active user. For that we need `session.user`

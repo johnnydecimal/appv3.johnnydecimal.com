@@ -1,47 +1,70 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { assign, Machine } from "@xstate/compiled";
-import userbase, { Database } from "userbase-js";
+import userbase, { Database, Item } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-interface Context {
+interface AppMachineContext {
   databases?: Database[];
-  horses: boolean;
-  items?: any;
+  items: Item[];
 }
 
-type Event =
-  | { type: "DATABASE OPENED"; items: any }
+type AppMachineEvent =
   | { type: "DATABASE ITEMS UPDATED"; items: any }
-  | { type: "error"; error: UserbaseError };
+  | { type: "CHECK FOR PROJECT" }
+  | { type: "PROJECT EXISTS" }
+  | { type: "PROJECT DOES NOT EXIST" }
+  | { type: "NULL" } // for testing
+  | { type: "ERROR"; error: UserbaseError };
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
   message: string; // Username or password mismatch.
   status: number; // 401
 }
+
+// === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
+/**
+ * # projectExists
+ *
+ * Given a Userbase list of `items`, is any of them a Project?
+ * Breaks on the first found.
+ */
+const projectExists = (items: Item[]): Boolean => {
+  for (let item of items) {
+    if (item.item.jdType === "project") {
+      return true;
+    }
+  }
+  return false;
+};
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const appMachine = Machine<Context, Event, "appMachine">(
+export const appMachine = Machine<
+  AppMachineContext,
+  AppMachineEvent,
+  "appMachine"
+>(
   {
     id: "appMachine",
     initial: "openingDatabase",
     context: {
       databases: undefined,
-      items: undefined,
-      horses: true,
+      items: [],
     },
     on: {
-      error: {
-        target: "#appMachine.error",
-      },
       "DATABASE ITEMS UPDATED": {
+        /**
+         * ubOpenDatabase.changeHandler sends this event whenever it receives
+         * updated data.
+         */
         actions: [
-          (context, event) => {
-            console.log("DATABASE ITEMS UPDATED.event:", event);
-          },
           assign({
             items: (context, event) => event.items,
           }),
         ],
+      },
+      ERROR: {
+        target: "#appMachine.error",
       },
     },
     states: {
@@ -50,7 +73,7 @@ export const appMachine = Machine<Context, Event, "appMachine">(
           src: "ubOpenDatabase",
         },
         on: {
-          "DATABASE OPENED": {
+          "CHECK FOR PROJECT": {
             target: "#appMachine.checkingForProject",
           },
         },
@@ -60,16 +83,16 @@ export const appMachine = Machine<Context, Event, "appMachine">(
          * On first run, we create a project `001` for the user. Check that it
          * exists, and create it if it doesn't.
          */
-        // invoke: {
-        //   src: (context, event) => {
-        //   }
-        // }
-        entry: [
-          (context) => {
-            console.log("entry to checkingForProject, context:", context);
-          },
-        ],
+        invoke: {
+          src: "checkItemsForProject",
+        },
+        on: {
+          "PROJECT EXISTS": "projectFound",
+          "PROJECT DOES NOT EXIST": "projectNotFound",
+        },
       },
+      projectFound: {},
+      projectNotFound: {},
       error: {
         /**
          * Top-level error state. Calling ERROR anywhere will bring us here.
@@ -94,14 +117,18 @@ export const appMachine = Machine<Context, Event, "appMachine">(
             },
           })
           .then(() => {
-            // sendBack({ type: "database opened" });
-            // This should never be triggered?
-            // Actually it's just then nothing, because the changeHandler takes
-            // care of it.
+            sendBack({ type: "CHECK FOR PROJECT" });
           })
           .catch((error) => {
             sendBack({ type: "error", error });
           });
+      },
+      checkItemsForProject: (context: AppMachineContext) => (sendBack: any) => {
+        if (projectExists(context.items)) {
+          sendBack({ type: "PROJECT EXISTS" });
+        } else {
+          sendBack({ type: "PROJECT DOES NOT EXIST" });
+        }
       },
     },
   }
