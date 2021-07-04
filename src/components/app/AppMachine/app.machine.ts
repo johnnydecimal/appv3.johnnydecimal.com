@@ -11,7 +11,9 @@ interface AppMachineContext {
 type AppMachineEvent =
   // Sent by userbase `changeHandler` when the database is updated.
   | { type: "DATABASE ITEMS UPDATED"; items: Item[] }
-  // Opening the database and checking that a project exists.
+  // Opening the database and checking that a project exists. These do the same
+  // thing and are duplicated for machine readability.
+  | { type: "DATABASE OPENED" }
   | { type: "CHECK FOR FIRST PROJECT" }
   | { type: "PROJECT EXISTS" }
   | { type: "PROJECT DOES NOT EXIST" }
@@ -82,6 +84,7 @@ export const appMachine = Machine<
         states: {
           init: {
             on: {
+              "DATABASE OPENED": "checkingForProject",
               "CHECK FOR FIRST PROJECT": "checkingForProject",
             },
           },
@@ -136,7 +139,7 @@ export const appMachine = Machine<
             },
           })
           .then(() => {
-            sendBack({ type: "CHECK FOR FIRST PROJECT" });
+            sendBack({ type: "DATABASE OPENED" });
           })
           .catch((error) => {
             sendBack({ type: "ERROR", error });
