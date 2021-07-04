@@ -4,7 +4,7 @@ import { inspect } from "@xstate/inspect";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sandbox } from "./playing/Sandbox";
 // import { JargonLoader } from "./playing/JargonLoader";
-import { MasterMachine } from "./components/authentication/AuthMachine";
+import { AuthMachine } from "./components/authentication/AuthMachine";
 // import { SignInForm } from "./signIn";
 
 /**
@@ -23,7 +23,7 @@ export const App = () => {
       {/* Constrain the width, and centre */}
       <div className="max-w-4xl mx-auto mt-2 font-jdcode">
         <h1 className="border-b-2 border-black">Johnny&bull;Decimal</h1>
-        <MasterMachine />
+        <AuthMachine />
         {/* <JargonLoader /> */}
         {/* <Sandbox /> */}
         {/* <SignInForm /> */}

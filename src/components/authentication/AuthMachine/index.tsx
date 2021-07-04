@@ -13,7 +13,7 @@ const WaitOne = () => <div>Wait one. Doing networks.</div>;
 // const SignInForm = () => <div>SignInForm</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const MasterMachine = () => {
+export const AuthMachine = () => {
   /**
    * Start the machine.
    */

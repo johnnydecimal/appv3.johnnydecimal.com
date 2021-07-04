@@ -35,13 +35,21 @@
     "test": "craco test",
     "eject": "react-scripts eject",
     "dev": "xstate-codegen \"src/**/**.machine.ts\" --once",
+    "xsc": "xstate-codegen \"src/**/**.machine.ts\"",
     "postinstall": "yarn dev --once"
   },
   "eslintConfig": {
-    "extends": ["react-app", "react-app/jest"]
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",

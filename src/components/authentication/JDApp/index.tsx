@@ -4,6 +4,13 @@ import { useService } from "@xstate/react";
 import { Sender } from "@xstate/react/lib/types";
 import { EventObject } from "xstate";
 
+// https://kyleshevlin.com/how-to-render-an-object-in-react
+const Log = ({ value = {}, replacer = null, space = 2 }) => (
+  <pre style={{ color: "darkblue" }}>
+    <code>{JSON.stringify(value, replacer, space)}</code>
+  </pre>
+);
+
 export const JDApp = () => {
   const { handleSignOut, state } = useContext(MasterMachineContext);
 
@@ -24,6 +31,7 @@ export const JDApp = () => {
       <div>JD App</div>
       <button onClick={handleSignOut}>Sign out</button>
       <div>appMachine.state: {JSON.stringify(appState.value)}</div>
+      <Log value={appState.context} />
       <button
         onClick={() => {
           sendApp({ type: "SEND" });

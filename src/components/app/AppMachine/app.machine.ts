@@ -1,14 +1,17 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { Machine, assign } from "@xstate/compiled";
-import userbase, { Database, DatabasesResult } from "userbase-js";
+import { assign, Machine } from "@xstate/compiled";
+import userbase, { Database } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface Context {
   databases?: Database[];
+  horses: boolean;
+  items?: any;
 }
 
 type Event =
-  | { type: "database opened" }
+  | { type: "DATABASE OPENED"; items: any }
+  | { type: "DATABASE ITEMS UPDATED"; items: any }
   | { type: "error"; error: UserbaseError };
 
 interface UserbaseError {
@@ -20,46 +23,57 @@ interface UserbaseError {
 export const appMachine = Machine<Context, Event, "appMachine">(
   {
     id: "appMachine",
-    initial: "databaseManagement",
+    initial: "openingDatabase",
     context: {
       databases: undefined,
+      items: undefined,
+      horses: true,
     },
     on: {
       error: {
         target: "#appMachine.error",
       },
+      "DATABASE ITEMS UPDATED": {
+        actions: [
+          (context, event) => {
+            console.log("DATABASE ITEMS UPDATED.event:", event);
+          },
+          assign({
+            items: (context, event) => event.items,
+          }),
+        ],
+      },
     },
     states: {
-      databaseManagement: {
-        type: "compound",
-        /**
-         * Userbase's `openDatabase` method will open an existing database
-         * *or* create one if it doesn't exist.
-         */
-        initial: "openDatabase",
-        states: {
-          openDatabase: {
-            invoke: {
-              src: "ubOpenDatabase",
-            },
-            on: {
-              "database opened": {
-                target: "#appMachine.next.dbReceived",
-              },
-              error: { target: "#appMachine.error" },
-            },
+      openingDatabase: {
+        invoke: {
+          src: "ubOpenDatabase",
+        },
+        on: {
+          "DATABASE OPENED": {
+            target: "#appMachine.checkingForProject",
           },
         },
       },
-      next: {
-        type: "compound",
-        initial: "dbReceived",
-        states: {
-          dbReceived: {},
-          noDBs: {},
-        },
+      checkingForProject: {
+        /**
+         * On first run, we create a project `001` for the user. Check that it
+         * exists, and create it if it doesn't.
+         */
+        // invoke: {
+        //   src: (context, event) => {
+        //   }
+        // }
+        entry: [
+          (context) => {
+            console.log("entry to checkingForProject, context:", context);
+          },
+        ],
       },
       error: {
+        /**
+         * Top-level error state. Calling ERROR anywhere will bring us here.
+         */
         type: "final",
       },
     },
@@ -76,11 +90,14 @@ export const appMachine = Machine<Context, Event, "appMachine">(
           .openDatabase({
             databaseName: "johnnydecimal",
             changeHandler: (items) => {
-              console.log("database items:", items);
+              sendBack({ type: "DATABASE ITEMS UPDATED", items });
             },
           })
           .then(() => {
-            sendBack({ type: "database opened" });
+            // sendBack({ type: "database opened" });
+            // This should never be triggered?
+            // Actually it's just then nothing, because the changeHandler takes
+            // care of it.
           })
           .catch((error) => {
             sendBack({ type: "error", error });
