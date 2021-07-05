@@ -99,11 +99,11 @@ export const databaseMachine = Machine<
       getDatabases: {
         type: "compound",
         initial: "init",
-        invoke: {
-          src: "ubGetDatabases",
-        },
         states: {
           init: {
+            invoke: {
+              src: "ubGetDatabases",
+            },
             on: {
               "GOT DATABASES": {
                 actions: [
@@ -129,7 +129,7 @@ export const databaseMachine = Machine<
                 target: "creatingFirstDatabase",
               },
               "ONE OR MORE DATABASES DETECTED": {
-                target: "openDatabase",
+                target: "#databaseMachine.openDatabase",
               },
             },
           },
@@ -146,19 +146,26 @@ export const databaseMachine = Machine<
               },
             },
           },
-          openDatabase: {
-            // @ts-ignore
-            invoke: {
-              src: {
-                type: "ubOpenDatabase",
-                databaseName: "001",
-              },
-            },
-            on: {
-              "DATABASE OPENED": "ready",
-            },
+        },
+      },
+      openDatabase: {
+        type: "compound",
+        initial: "openingDatabase",
+        /**
+         * This is where the Userbase changeHandler gets set up. If we exit this
+         * state the handler gets killed/ignored.
+         */
+        // @ts-ignore
+        invoke: {
+          src: {
+            type: "ubOpenDatabase",
+            databaseName: "001",
           },
-          ready: {},
+        },
+        states: {
+          openingDatabase: {
+            //
+          },
         },
       },
       error: {
