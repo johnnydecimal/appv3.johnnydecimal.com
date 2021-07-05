@@ -26,7 +26,7 @@ export const DatabaseMachine = () => {
 
   // TODO: fix this `any` typing.
   const [appState, sendApp]: [any, Sender<EventObject>] = useActor(
-    state.children.appMachine
+    state.children.databaseMachine
   );
 
   return (

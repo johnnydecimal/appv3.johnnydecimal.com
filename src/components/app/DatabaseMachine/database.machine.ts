@@ -5,12 +5,13 @@ import userbase, { Database, Item } from "userbase-js";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface DatabaseMachineContext {
   databases?: Database[];
-  items: Item[];
+  jdSystem?: any; // The full parsed jdSystem object.
+  userbaseItems: Item[];
 }
 
 type DatabaseMachineEvent =
   // Sent by userbase `changeHandler` when the database is updated.
-  | { type: "DATABASE ITEMS UPDATED"; items: Item[] }
+  | { type: "USERBASEITEMS UPDATED"; userbaseItems: Item[] }
   // Opening the database and checking that a project exists. These do the same
   // thing and are duplicated for machine readability.
   | { type: "DATABASE OPENED" }
@@ -29,17 +30,55 @@ interface UserbaseError {
 /**
  * # projectExists
  *
- * Given a Userbase list of `items`, is any of them a Project?
+ * Given a Userbase list of `userbaseItems`, is any of them a Project?
  * Breaks on the first found.
  */
-const projectExists = (items: Item[]): Boolean => {
+const projectExists = (userbaseItems: Item[]): Boolean => {
   let exists = false;
-  for (let item of items) {
+  for (let item of userbaseItems) {
     if (item.item.jdType === "project") {
       exists = true;
     }
   }
   return exists;
+};
+
+/**
+ * # buildJdSystem
+ *
+ * The goal is to take a userbase.items array and turn it in to our internal
+ * representation of the JD system. This will allow much simpler display and
+ * traversal, like:
+ *
+ * `jdSystem["001"]["00-09"]`
+ */
+const buildJdSystem = (userbaseItems: Item[]) => {
+  // Do we need to parse it for validity first? Or will that come as a result if
+  // we do checks as we go?
+
+  const jdSystem = {};
+
+  // Get all projects and install them as the first-level keys.
+  userbaseItems.forEach((item) => {
+    if (item.item.jdType === "project") {
+      // @ts-ignore
+      jdSystem[item.item.jdNumber] = {
+        jdTitle: item.item.jdTitle,
+      };
+    }
+  });
+
+  // Get all areas and put them under their projects.
+  userbaseItems.forEach((item) => {
+    if (item.item.jdType === "area") {
+      // @ts-ignore
+      jdSystem[item.item.jdProject][item.item.jdNumber] = {
+        jdTitle: item.item.jdTitle,
+      };
+    }
+  });
+
+  return jdSystem;
 };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -53,19 +92,23 @@ export const databaseMachine = Machine<
     initial: "openDatabase",
     context: {
       databases: undefined,
-      items: [],
+      jdSystem: undefined,
+      userbaseItems: [],
     },
     on: {
-      "DATABASE ITEMS UPDATED": {
+      "USERBASEITEMS UPDATED": {
         /**
          * ubOpenDatabase.changeHandler sends this event whenever it receives
          * updated data.
          */
         actions: [
           (context, event) =>
-            console.log("DATABASE ITEMS UPDATED:actions:event:", event),
+            console.log("USERBASEITEMS UPDATED:actions:event:", event),
           assign({
-            items: (context, event) => event.items,
+            userbaseItems: (context, event) => event.userbaseItems,
+          }),
+          assign({
+            jdSystem: (context) => buildJdSystem(context.userbaseItems),
           }),
         ],
       },
@@ -128,11 +171,14 @@ export const databaseMachine = Machine<
         userbase
           .openDatabase({
             databaseName: "johnnydecimal",
-            changeHandler: (items) => {
-              console.log("👷‍♀️ userbase:changeHandler:items:", items);
+            changeHandler: (userbaseItems) => {
+              console.log(
+                "👷‍♀️ userbase:changeHandler:userbaseItems:",
+                userbaseItems
+              );
               sendBack({
-                type: "DATABASE ITEMS UPDATED",
-                items,
+                type: "USERBASEITEMS UPDATED",
+                userbaseItems,
               });
             },
           })
@@ -144,7 +190,7 @@ export const databaseMachine = Machine<
           });
       },
       checkForProject: (context: DatabaseMachineContext) => (sendBack: any) => {
-        if (projectExists(context.items)) {
+        if (projectExists(context.userbaseItems)) {
           sendBack({ type: "PROJECT EXISTS" });
         } else {
           sendBack({ type: "PROJECT DOES NOT EXIST" });

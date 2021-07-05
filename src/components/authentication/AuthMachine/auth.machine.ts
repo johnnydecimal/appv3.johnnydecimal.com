@@ -335,7 +335,7 @@ export const authMachine = Machine<
               send({ type: "write to the log", log: "Sign in successful." }),
             ],
             invoke: {
-              id: "appMachine",
+              id: "databaseMachine",
               src: databaseMachine,
             },
           },
