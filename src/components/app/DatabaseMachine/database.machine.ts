@@ -46,10 +46,10 @@ const projectExists = (items: Item[]): Boolean => {
 export const databaseMachine = Machine<
   DatabaseMachineContext,
   DatabaseMachineEvent,
-  "appMachine"
+  "databaseMachine"
 >(
   {
-    id: "appMachine",
+    id: "databaseMachine",
     initial: "openDatabase",
     context: {
       databases: undefined,
@@ -70,7 +70,7 @@ export const databaseMachine = Machine<
         ],
       },
       ERROR: {
-        target: "#appMachine.error",
+        target: "#databaseMachine.error",
       },
     },
     states: {
