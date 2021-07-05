@@ -1,9 +1,18 @@
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useContext } from "react";
-import { MasterMachineContext } from "../AuthMachine/auth.machine";
 import { useActor } from "@xstate/react";
-import { Sender } from "@xstate/react/lib/types";
-import { EventObject } from "xstate";
 
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import {
+  AuthMachineReactContext,
+  DatabaseMachineReactContext,
+} from "../../../components";
+
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { EventObject } from "xstate";
+import { Sender } from "@xstate/react/lib/types";
+
+// === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
 const Log = ({ value = {}, replacer = null, space = 2 }) => (
   <pre style={{ color: "darkblue" }}>
@@ -11,23 +20,17 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
-export const JDApp = () => {
-  const { handleSignOut, state } = useContext(MasterMachineContext);
+// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+export const DatabaseMachine = () => {
+  const { handleSignOut, state } = useContext(AuthMachineReactContext);
 
   // TODO: fix this `any` typing.
   const [appState, sendApp]: [any, Sender<EventObject>] = useActor(
-    state.children.appMachine
+    state.children.databaseMachine
   );
 
-  /**
-   * NEXT: set up some context like MasterMachineContext. Use this component
-   *       as the master for the app and start building it out.
-   */
-
-  // TODO: Careful, state isn't typed here. Fix.
-
   return (
-    <div>
+    <DatabaseMachineReactContext.Provider value={undefined}>
       <div>JD App</div>
       <button onClick={handleSignOut}>Sign out</button>
       <div>appMachine.state: {JSON.stringify(appState.value)}</div>
@@ -39,6 +42,6 @@ export const JDApp = () => {
       >
         ADD TEST ITEM TO DATABASE
       </button>
-    </div>
+    </DatabaseMachineReactContext.Provider>
   );
 };

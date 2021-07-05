@@ -2,10 +2,16 @@
 import { useMachine } from "@xstate/compiled/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { masterMachine, MasterMachineContext } from "./auth.machine";
-import { SignInForm, ISignInFormData } from "../SignInForm";
-import { SignUpForm, ISignUpFormData } from "../SignUpForm";
-import { JDApp } from "../JDApp";
+import {
+  authMachine,
+  AuthMachineReactContext,
+  SignInForm,
+  SignUpForm,
+  DatabaseMachine,
+} from "../../../components";
+
+import { ISignInFormData } from "../SignInForm";
+import { ISignUpFormData } from "../SignUpForm";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
@@ -17,7 +23,7 @@ export const AuthMachine = () => {
   /**
    * Start the machine.
    */
-  const [state, send] = useMachine(masterMachine, {
+  const [state, send] = useMachine(authMachine, {
     devTools: true,
   });
 
@@ -60,7 +66,7 @@ export const AuthMachine = () => {
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
    */
-  const MasterContextValue = {
+  const AuthContextValue = {
     handleAcknowledgeDireWarningAboutE2EEncryption,
     handleSignIn,
     handleSignOut,
@@ -82,7 +88,7 @@ export const AuthMachine = () => {
       RenderComponent = <SignUpForm />;
       break;
     case state.matches("signedIn"):
-      RenderComponent = <JDApp />;
+      RenderComponent = <DatabaseMachine />;
       break;
     default:
       RenderComponent = <FourOhFour />;
@@ -90,9 +96,9 @@ export const AuthMachine = () => {
   }
 
   return (
-    <MasterMachineContext.Provider
+    <AuthMachineReactContext.Provider
       children={RenderComponent}
-      value={MasterContextValue}
+      value={AuthContextValue}
     />
   );
 };
