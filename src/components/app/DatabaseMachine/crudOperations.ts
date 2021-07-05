@@ -7,6 +7,7 @@ import type { JDItem } from "../../../@types";
 /**
  * # insertJdItem
  *
- * Takes an object
+ * Takes a jdItem and, after verification, performs the userbase.insertItem()
+ * operation.
  */
 export const insertJdItem = (jdItem: JDItem) => {};
