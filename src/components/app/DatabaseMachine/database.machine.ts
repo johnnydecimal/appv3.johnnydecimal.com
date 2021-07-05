@@ -175,9 +175,11 @@ export const databaseMachine = Machine<
         /**
          * Get the array of databases. Is always returned, can be empty.
          */
+        console.log("🌮 ubGetDatabases: go");
         userbase
           .getDatabases()
           .then(({ databases }) => {
+            console.log("🌮 ubGetDatabases: sending GOT DATABASES");
             sendBack({ type: "GOT DATABASES", databases });
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
