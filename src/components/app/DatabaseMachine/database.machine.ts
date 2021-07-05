@@ -17,10 +17,15 @@ type DatabaseMachineEvent =
   | { type: "GOT DATABASES"; databases: Database[] }
 
   /**
-   * evalDatabases returns depending on the length of the databases array.
+   * countDatabases returns depending on the length of the databases array.
    */
   | { type: "ZERO DATABASES DETECTED" }
   | { type: "ONE OR MORE DATABASES DETECTED" }
+
+  /**
+   * ubCreateFirstDatabase
+   */
+  | { type: "FIRST DATABASE CREATED" }
 
   /**
    * ubOpenDatabase.
@@ -102,23 +107,22 @@ export const databaseMachine = Machine<
             on: {
               "GOT DATABASES": {
                 actions: [
-                  (context, event) => console.log("databases", event),
                   assign({
                     databases: (context, event) => event.databases,
                   }),
                 ],
-                target: "evalDatabases",
+                target: "countDatabases",
               },
             },
           },
-          evalDatabases: {
+          countDatabases: {
             /**
              * We got zero or some databases. These are our projects.
              *
              * Figure out how many and act accordingly.
              */
             invoke: {
-              src: "evalDatabases",
+              src: "countDatabases",
             },
             on: {
               "ZERO DATABASES DETECTED": {
@@ -132,20 +136,13 @@ export const databaseMachine = Machine<
           creatingFirstDatabase: {
             // @ts-ignore
             invoke: {
-              /**
-               * This creates the database but we don't bother setting the
-               * changeHandler as we're going to open it again properly
-               * in a moment.
-               */
               src: {
-                type: "ubOpenDatabase",
-                databaseName: "000",
-                withoutChangeHandler: true,
+                type: "ubCreateFirstDatabase",
               },
             },
             on: {
-              "DATABASE OPENED": {
-                target: "openDatabase",
+              "FIRST DATABASE CREATED": {
+                target: "init",
               },
             },
           },
@@ -154,10 +151,14 @@ export const databaseMachine = Machine<
             invoke: {
               src: {
                 type: "ubOpenDatabase",
-                databaseName: "000",
+                databaseName: "001",
               },
             },
+            on: {
+              "DATABASE OPENED": "ready",
+            },
           },
+          ready: {},
         },
       },
       error: {
@@ -177,11 +178,11 @@ export const databaseMachine = Machine<
         userbase
           .getDatabases()
           .then(({ databases }) => {
-            sendBack({ type: "GOT DATABASES", databases: databases });
+            sendBack({ type: "GOT DATABASES", databases });
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
-      evalDatabases: (context) => (sendBack: any) => {
+      countDatabases: (context: DatabaseMachineContext) => (sendBack: any) => {
         /**
          * We got zero or more databases. These are our projects.
          */
@@ -191,19 +192,22 @@ export const databaseMachine = Machine<
           sendBack({ type: "ONE OR MORE DATABASES DETECTED" });
         }
       },
-      /**
-       * # ubOpenDatabase
-       *
-       * Opens the database specified, creating it if it doesn't exist.
-       * `invoke: { src: 'upOpenDatabase', databaseName: 'your-value-here' }`
-       */
+      ubCreateFirstDatabase: () => (sendBack: any) => {
+        userbase
+          .openDatabase({
+            databaseName: "001",
+            changeHandler: () => {
+              // Nothing here, we'll open this again properly in a moment.
+            },
+          })
+          .then(sendBack({ type: "FIRST DATABASE CREATED" }))
+          .catch((error) => sendBack({ type: "ERROR", error }));
+      },
       ubOpenDatabase:
         (
           context: DatabaseMachineContext,
           event: DatabaseMachineEvent,
-          {
-            src: { databaseName, withoutChangeHandler = false },
-          }: { src: { databaseName: string; withoutChangeHandler: Boolean } }
+          { src: { databaseName } }: { src: { databaseName: string } }
         ) =>
         (sendBack: any) => {
           if (!databaseName) {
@@ -217,18 +221,14 @@ export const databaseMachine = Machine<
             .openDatabase({
               databaseName,
               changeHandler: (userbaseItems) => {
-                if (withoutChangeHandler) {
-                  return;
-                } else {
-                  console.log(
-                    "👷‍♀️ userbase:changeHandler:userbaseItems:",
-                    userbaseItems
-                  );
-                  sendBack({
-                    type: "USERBASEITEMS UPDATED",
-                    userbaseItems,
-                  });
-                }
+                console.log(
+                  "👷‍♀️ userbase:changeHandler:userbaseItems:",
+                  userbaseItems
+                );
+                sendBack({
+                  type: "USERBASEITEMS UPDATED",
+                  userbaseItems,
+                });
               },
             })
             .then(() => {
@@ -238,38 +238,6 @@ export const databaseMachine = Machine<
               sendBack({ type: "ERROR", error });
             });
         },
-      checkForProject: (context: DatabaseMachineContext) => (sendBack: any) => {
-        if (projectExists(context.userbaseItems)) {
-          sendBack({ type: "PROJECT EXISTS" });
-        } else {
-          sendBack({ type: "PROJECT DOES NOT EXIST" });
-        }
-      },
-      createFirstProject: () => (sendBack: any) => {
-        userbase
-          .insertItem({
-            databaseName: "johnnydecimal",
-            item: {
-              jdType: "project",
-              jdNumber: "001",
-              jdTitle: "Default project (system created)",
-            },
-          })
-          .then(() => {
-            /**
-             * Success just sends us back to the start.
-             */
-            sendBack({
-              type: "CHECK FOR FIRST PROJECT",
-            });
-          })
-          .catch((error) =>
-            sendBack({
-              type: "ERROR",
-              error,
-            })
-          );
-      },
     },
   }
 );
