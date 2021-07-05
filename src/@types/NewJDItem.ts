@@ -1,6 +1,4 @@
-import JDArea from "./JDArea";
-import JDCategory from "./JDCategory";
-import JDID from "./JDID";
+import type { JDArea, JDCategory, JDID } from ".";
 
 /**
  * # NewJDItem (type)
@@ -12,12 +10,12 @@ import JDID from "./JDID";
  * it's an AC.ID: we figure that out from the shape of the input.
  */
 interface NewJDItem {
-	jdNumber: JDArea | JDCategory | JDID;
-	jdTitle: string; // TODO: This is optional on JDItem, why?
-	comment?: string; // Any inline comments like this one
-	metadata?: string; // TODO: Figure out how this is stored.
-	createdTime?: string; // This will be a Date() string.
-	lastUpdatedTime?: string; // This will be a Date() string.
+  jdNumber: JDArea | JDCategory | JDID;
+  jdTitle: string; // TODO: This is optional on JDItem, why?
+  comment?: string; // Any inline comments like this one
+  metadata?: string; // TODO: Figure out how this is stored.
+  createdTime?: string; // This will be a Date() string.
+  lastUpdatedTime?: string; // This will be a Date() string.
 }
 
 export default NewJDItem;

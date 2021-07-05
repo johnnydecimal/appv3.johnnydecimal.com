@@ -1,12 +1,12 @@
-import JDItem from "./JDItem";
+import { JDItem } from ".";
 
 /**
  * Each `UserbaseItem` is an object with a `JDItem` on the `item` property and
  * a Userbase-generated GUID on the `itemId` property.
  */
 interface UserbaseItem {
-	item: JDItem;
-	itemId: string;
+  item: JDItem;
+  itemId: string;
 }
 
 /**
