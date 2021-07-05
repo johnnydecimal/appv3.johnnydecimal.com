@@ -3,7 +3,10 @@ import { useContext } from "react";
 import { useActor } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext } from "../../../components";
+import {
+  AuthMachineReactContext,
+  DatabaseMachineReactContext,
+} from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { EventObject } from "xstate";
@@ -17,6 +20,7 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
+// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
   const { handleSignOut, state } = useContext(AuthMachineReactContext);
 
@@ -25,15 +29,8 @@ export const DatabaseMachine = () => {
     state.children.appMachine
   );
 
-  /**
-   * NEXT: set up some context like AuthMachineContext. Use this component
-   *       as the master for the app and start building it out.
-   */
-
-  // TODO: Careful, state isn't typed here. Fix.
-
   return (
-    <div>
+    <DatabaseMachineReactContext.Provider value={undefined}>
       <div>JD App</div>
       <button onClick={handleSignOut}>Sign out</button>
       <div>appMachine.state: {JSON.stringify(appState.value)}</div>
@@ -45,6 +42,6 @@ export const DatabaseMachine = () => {
       >
         appMachine SEND
       </button>
-    </div>
+    </DatabaseMachineReactContext.Provider>
   );
 };

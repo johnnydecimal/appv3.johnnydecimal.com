@@ -7,6 +7,7 @@ import { LogViewer } from "./authentication/LogViewer";
 
 import { DatabaseMachine } from "./app/DatabaseMachine/DatabaseMachine";
 import { databaseMachine } from "./app/DatabaseMachine/database.machine";
+import { DatabaseMachineReactContext } from "./app/DatabaseMachine/context";
 
 import { SignInForm } from "./authentication/SignInForm";
 import { SignUpForm } from "./authentication/SignUpForm";
@@ -17,6 +18,7 @@ export {
   authMachine,
   LogViewer,
   DatabaseMachine,
+  DatabaseMachineReactContext,
   databaseMachine,
   SignInForm,
   SignUpForm,
