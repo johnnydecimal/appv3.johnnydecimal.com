@@ -1,9 +1,15 @@
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { useContext } from "react";
-import { AuthMachineReactContext } from "../../authentication/AuthMachine/context";
 import { useActor } from "@xstate/react";
-import { Sender } from "@xstate/react/lib/types";
-import { EventObject } from "xstate";
 
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { AuthMachineReactContext } from "../../authentication/AuthMachine/context";
+
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { EventObject } from "xstate";
+import { Sender } from "@xstate/react/lib/types";
+
+// === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
 const Log = ({ value = {}, replacer = null, space = 2 }) => (
   <pre style={{ color: "darkblue" }}>
