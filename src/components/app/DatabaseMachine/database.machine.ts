@@ -4,21 +4,34 @@ import userbase, { Database, Item } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface DatabaseMachineContext {
-  databases?: Database[];
+  databases: Database[];
   jdSystem?: any; // The full parsed jdSystem object.
   userbaseItems: Item[];
 }
 
 type DatabaseMachineEvent =
-  // Get the list of databases
+  /**
+   * ubGetDatabases returns GOT DATABASES as long as the connection to Userbase
+   * was successful. `databases` could be an empty array.
+   */
   | { type: "GOT DATABASES"; databases: Database[] }
-  // Sent by userbase `changeHandler` when the database is updated.
+
+  /**
+   * evalDatabases returns depending on the length of the databases array.
+   */
+  | { type: "ZERO DATABASES DETECTED" }
+  | { type: "ONE OR MORE DATABASES DETECTED" }
+
+  /**
+   * ubOpenDatabase.
+   */
+  // The changeHandler fires this.
   | { type: "USERBASEITEMS UPDATED"; userbaseItems: Item[] }
-  // Opening the database and checking that a project exists. These do the same
-  // thing and are duplicated for machine readability.
+  // When we open a database.
   | { type: "DATABASE OPENED" }
-  | { type: "PROJECT EXISTS" }
-  | { type: "PROJECT DOES NOT EXIST" }
+
+  // Testing/building
+  | { type: "TEST" }
   // Errors
   | { type: "ERROR"; error: UserbaseError };
 
@@ -55,7 +68,7 @@ export const databaseMachine = Machine<
     id: "databaseMachine",
     initial: "getDatabases",
     context: {
-      databases: undefined,
+      databases: [],
       jdSystem: undefined,
       userbaseItems: [],
     },
@@ -94,46 +107,57 @@ export const databaseMachine = Machine<
                     databases: (context, event) => event.databases,
                   }),
                 ],
-                target: "next",
+                target: "evalDatabases",
               },
             },
           },
-          next: {},
-        },
-      },
-      openDatabase: {
-        type: "compound",
-        initial: "init",
-        invoke: {
-          src: "ubOpenDatabase",
-        },
-        states: {
-          init: {
+          evalDatabases: {
+            /**
+             * We got zero or some databases. These are our projects.
+             *
+             * Figure out how many and act accordingly.
+             */
+            invoke: {
+              src: "evalDatabases",
+            },
             on: {
-              "DATABASE OPENED": "checkingForProject",
+              "ZERO DATABASES DETECTED": {
+                target: "creatingFirstDatabase",
+              },
+              "ONE OR MORE DATABASES DETECTED": {
+                target: "openDatabase",
+              },
             },
           },
-          checkingForProject: {
+          creatingFirstDatabase: {
+            // @ts-ignore
             invoke: {
-              src: "checkForProject",
-            },
-            on: {
-              "PROJECT EXISTS": "ready",
-              "PROJECT DOES NOT EXIST": "creatingFirstProject",
-            },
-          },
-          creatingFirstProject: {
-            invoke: {
-              src: "createFirstProject",
-            },
-            on: {
               /**
-               * Success just sends us back to the start.
+               * This creates the database but we don't bother setting the
+               * changeHandler as we're going to open it again properly
+               * in a moment.
                */
-              "DATABASE OPENED": "checkingForProject",
+              src: {
+                type: "ubOpenDatabase",
+                databaseName: "000",
+                withoutChangeHandler: true,
+              },
+            },
+            on: {
+              "DATABASE OPENED": {
+                target: "openDatabase",
+              },
             },
           },
-          ready: {},
+          openDatabase: {
+            // @ts-ignore
+            invoke: {
+              src: {
+                type: "ubOpenDatabase",
+                databaseName: "000",
+              },
+            },
+          },
         },
       },
       error: {
@@ -145,43 +169,75 @@ export const databaseMachine = Machine<
     },
   },
   {
-    actions: {
-      // assignDatabases: assign({
-      //   databases: (_context, event) => event.databases,
-      // }),
-    },
     services: {
       ubGetDatabases: () => (sendBack: any) => {
+        /**
+         * Get the array of databases. Is always returned, can be empty.
+         */
         userbase
           .getDatabases()
           .then(({ databases }) => {
-            console.log("databases in the service:", databases);
             sendBack({ type: "GOT DATABASES", databases: databases });
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
-      ubOpenDatabase: () => (sendBack: any) => {
-        userbase
-          .openDatabase({
-            databaseName: "johnnydecimal",
-            changeHandler: (userbaseItems) => {
-              console.log(
-                "👷‍♀️ userbase:changeHandler:userbaseItems:",
-                userbaseItems
-              );
-              sendBack({
-                type: "USERBASEITEMS UPDATED",
-                userbaseItems,
-              });
-            },
-          })
-          .then(() => {
-            sendBack({ type: "DATABASE OPENED" });
-          })
-          .catch((error) => {
-            sendBack({ type: "ERROR", error });
-          });
+      evalDatabases: (context) => (sendBack: any) => {
+        /**
+         * We got zero or more databases. These are our projects.
+         */
+        if (context.databases.length === 0) {
+          sendBack({ type: "ZERO DATABASES DETECTED" });
+        } else {
+          sendBack({ type: "ONE OR MORE DATABASES DETECTED" });
+        }
       },
+      /**
+       * # ubOpenDatabase
+       *
+       * Opens the database specified, creating it if it doesn't exist.
+       * `invoke: { src: 'upOpenDatabase', databaseName: 'your-value-here' }`
+       */
+      ubOpenDatabase:
+        (
+          context: DatabaseMachineContext,
+          event: DatabaseMachineEvent,
+          {
+            src: { databaseName, withoutChangeHandler = false },
+          }: { src: { databaseName: string; withoutChangeHandler: Boolean } }
+        ) =>
+        (sendBack: any) => {
+          if (!databaseName) {
+            sendBack({
+              type: "ERROR",
+              error: "ubOpenDatabase called without `databaseName`.",
+            });
+            return;
+          }
+          userbase
+            .openDatabase({
+              databaseName,
+              changeHandler: (userbaseItems) => {
+                if (withoutChangeHandler) {
+                  return;
+                } else {
+                  console.log(
+                    "👷‍♀️ userbase:changeHandler:userbaseItems:",
+                    userbaseItems
+                  );
+                  sendBack({
+                    type: "USERBASEITEMS UPDATED",
+                    userbaseItems,
+                  });
+                }
+              },
+            })
+            .then(() => {
+              sendBack({ type: "DATABASE OPENED" });
+            })
+            .catch((error) => {
+              sendBack({ type: "ERROR", error });
+            });
+        },
       checkForProject: (context: DatabaseMachineContext) => (sendBack: any) => {
         if (projectExists(context.userbaseItems)) {
           sendBack({ type: "PROJECT EXISTS" });
