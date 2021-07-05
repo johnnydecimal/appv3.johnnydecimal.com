@@ -3,6 +3,7 @@ import { Machine, assign, send } from "@xstate/compiled";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+// Can't import from components, breaks xstate-codegen
 import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===

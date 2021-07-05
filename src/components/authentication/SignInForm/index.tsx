@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { AuthMachineReactContext } from "../../../components";
-import { LogViewer } from "../LogViewer";
+import { LogViewer } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignInFormData {
