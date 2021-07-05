@@ -43,44 +43,6 @@ const projectExists = (userbaseItems: Item[]): Boolean => {
   return exists;
 };
 
-/**
- * # buildJdSystem
- *
- * The goal is to take a userbase.items array and turn it in to our internal
- * representation of the JD system. This will allow much simpler display and
- * traversal, like:
- *
- * `jdSystem["001"]["00-09"]`
- */
-const buildJdSystem = (userbaseItems: Item[]) => {
-  // Do we need to parse it for validity first? Or will that come as a result if
-  // we do checks as we go?
-
-  const jdSystem = {};
-
-  // Get all projects and install them as the first-level keys.
-  userbaseItems.forEach((item) => {
-    if (item.item.jdType === "project") {
-      // @ts-ignore
-      jdSystem[item.item.jdNumber] = {
-        jdTitle: item.item.jdTitle,
-      };
-    }
-  });
-
-  // Get all areas and put them under their projects.
-  userbaseItems.forEach((item) => {
-    if (item.item.jdType === "area") {
-      // @ts-ignore
-      jdSystem[item.item.jdProject][item.item.jdNumber] = {
-        jdTitle: item.item.jdTitle,
-      };
-    }
-  });
-
-  return jdSystem;
-};
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = Machine<
   DatabaseMachineContext,
@@ -106,9 +68,6 @@ export const databaseMachine = Machine<
             console.log("USERBASEITEMS UPDATED:actions:event:", event),
           assign({
             userbaseItems: (context, event) => event.userbaseItems,
-          }),
-          assign({
-            jdSystem: (context) => buildJdSystem(context.userbaseItems),
           }),
         ],
       },
