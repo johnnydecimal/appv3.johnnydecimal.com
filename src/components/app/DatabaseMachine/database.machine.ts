@@ -10,6 +10,8 @@ interface DatabaseMachineContext {
 }
 
 type DatabaseMachineEvent =
+  // Get the list of databases
+  | { type: "GOT DATABASES"; databases: Database[] }
   // Sent by userbase `changeHandler` when the database is updated.
   | { type: "USERBASEITEMS UPDATED"; userbaseItems: Item[] }
   // Opening the database and checking that a project exists. These do the same
@@ -51,7 +53,7 @@ export const databaseMachine = Machine<
 >(
   {
     id: "databaseMachine",
-    initial: "openDatabase",
+    initial: "getDatabases",
     context: {
       databases: undefined,
       jdSystem: undefined,
@@ -76,6 +78,29 @@ export const databaseMachine = Machine<
       },
     },
     states: {
+      getDatabases: {
+        type: "compound",
+        initial: "init",
+        invoke: {
+          src: "ubGetDatabases",
+        },
+        states: {
+          init: {
+            on: {
+              "GOT DATABASES": {
+                actions: [
+                  (context, event) => console.log("databases", event),
+                  assign({
+                    databases: (context, event) => event.databases,
+                  }),
+                ],
+                target: "next",
+              },
+            },
+          },
+          next: {},
+        },
+      },
       openDatabase: {
         type: "compound",
         initial: "init",
@@ -126,6 +151,15 @@ export const databaseMachine = Machine<
       // }),
     },
     services: {
+      ubGetDatabases: () => (sendBack: any) => {
+        userbase
+          .getDatabases()
+          .then(({ databases }) => {
+            console.log("databases in the service:", databases);
+            sendBack({ type: "GOT DATABASES", databases: databases });
+          })
+          .catch((error) => sendBack({ type: "ERROR", error }));
+      },
       ubOpenDatabase: () => (sendBack: any) => {
         userbase
           .openDatabase({
