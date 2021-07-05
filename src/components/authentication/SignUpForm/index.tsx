@@ -3,8 +3,7 @@ import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext } from "../../../components";
-import { LogViewer } from "../../../components";
+import { AuthMachineReactContext, LogViewer } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignUpFormData {
