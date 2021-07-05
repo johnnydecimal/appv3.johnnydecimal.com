@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext } from "../AuthMachine/context";
+import { AuthMachineReactContext } from "../../../components";
 import { LogViewer } from "../LogViewer";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===

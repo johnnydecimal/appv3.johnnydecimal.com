@@ -2,11 +2,11 @@
 import { useMachine } from "@xstate/compiled/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { authMachine } from "./auth.machine";
-import { AuthMachineReactContext } from "./context";
+import { authMachine } from "../../../components";
+import { AuthMachineReactContext } from "../../../components";
 import { SignInForm, ISignInFormData } from "../SignInForm";
 import { SignUpForm, ISignUpFormData } from "../SignUpForm";
-import { DatabaseMachine } from "../../app/DatabaseMachine";
+import { DatabaseMachine } from "../..";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
