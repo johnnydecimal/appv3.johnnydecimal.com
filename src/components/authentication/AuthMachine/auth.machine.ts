@@ -8,8 +8,8 @@ import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
-import { ISignInFormData } from "../SignInForm";
-import { ISignUpFormData } from "../SignUpForm";
+import { ISignInFormData } from "../SignInForm/SignInForm";
+import { ISignUpFormData } from "../SignUpForm/SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch

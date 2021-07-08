@@ -10,8 +10,8 @@ import {
   DatabaseMachine,
 } from "../../../components";
 
-import { ISignInFormData } from "../SignInForm";
-import { ISignUpFormData } from "../SignUpForm";
+import { ISignInFormData } from "../SignInForm/SignInForm";
+import { ISignUpFormData } from "../SignUpForm/SignUpForm";
 
 // === TEST ===
 const FourOhFour = () => <div>404</div>;

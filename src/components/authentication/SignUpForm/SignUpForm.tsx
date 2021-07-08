@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext, LogViewer } from "../../../components";
+import { AuthMachineReactContext, LogViewer } from "../..";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignUpFormData {
@@ -113,7 +113,7 @@ export const SignUpForm = () => {
             >
               {state.value.signUp ===
               "direWarningAboutE2EEncryptionNotAcknowledged"
-                ? "↓ Read below ↓"
+                ? "↓ Read me ↓"
                 : state.value.signUp === "tryingSignUp"
                 ? "Wait..."
                 : "Sign up"}
