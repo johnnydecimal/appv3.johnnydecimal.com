@@ -46,23 +46,6 @@ interface UserbaseError {
   status: number; // 401
 }
 
-// === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
-/**
- * # projectExists
- *
- * Given a Userbase list of `userbaseItems`, is any of them a Project?
- * Breaks on the first found.
- */
-const projectExists = (userbaseItems: Item[]): Boolean => {
-  let exists = false;
-  for (let item of userbaseItems) {
-    if (item.item.jdType === "project") {
-      exists = true;
-    }
-  }
-  return exists;
-};
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = Machine<
   DatabaseMachineContext,
