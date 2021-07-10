@@ -67,8 +67,6 @@ export const databaseMachine = Machine<
          * updated data.
          */
         actions: [
-          (context, event) =>
-            console.log("USERBASEITEMS UPDATED:actions:event:", event),
           assign({
             userbaseItems: (context, event) => event.userbaseItems,
           }),
@@ -214,10 +212,6 @@ export const databaseMachine = Machine<
             .openDatabase({
               databaseName,
               changeHandler: (userbaseItems) => {
-                console.log(
-                  "👷‍♀️ userbase:changeHandler:userbaseItems:",
-                  userbaseItems
-                );
                 sendBack({
                   type: "USERBASEITEMS UPDATED",
                   userbaseItems,
