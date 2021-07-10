@@ -1,20 +1,45 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { JDItem } from "@types";
 import { assign, Machine } from "@xstate/compiled";
 import userbase, { Database, Item } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+interface UserbaseError {
+  name: string; // UsernameOrPasswordMismatch
+  message: string; // Username or password mismatch.
+  status: number; // 401
+}
+
+interface JDUserbaseItem extends Item {
+  item: JDItem;
+}
+
 interface DatabaseMachineContext {
+  /**
+   * The array of the user's available database objects, returned by Userbase.
+   * The `databaseName` property on each object is the 3-digit JD project code,
+   * which is a string.
+   */
   databases: Database[];
-  jdSystem?: any; // The full parsed jdSystem object.
-  userbaseItems: Item[];
+  /**
+   * currentProject is the 3-digit project which we have open. Corresponds to
+   * the databaseName in Userbase.
+   */
+  currentProject: string;
+  /**
+   * When we open any given database, `userbaseItems` is the array of Items
+   * which makes up that database.
+   */
+  userbaseItems: JDUserbaseItem[];
+  error: any;
 }
 
 type DatabaseMachineEvent =
   /**
-   * ubGetDatabases returns GOT DATABASES as long as the connection to Userbase
-   * was successful. `databases` could be an empty array.
+   * ubGetDatabases returns GOT ARRAY OF DATABASES as long as the connection to
+   * Userbase was successful. `databases` could be an empty array.
    */
-  | { type: "GOT DATABASES"; databases: Database[] }
+  | { type: "GOT ARRAY OF DATABASES"; databases: Database[] }
 
   /**
    * countingDatabases returns depending on the length of the databases array.
@@ -40,12 +65,6 @@ type DatabaseMachineEvent =
   // Errors
   | { type: "ERROR"; error: UserbaseError };
 
-interface UserbaseError {
-  name: string; // UsernameOrPasswordMismatch
-  message: string; // Username or password mismatch.
-  status: number; // 401
-}
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = Machine<
   DatabaseMachineContext,
@@ -57,8 +76,9 @@ export const databaseMachine = Machine<
     initial: "getDatabases",
     context: {
       databases: [],
-      jdSystem: undefined,
+      currentProject: "",
       userbaseItems: [],
+      error: undefined,
     },
     on: {
       "USERBASEITEMS UPDATED": {
@@ -74,6 +94,12 @@ export const databaseMachine = Machine<
       },
       ERROR: {
         target: "#databaseMachine.error",
+        actions: [
+          (context, event) => console.log("ERROR.event:", event),
+          assign({
+            error: (context, event) => event.error,
+          }),
+        ],
       },
     },
     states: {
@@ -86,10 +112,19 @@ export const databaseMachine = Machine<
               src: "ubGetDatabases",
             },
             on: {
-              "GOT DATABASES": {
+              "GOT ARRAY OF DATABASES": {
                 actions: [
                   assign({
                     databases: (context, event) => event.databases,
+                  }),
+                  assign({
+                    currentProject: (context, event) => {
+                      if (event.databases[0]) {
+                        return event.databases[0].databaseName;
+                      } else {
+                        return "";
+                      }
+                    },
                   }),
                 ],
                 target: "countingDatabases",
@@ -133,17 +168,16 @@ export const databaseMachine = Machine<
          * This is where the Userbase changeHandler gets set up. If we exit this
          * state the handler gets killed/ignored.
          */
-        // @ts-ignore
         invoke: {
-          src: {
-            type: "ubOpenDatabase",
-            databaseName: "001",
-          },
+          src: "ubOpenDatabase",
         },
         states: {
           openingDatabase: {
-            //
+            on: {
+              "DATABASE OPENED": "databaseIsOpen",
+            },
           },
+          databaseIsOpen: {},
         },
       },
       error: {
@@ -163,7 +197,7 @@ export const databaseMachine = Machine<
         userbase
           .getDatabases()
           .then(({ databases }) => {
-            sendBack({ type: "GOT DATABASES", databases });
+            sendBack({ type: "GOT ARRAY OF DATABASES", databases });
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
@@ -194,37 +228,31 @@ export const databaseMachine = Machine<
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
-      ubOpenDatabase:
-        (
-          context: DatabaseMachineContext,
-          event: DatabaseMachineEvent,
-          { src: { databaseName } }: { src: { databaseName: string } }
-        ) =>
-        (sendBack: any) => {
-          if (!databaseName) {
-            sendBack({
-              type: "ERROR",
-              error: "ubOpenDatabase called without `databaseName`.",
-            });
-            return;
-          }
-          userbase
-            .openDatabase({
-              databaseName,
-              changeHandler: (userbaseItems) => {
-                sendBack({
-                  type: "USERBASEITEMS UPDATED",
-                  userbaseItems,
-                });
-              },
-            })
-            .then(() => {
-              sendBack({ type: "DATABASE OPENED" });
-            })
-            .catch((error) => {
-              sendBack({ type: "ERROR", error });
-            });
-        },
+      ubOpenDatabase: (context: DatabaseMachineContext) => (sendBack: any) => {
+        if (context.currentProject === "") {
+          sendBack({
+            type: "ERROR",
+            error: "ubOpenDatabase called while context.currentProject === ''",
+          });
+          return;
+        }
+        userbase
+          .openDatabase({
+            databaseName: context.currentProject,
+            changeHandler: (userbaseItems) => {
+              sendBack({
+                type: "USERBASEITEMS UPDATED",
+                userbaseItems,
+              });
+            },
+          })
+          .then(() => {
+            sendBack({ type: "DATABASE OPENED" });
+          })
+          .catch((error) => {
+            sendBack({ type: "ERROR", error });
+          });
+      },
     },
   }
 );

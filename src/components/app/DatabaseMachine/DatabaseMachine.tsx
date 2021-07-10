@@ -11,37 +11,68 @@ import {
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { EventObject } from "xstate";
 import { Sender } from "@xstate/react/lib/types";
+import { Database } from "userbase-js";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
 const Log = ({ value = {}, replacer = null, space = 2 }) => (
-  <pre style={{ color: "darkblue" }}>
+  <pre>
     <code>{JSON.stringify(value, replacer, space)}</code>
   </pre>
 );
 
+const ProjectViewer = ({
+  projectNumber,
+  projectTitle,
+}: {
+  projectNumber: string;
+  projectTitle: string;
+}) => {
+  return (
+    <div className="my-8">
+      {projectNumber}: {projectTitle}
+    </div>
+  );
+};
+
+const ProjectPicker = ({ projects }: { projects: Database[] }) => {
+  return (
+    <div>
+      <select id="project" name="project">
+        {projects.map((project) => (
+          <option key={project.databaseName} value={project.databaseName}>
+            {project.databaseName}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
-  const { handleSignOut, state } = useContext(AuthMachineReactContext);
+  const { handleSignOut, state: authState } = useContext(
+    AuthMachineReactContext
+  );
 
   // TODO: fix this `any` typing.
-  const [appState, sendApp]: [any, Sender<EventObject>] = useActor(
-    state.children.databaseMachine
+  const [state, send]: [any, Sender<EventObject>] = useActor(
+    authState.children.databaseMachine
   );
 
   return (
     <DatabaseMachineReactContext.Provider value={undefined}>
       <div>JD App</div>
       <button onClick={handleSignOut}>Sign out</button>
-      <div>appMachine.state: {JSON.stringify(appState.value)}</div>
-      <Log value={appState.context} />
-      <button
-        onClick={() => {
-          sendApp({ type: "ADD TEST ITEM TO DATABASE" });
-        }}
-      >
-        ADD TEST ITEM TO DATABASE
-      </button>
+      <hr />
+      <ProjectPicker projects={state.context.databases} />
+      <ProjectViewer
+        projectNumber={state.context.databases.databaseName}
+        projectTitle="Passed in by props"
+      />
+      <hr />
+      <div>appMachine.state: {JSON.stringify(state.value)}</div>
+      <Log value={state.context} />
     </DatabaseMachineReactContext.Provider>
   );
 };
