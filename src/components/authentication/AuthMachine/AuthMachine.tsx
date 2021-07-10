@@ -66,7 +66,7 @@ export const AuthMachine = () => {
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
    */
-  const AuthContextValue = {
+  const AuthReactContextValue = {
     handleAcknowledgeDireWarningAboutE2EEncryption,
     handleSignIn,
     handleSignOut,
@@ -98,7 +98,7 @@ export const AuthMachine = () => {
   return (
     <AuthMachineReactContext.Provider
       children={RenderComponent}
-      value={AuthContextValue}
+      value={AuthReactContextValue}
     />
   );
 };

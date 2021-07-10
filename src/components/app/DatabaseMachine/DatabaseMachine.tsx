@@ -9,7 +9,7 @@ import {
 } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { EventObject } from "xstate";
+import { EventObject, send } from "xstate";
 import { Sender } from "@xstate/react/lib/types";
 import { Database } from "userbase-js";
 
@@ -60,8 +60,19 @@ export const DatabaseMachine = () => {
     authState.children.databaseMachine
   );
 
+  const createProject = (projectNumber: string) => {
+    send({
+      type: "CREATE PROJECT",
+      projectNumber,
+    });
+  };
+
+  const DatabaseReactContextValue = {
+    createProject,
+  };
+
   return (
-    <DatabaseMachineReactContext.Provider value={undefined}>
+    <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
       <div>JD App</div>
       <button onClick={handleSignOut}>Sign out</button>
       <hr />

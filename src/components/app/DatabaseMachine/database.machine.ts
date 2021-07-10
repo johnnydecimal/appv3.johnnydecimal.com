@@ -57,6 +57,10 @@ type DatabaseMachineEvent =
    */
   // The changeHandler fires this.
   | { type: "USERBASEITEMS UPDATED"; userbaseItems: Item[] }
+
+  // When we want to create a new project.
+  | { type: "CREATE PROJECT"; projectNumber: string }
+
   // When we open a database.
   | { type: "DATABASE OPENED" }
 
@@ -91,6 +95,14 @@ export const databaseMachine = Machine<
             userbaseItems: (context, event) => event.userbaseItems,
           }),
         ],
+      },
+      "CREATE PROJECT": {
+        actions: [
+          assign({
+            currentProject: (context, event) => event.projectNumber,
+          }),
+        ],
+        target: "#databaseMachine.openDatabase",
       },
       ERROR: {
         target: "#databaseMachine.error",
