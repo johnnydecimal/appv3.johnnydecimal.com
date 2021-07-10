@@ -17,7 +17,7 @@ type DatabaseMachineEvent =
   | { type: "GOT DATABASES"; databases: Database[] }
 
   /**
-   * countDatabases returns depending on the length of the databases array.
+   * countingDatabases returns depending on the length of the databases array.
    */
   | { type: "ZERO DATABASES DETECTED" }
   | { type: "ONE OR MORE DATABASES DETECTED" }
@@ -94,11 +94,11 @@ export const databaseMachine = Machine<
                     databases: (context, event) => event.databases,
                   }),
                 ],
-                target: "countDatabases",
+                target: "countingDatabases",
               },
             },
           },
-          countDatabases: {
+          countingDatabases: {
             /**
              * We got zero or some databases. These are our projects.
              *
@@ -117,11 +117,8 @@ export const databaseMachine = Machine<
             },
           },
           creatingFirstDatabase: {
-            // @ts-ignore
             invoke: {
-              src: {
-                type: "ubCreateFirstDatabase",
-              },
+              src: "ubCreateFirstDatabase",
             },
             on: {
               "FIRST DATABASE CREATED": {
@@ -165,19 +162,14 @@ export const databaseMachine = Machine<
         /**
          * Get the array of databases. Is always returned, can be empty.
          */
-        console.log("🌮 ubGetDatabases: go");
         userbase
           .getDatabases()
           .then(({ databases }) => {
-            console.log("🌮 ubGetDatabases: sending GOT DATABASES");
             sendBack({ type: "GOT DATABASES", databases });
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
       countDatabases: (context: DatabaseMachineContext) => (sendBack: any) => {
-        /**
-         * We got zero or more databases. These are our projects.
-         */
         if (context.databases.length === 0) {
           sendBack({ type: "ZERO DATABASES DETECTED" });
         } else {
@@ -189,10 +181,19 @@ export const databaseMachine = Machine<
           .openDatabase({
             databaseName: "001",
             changeHandler: () => {
-              // Nothing here, we'll open this again properly in a moment.
+              /**
+               * This changeHandler isn't needed, but is required by Userbase.
+               * We exit the state that invoked this service immediately, so
+               * anything created by this service will be ignored by XState.
+               *
+               * This function might be a minor memory leak? Which is why it
+               * doesn't do anything.
+               */
             },
           })
-          .then(sendBack({ type: "FIRST DATABASE CREATED" }))
+          .then(() => {
+            sendBack({ type: "FIRST DATABASE CREATED" });
+          })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
       ubOpenDatabase:
