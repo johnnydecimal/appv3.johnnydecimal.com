@@ -36,10 +36,10 @@ interface DatabaseMachineContext {
 
 type DatabaseMachineEvent =
   /**
-   * ubGetDatabases returns GOT ARRAY OF DATABASES as long as the connection to
+   * ubGetDatabases returns GOT DATABASES as long as the connection to
    * Userbase was successful. `databases` could be an empty array.
    */
-  | { type: "GOT ARRAY OF DATABASES"; databases: Database[] }
+  | { type: "GOT DATABASES"; databases: Database[] }
 
   /**
    * countingDatabases returns depending on the length of the databases array.
@@ -124,41 +124,30 @@ export const databaseMachine = Machine<
               src: "ubGetDatabases",
             },
             on: {
-              "GOT ARRAY OF DATABASES": {
-                actions: [
-                  assign({
-                    databases: (context, event) => event.databases,
-                  }),
-                  assign({
-                    currentProject: (context, event) => {
-                      if (event.databases[0]) {
-                        return event.databases[0].databaseName;
-                      } else {
-                        return "";
-                      }
-                    },
-                  }),
-                ],
-                target: "countingDatabases",
-              },
-            },
-          },
-          countingDatabases: {
-            /**
-             * We got zero or some databases. These are our projects.
-             *
-             * Figure out how many and act accordingly.
-             */
-            invoke: {
-              src: "countDatabases",
-            },
-            on: {
-              "ZERO DATABASES DETECTED": {
-                target: "creatingFirstDatabase",
-              },
-              "ONE OR MORE DATABASES DETECTED": {
-                target: "#databaseMachine.openDatabase",
-              },
+              "GOT DATABASES": [
+                /**
+                 * This event comes with `{ databases: Database[] }`.
+                 */
+                {
+                  /**
+                   * If there are no databases, create one.
+                   */
+                  cond: (_, event) => event.databases.length === 0,
+                  target: "#databaseMachine.getDatabases.creatingFirstDatabase",
+                },
+                {
+                  /**
+                   * If there are databases, store them on context and open.
+                   */
+                  cond: (_, event) => event.databases.length > 0,
+                  actions: [
+                    assign({
+                      databases: (_, event) => event.databases,
+                    }),
+                  ],
+                  target: "#databaseMachine.openDatabase",
+                },
+              ],
             },
           },
           creatingFirstDatabase: {
@@ -213,13 +202,17 @@ export const databaseMachine = Machine<
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
+      /**
+       * This is just a guard on context.databases.length.
       countDatabases: (context: DatabaseMachineContext) => (sendBack: any) => {
+         * We got zero or more databases. These are our projects.
         if (context.databases.length === 0) {
           sendBack({ type: "ZERO DATABASES DETECTED" });
         } else {
           sendBack({ type: "ONE OR MORE DATABASES DETECTED" });
         }
       },
+      */
       ubCreateFirstDatabase: () => (sendBack: any) => {
         userbase
           .openDatabase({
