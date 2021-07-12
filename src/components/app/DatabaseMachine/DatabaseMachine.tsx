@@ -9,9 +9,9 @@ import {
 } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { EventObject, send } from "xstate";
 import { Sender } from "@xstate/react/lib/types";
 import { Database } from "userbase-js";
+import { DatabaseMachineEvent } from "./database.machine";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -29,7 +29,7 @@ const ProjectViewer = ({
   projectTitle: string;
 }) => {
   return (
-    <div className="my-8">
+    <div>
       {projectNumber}: {projectTitle}
     </div>
   );
@@ -56,7 +56,7 @@ export const DatabaseMachine = () => {
   );
 
   // TODO: fix this `any` typing.
-  const [state, send]: [any, Sender<EventObject>] = useActor(
+  const [state, send]: [any, Sender<DatabaseMachineEvent>] = useActor(
     authState.children.databaseMachine
   );
 
@@ -74,14 +74,18 @@ export const DatabaseMachine = () => {
   return (
     <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
       <div>JD App</div>
+      <hr className="my-2" />
       <button onClick={handleSignOut}>Sign out</button>
-      <hr />
+      <hr className="my-2" />
+      <button onClick={() => createProject("002")}>Create project 002</button>
+      <hr className="my-2" />
       <ProjectPicker projects={state.context.databases} />
+      <hr className="my-2" />
       <ProjectViewer
         projectNumber={state.context.databases.databaseName}
         projectTitle="Passed in by props"
       />
-      <hr />
+      <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} />
     </DatabaseMachineReactContext.Provider>

@@ -31,10 +31,10 @@ interface DatabaseMachineContext {
    * which makes up that database.
    */
   userbaseItems: JDUserbaseItem[];
-  error: any;
+  error?: UserbaseError;
 }
 
-type DatabaseMachineEvent =
+export type DatabaseMachineEvent =
   /**
    * ubGetDatabases returns GOT DATABASES as long as the connection to
    * Userbase was successful. `databases` could be an empty array.
@@ -67,7 +67,7 @@ type DatabaseMachineEvent =
   // Testing/building
   | { type: "TEST" }
   // Errors
-  | { type: "ERROR"; error: UserbaseError };
+  | { type: "ERROR"; error: any }; // TODO: fix the any
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = Machine<
@@ -162,6 +162,25 @@ export const databaseMachine = Machine<
           },
         },
       },
+      setCurrentProject: {
+        /**
+         * We should only get here if `context.databases.length > 0`.
+         */
+        entry: [
+          /**
+           * Just any old database for now. They're returned in `databaseId`
+           * order so this won't make any sense.
+           */
+          assign({
+            currentProject: (context) => context.databases[0].databaseName,
+          }),
+        ],
+        always: [
+          {
+            target: "openDatabase",
+          },
+        ],
+      },
       openDatabase: {
         type: "compound",
         initial: "openingDatabase",
@@ -169,6 +188,16 @@ export const databaseMachine = Machine<
          * This is where the Userbase changeHandler gets set up. If we exit this
          * state the handler gets killed/ignored.
          */
+        always: [
+          /**
+           * We invoke `ubOpenDatabase`, and it needs `context.currentProject`,
+           * so check for it and branch rather than throwing an error later.
+           */
+          {
+            cond: (context) => context.currentProject === "",
+            target: "#databaseMachine.setCurrentProject",
+          },
+        ],
         invoke: {
           src: "ubOpenDatabase",
         },
@@ -198,21 +227,10 @@ export const databaseMachine = Machine<
         userbase
           .getDatabases()
           .then(({ databases }) => {
-            sendBack({ type: "GOT ARRAY OF DATABASES", databases });
+            sendBack({ type: "GOT DATABASES", databases });
           })
           .catch((error) => sendBack({ type: "ERROR", error }));
       },
-      /**
-       * This is just a guard on context.databases.length.
-      countDatabases: (context: DatabaseMachineContext) => (sendBack: any) => {
-         * We got zero or more databases. These are our projects.
-        if (context.databases.length === 0) {
-          sendBack({ type: "ZERO DATABASES DETECTED" });
-        } else {
-          sendBack({ type: "ONE OR MORE DATABASES DETECTED" });
-        }
-      },
-      */
       ubCreateFirstDatabase: () => (sendBack: any) => {
         userbase
           .openDatabase({
