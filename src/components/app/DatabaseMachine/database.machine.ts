@@ -132,11 +132,18 @@ export const databaseMachine = Machine<
              */
             always: [
               {
-                cond: (context) => if (context.currentDatabase) true,
+                cond: (context: any) => {
+                  return context.currentDatabase;
+                },
+                target: "openingDatabase",
               },
-              {},
+              {
+                target: "creatingDatabase",
+              },
             ],
           },
+          openingDatabase: {},
+          creatingDatabase: {},
         },
       },
     },

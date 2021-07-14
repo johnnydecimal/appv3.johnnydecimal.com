@@ -51,9 +51,11 @@ const ProjectPicker = ({ projects }: { projects: Database[] }) => {
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
-  const { handleSignOut, state: authState } = useContext(
-    AuthMachineReactContext
-  );
+  const {
+    handleSignOut,
+    state: authState,
+    updateUserProfile,
+  } = useContext(AuthMachineReactContext);
 
   // TODO: fix this `any` typing.
   const [state]: [any, Sender<DatabaseMachineEvent>] = useActor(
@@ -84,7 +86,9 @@ export const DatabaseMachine = () => {
         projectTitle="Passed in by props"
       />
       <hr className="my-2" />
-      {/* <button onClick={() => createProject("005")}>Create 005</button> */}
+      <button onClick={() => updateUserProfile({ currentDatabase: "001" })}>
+        Create 005
+      </button>
       <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} />

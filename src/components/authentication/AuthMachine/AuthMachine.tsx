@@ -62,6 +62,10 @@ export const AuthMachine = () => {
     send("acknowledge dire warning about e2e encryption");
   };
 
+  const updateUserProfile = (profile: any) => {
+    send({ type: "update user profile", profile });
+  };
+
   /**
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
@@ -74,6 +78,7 @@ export const AuthMachine = () => {
     state,
     switchToSignIn,
     switchToSignUp,
+    updateUserProfile,
   };
 
   let RenderComponent;

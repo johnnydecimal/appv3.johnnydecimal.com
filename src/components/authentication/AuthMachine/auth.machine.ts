@@ -66,6 +66,8 @@ type AuthMachineEvent =
   | { type: "attempt signup"; data: ISignUpFormData }
   | { type: "signup was successful"; user: UserResult }
   | { type: "signup failed"; error: UserbaseError }
+  // Updating
+  | { type: "update user profile"; profile: any }
   // Helpers
   | { type: "write to the log"; log: string }
   | { type: "clear the log" }
@@ -344,6 +346,13 @@ export const authMachine = Machine<
           "attempt signout": {
             target: "signedOut.tryingSignOut",
           },
+          "update user profile": {
+            actions: [
+              assign({
+                user: (context, event) => { ...context.user, profile },
+              }),
+            ],
+          },
         },
       },
       catastrophicError: {},
@@ -388,21 +397,14 @@ export const authMachine = Machine<
          */
 
         /**
-         * In the special case where the user has arrived directly at `/signup`,
-         * send them to the part of the machine that handles that.
-         if (window.location.pathname.indexOf("signup") > 0) {
-           sendBack({
-             type: "REPORT_SIGNUP_URL",
-            });
-          }
-        */
-
-        /**
          * Otherwise check sign in status with Userbase and react accordingly.
          */
         userbase
           .init({
             appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
+            updateUserHandler: ({ user }) => {
+              assign({ user });
+            },
           })
           .then((session) => {
             /**
@@ -447,7 +449,7 @@ export const authMachine = Machine<
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       userbaseSignIn:
-        (_context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
           /**
            * If we're testing this using the inspector, the button-click isn't
            * sending any event.data. Pick that up, and load some dummy values.
@@ -480,7 +482,7 @@ export const authMachine = Machine<
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       userbaseSignUp:
-        (_context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
           userbase
             .signUp({
               username: event.data.username,
@@ -495,7 +497,6 @@ export const authMachine = Machine<
         },
 
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      // TODO: figure out why this is needed - appeared after a `yarn upgrade`
       // @ts-ignore
       userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {
         userbase
