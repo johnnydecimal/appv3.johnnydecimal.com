@@ -1,5 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { Machine, assign, send } from "@xstate/compiled";
+import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -348,8 +349,10 @@ export const authMachine = Machine<
           },
           "update user profile": {
             actions: [
-              assign({
-                user: (context, event) => { ...context.user, profile },
+              immerAssign((context, event) => {
+                if (context.user) {
+                  context.user.profile = event.profile;
+                }
               }),
             ],
           },
