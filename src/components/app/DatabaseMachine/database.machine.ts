@@ -1,9 +1,11 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JDItem } from "@types";
-import { assign, Machine } from "@xstate/compiled";
+import { assign } from "xstate";
+import { Machine } from "@xstate/compiled";
 import userbase, { Database, Item } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { JDItem } from "@types";
+
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
   message: string; // Username or password mismatch.
@@ -25,7 +27,7 @@ export interface DatabaseMachineContext {
    * currentProject is the 3-digit project which we have open. Corresponds to
    * the databaseName in Userbase.
    */
-  currentProject: string;
+  currentDatabase?: string;
   /**
    * When we open any given database, `userbaseItems` is the array of Items
    * which makes up that database.
@@ -82,7 +84,7 @@ export const databaseMachine = Machine<
     type: "parallel",
     context: {
       databases: [],
-      currentProject: "",
+      currentDatabase: undefined,
       userbaseItems: [],
       error: undefined,
     },
@@ -96,13 +98,47 @@ export const databaseMachine = Machine<
               src: "ubGetDatabases",
             },
             on: {
-              "GOT DATABASES": "idle",
+              "GOT DATABASES": {
+                actions: [
+                  assign({
+                    databases: (_, event) => event.databases,
+                  }),
+                ],
+                target: "idle",
+              },
             },
           },
-          idle: {},
+          idle: {
+            after: {
+              60000: {
+                target: "gettingDatabases",
+              },
+            },
+          },
         },
       },
-      databaseOpener: {},
+      databaseOpener: {
+        type: "compound",
+        initial: "init",
+        states: {
+          init: {
+            /**
+             * The only way that `context.currentDatabase` can be empty here is
+             * if this is a brand-new user. Otherwise it has been passed to the
+             * machine from their profile.
+             *
+             * In that case, create the first database for the user. Otherwise,
+             * open `currentDatabase`.
+             */
+            always: [
+              {
+                cond: (context) => if (context.currentDatabase) true,
+              },
+              {},
+            ],
+          },
+        },
+      },
     },
   },
   {

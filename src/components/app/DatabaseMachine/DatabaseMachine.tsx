@@ -56,19 +56,19 @@ export const DatabaseMachine = () => {
   );
 
   // TODO: fix this `any` typing.
-  const [state, send]: [any, Sender<DatabaseMachineEvent>] = useActor(
+  const [state]: [any, Sender<DatabaseMachineEvent>] = useActor(
     authState.children.databaseMachine
   );
 
-  const createProject = (projectNumber: string) => {
-    send({
-      type: "CREATE PROJECT",
-      projectNumber,
-    });
-  };
+  // const createProject = (projectNumber: string) => {
+  //   send({
+  //     type: "CREATE PROJECT",
+  //     projectNumber,
+  //   });
+  // };
 
   const DatabaseReactContextValue = {
-    createProject,
+    // createProject,
   };
 
   return (
@@ -84,7 +84,7 @@ export const DatabaseMachine = () => {
         projectTitle="Passed in by props"
       />
       <hr className="my-2" />
-      <button onClick={() => createProject("005")}>Create 005</button>
+      {/* <button onClick={() => createProject("005")}>Create 005</button> */}
       <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} />
