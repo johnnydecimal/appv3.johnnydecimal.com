@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign } from "xstate";
+import { assign, sendParent } from "xstate";
 import { Machine } from "@xstate/compiled";
 import userbase, { Database, Item } from "userbase-js";
 
@@ -24,7 +24,7 @@ export interface DatabaseMachineContext {
    */
   databases: Database[];
   /**
-   * currentProject is the 3-digit project which we have open. Corresponds to
+   * currentDatabase is the 3-digit project which we have open. Corresponds to
    * the databaseName in Userbase.
    */
   currentDatabase?: string;
@@ -42,7 +42,7 @@ export type DatabaseMachineEvent =
    * Userbase was successful. `databases` could be an empty array.
    */
   | { type: "GOT DATABASES"; databases: Database[] }
-
+  | { type: "CURRENT DATABASE UPDATED"; currentDatabase: string }
   /**
    * countingDatabases returns depending on the length of the databases array.
    */
@@ -88,6 +88,7 @@ export const databaseMachine = Machine<
       userbaseItems: [],
       error: undefined,
     },
+    on: {},
     states: {
       databaseGetter: {
         type: "compound",
@@ -122,28 +123,6 @@ export const databaseMachine = Machine<
         initial: "init",
         states: {
           init: {
-            /**
-             * The only way that `context.currentDatabase` can be empty here is
-             * if this is a brand-new user. Otherwise it has been passed to the
-             * machine from their profile.
-             *
-             * In that case, create the first database for the user. Otherwise,
-             * open `currentDatabase`.
-             */
-            always: [
-              {
-                cond: (context: any) => {
-                  return context.currentDatabase;
-                },
-                target: "openingDatabase",
-              },
-              {
-                target: "creatingDatabase",
-              },
-            ],
-          },
-          openingDatabase: {},
-          creatingDatabase: {
             invoke: {
               src: "ubOpenDatabase",
             },
@@ -154,20 +133,39 @@ export const databaseMachine = Machine<
   },
   {
     services: {
-      ubGetDatabases: () => (sendBack: any) => {
-        /**
-         * Get the array of databases. Is always returned, can be empty.
-         */
-        userbase
-          .getDatabases()
-          .then(({ databases }) => {
-            sendBack({ type: "GOT DATABASES", databases });
-          })
-          .catch((error: UserbaseError) => sendBack({ type: "ERROR", error }));
-      },
-      ubOpenDatabase: () => (sendBack: any) => {
-        // yeah
-      },
+      // @ts-ignore
+      ubGetDatabases:
+        () => (sendBack: (event: DatabaseMachineEvent) => void) => {
+          /**
+           * Get the array of databases. Is always returned, can be empty.
+           */
+          userbase
+            .getDatabases()
+            .then(({ databases }) => {
+              sendBack({ type: "GOT DATABASES", databases });
+            })
+            .catch((error: UserbaseError) =>
+              sendBack({ type: "ERROR", error })
+            );
+        },
+      // @ts-ignore
+      ubOpenDatabase:
+        (context: DatabaseMachineContext) =>
+        (sendBack: (event: DatabaseMachineEvent) => void) => {
+          const databaseName = context.currentDatabase || "001";
+          userbase
+            .openDatabase({
+              databaseName,
+              changeHandler: () => {},
+            })
+            .then(() => {
+              sendParent({ type: "CURRENT DATABASE UPDATED", databaseName });
+              // sendBack({ });
+            })
+            .catch((error) => {
+              /* TODO handle */
+            });
+        },
     },
   }
 );

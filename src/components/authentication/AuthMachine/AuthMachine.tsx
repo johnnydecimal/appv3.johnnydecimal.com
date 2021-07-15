@@ -34,36 +34,39 @@ export const AuthMachine = () => {
    */
   const handleSignIn = (data: ISignInFormData) => {
     send({
-      type: "attempt signin",
+      type: "ATTEMPT SIGNIN",
       data,
     });
   };
 
   const handleSignUp = (data: ISignUpFormData) => {
     send({
-      type: "attempt signup",
+      type: "ATTEMPT SIGNUP",
       data,
     });
   };
 
   const handleSignOut = () => {
-    send("attempt signout");
+    send("ATTEMPT SIGNOUT");
   };
 
   const switchToSignIn = () => {
-    send("switch to the signin page");
+    send("SWITCH TO THE SIGNIN PAGE");
   };
 
   const switchToSignUp = () => {
-    send("switch to the signup page");
+    send("SWITCH TO THE SIGNUP PAGE");
   };
 
   const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
-    send("acknowledge dire warning about e2e encryption");
+    send("ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION");
   };
 
   const updateUserProfile = (profile: any) => {
-    send({ type: "update user profile", profile });
+    send({
+      type: "UPDATE USER PROFILE",
+      profile,
+    });
   };
 
   /**

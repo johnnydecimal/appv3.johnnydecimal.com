@@ -69,6 +69,7 @@ type AuthMachineEvent =
   | { type: "SIGNUP FAILED"; error: UserbaseError }
   // Updating
   | { type: "UPDATE USER PROFILE"; profile: any }
+  | { type: "CURRENT DATABASE UPDATED"; databaseName: string }
   // Helpers
   | { type: "WRITE TO THE LOG"; log: string }
   | { type: "CLEAR THE LOG" }
@@ -111,6 +112,25 @@ export const authMachine = Machine<
         actions: [
           assign({
             log: (_context, _event) => [],
+          }),
+        ],
+      },
+      "CURRENT DATABASE UPDATED": {
+        actions: [
+          immerAssign((context, event) => {
+            if (context.user && !context.user.profile) {
+              /**
+               * A signed-in user who has never had a database updated might
+               * not yet have a user.profile object (it doesn't)
+               */
+              context.user.profile = {};
+            }
+            if (context.user && context.user.profile) {
+              /**
+               * Which it must as we just created it.
+               */
+              context.user.profile.currentDatabase = event.databaseName;
+            }
           }),
         ],
       },
@@ -323,6 +343,9 @@ export const authMachine = Machine<
                     type: "WRITE TO THE LOG",
                     log: "Sign up successful.",
                   }),
+                  assign({
+                    user: (_, event) => event.user,
+                  }),
                 ],
               },
               "SIGNUP FAILED": {
@@ -404,64 +427,77 @@ export const authMachine = Machine<
        * How the fuck you figured this out I do not know.
        */
       // @ts-ignore
-      userbaseInit: () => (sendBack: (event: AuthMachineEvent) => void) => {
-        /**
-         * So this is a regular callback. We do the userbase stuff, let it
-         * resolve, then use `sendBack` to send an event to the machine.
-         */
-
-        /**
-         * Otherwise check sign in status with Userbase and react accordingly.
-         */
-        userbase
-          .init({
-            appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
-            updateUserHandler: ({ user }) => {
-              assign({ user });
-            },
-          })
-          .then((session) => {
-            /**
-             * This only tells us that the SDK initialised successfully, *not*
-             * that there is an active user. For that we need `session.user`
-             * to contain a user object.
-             */
-            if (session.user) {
+      userbaseInit:
+        (context) => (sendBack: (event: AuthMachineEvent) => void) => {
+          userbase
+            .init({
+              appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
+              updateUserHandler: ({ user }) => {
+                assign({ user });
+                /**
+                 * If the current database has changed, send an update to the
+                 * `databaseMachine`.
+                 *
+                 * This handles the situation where a user on
+                 */
+                if (
+                  context.user?.profile?.currentDatabase !==
+                  user.profile?.currentDatabase
+                ) {
+                  send(
+                    {
+                      type: "CURRENT DATABASE UPDATED",
+                      currentDatabase: user.profile?.currentDatabase,
+                    },
+                    {
+                      to: "databaseMachine",
+                    }
+                  );
+                }
+              },
+            })
+            .then((session) => {
               /**
-               * We have a user, so a user is signed in.
+               * This only tells us that the SDK initialised successfully, *not*
+               * that there is an active user. For that we need `session.user`
+               * to contain a user object.
+               */
+              if (session.user) {
+                /**
+                 * We have a user, so a user is signed in.
+                 */
+                sendBack({
+                  type: "A USER IS SIGNED IN",
+                  user: session.user,
+                });
+              } else {
+                /**
+                 * There's no user, but this isn't an error. We just don't have
+                 * a signed-in user.
+                 */
+                sendBack({
+                  type: "NO USER IS SIGNED IN",
+                  info: "Database connection established. No user signed in.",
+                });
+              }
+            })
+            .catch((error) => {
+              /**
+               * Now *this* is an error. Something janky happened with the `init`
+               * call. We shit the bed at this stage.
+               *
+               * Update: change from CATASTROPHIC_ERROR to a regular error. Hmm
+               * no. What we need to do is examine the error, and depending on
+               * which one it is, act accordingly. They're all documented.
+               *
+               * // TODO: sort this out.
                */
               sendBack({
-                type: "A USER IS SIGNED IN",
-                user: session.user,
+                type: "USERBASE.INIT() RAISED AN ERROR",
+                error,
               });
-            } else {
-              /**
-               * There's no user, but this isn't an error. We just don't have
-               * a signed-in user.
-               */
-              sendBack({
-                type: "NO USER IS SIGNED IN",
-                info: "Database connection established. No user signed in.",
-              });
-            }
-          })
-          .catch((error) => {
-            /**
-             * Now *this* is an error. Something janky happened with the `init`
-             * call. We shit the bed at this stage.
-             *
-             * Update: change from CATASTROPHIC_ERROR to a regular error. Hmm
-             * no. What we need to do is examine the error, and depending on
-             * which one it is, act accordingly. They're all documented.
-             *
-             * // TODO: sort this out.
-             */
-            sendBack({
-              type: "USERBASE.INIT() RAISED AN ERROR",
-              error,
             });
-          });
-      },
+        },
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
@@ -509,6 +545,12 @@ export const authMachine = Machine<
               password: event.data.password,
             })
             .then((user) => {
+              /**
+               * Brand-new users need a first database.
+               */
+              user.profile = {
+                currentDatabase: "001",
+              };
               sendBack({
                 type: "SIGNUP WAS SUCCESSFUL",
                 user,
