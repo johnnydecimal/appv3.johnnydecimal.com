@@ -145,7 +145,7 @@ export const databaseMachine = Machine<
           openingDatabase: {},
           creatingDatabase: {
             invoke: {
-              src: "ubCreateFirstDatabase",
+              src: "ubOpenDatabase",
             },
           },
         },
@@ -165,25 +165,8 @@ export const databaseMachine = Machine<
           })
           .catch((error: UserbaseError) => sendBack({ type: "ERROR", error }));
       },
-      ubCreateFirstDatabase: () => (sendBack: any) => {
-        userbase
-          .openDatabase({
-            databaseName: "001",
-            changeHandler: () => {
-              /**
-               * This changeHandler isn't needed, but is required by Userbase.
-               * We exit the state that invoked this service immediately, so
-               * anything created by this service will be ignored by XState.
-               *
-               * This function might be a minor memory leak? Which is why it
-               * doesn't do anything.
-               */
-            },
-          })
-          .then(() => {
-            sendBack({ type: "FIRST DATABASE CREATED" });
-          })
-          .catch((error) => sendBack({ type: "ERROR", error }));
+      ubOpenDatabase: () => (sendBack: any) => {
+        // yeah
       },
     },
   }
