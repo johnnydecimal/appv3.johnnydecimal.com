@@ -49,29 +49,29 @@ interface AuthMachineContext {
 
 type AuthMachineEvent =
   // Initialising the machine
-  | { type: "a user is signed in"; user: UserResult }
-  | { type: "no user is signed in"; info: string }
-  | { type: "userbase.init() raised an error"; error: UserbaseError }
+  | { type: "A USER IS SIGNED IN"; user: UserResult }
+  | { type: "NO USER IS SIGNED IN"; info: string }
+  | { type: "USERBASE.INIT() RAISED AN ERROR"; error: UserbaseError }
   // Signing in
-  | { type: "attempt signin"; data: ISignInFormData }
-  | { type: "userbase.signIn() raised an error"; error: UserbaseError }
+  | { type: "ATTEMPT SIGNIN"; data: ISignInFormData }
+  | { type: "USERBASE.SIGNIN() RAISED AN ERROR"; error: UserbaseError }
   // Signing out
-  | { type: "attempt signout" }
-  | { type: "the user was signed out" }
-  | { type: "signout failed, so we force it anyway" }
+  | { type: "ATTEMPT SIGNOUT" }
+  | { type: "THE USER WAS SIGNED OUT" }
+  | { type: "SIGNOUT FAILED, SO WE FORCE IT ANYWAY" }
   // Moving around the interface
-  | { type: "switch to the signin page" }
-  | { type: "switch to the signup page" }
+  | { type: "SWITCH TO THE SIGNIN PAGE" }
+  | { type: "SWITCH TO THE SIGNUP PAGE" }
   // Signing up
-  | { type: "acknowledge dire warning about e2e encryption" }
-  | { type: "attempt signup"; data: ISignUpFormData }
-  | { type: "signup was successful"; user: UserResult }
-  | { type: "signup failed"; error: UserbaseError }
+  | { type: "ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION" }
+  | { type: "ATTEMPT SIGNUP"; data: ISignUpFormData }
+  | { type: "SIGNUP WAS SUCCESSFUL"; user: UserResult }
+  | { type: "SIGNUP FAILED"; error: UserbaseError }
   // Updating
-  | { type: "update user profile"; profile: any }
+  | { type: "UPDATE USER PROFILE"; profile: any }
   // Helpers
-  | { type: "write to the log"; log: string }
-  | { type: "clear the log" }
+  | { type: "WRITE TO THE LOG"; log: string }
+  | { type: "CLEAR THE LOG" }
   // Errors
   | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
 
@@ -104,10 +104,10 @@ export const authMachine = Machine<
       log: [`${new Date().toTimeString().slice(0, 8)}: Initialised.`],
     },
     on: {
-      "write to the log": {
+      "WRITE TO THE LOG": {
         actions: [(context, event) => addToLog(context, event.log)],
       },
-      "clear the log": {
+      "CLEAR THE LOG": {
         actions: [
           assign({
             log: (_context, _event) => [],
@@ -132,28 +132,28 @@ export const authMachine = Machine<
           },
         },
         on: {
-          "a user is signed in": {
+          "A USER IS SIGNED IN": {
             target: "#authMachine.signedIn.idle",
             actions: [
               "assignUser",
               "clearError",
               send({
-                type: "write to the log",
+                type: "WRITE TO THE LOG",
                 log: "Previous user still signed in.",
               }),
             ],
           },
-          "no user is signed in": {
+          "NO USER IS SIGNED IN": {
             target: "#authMachine.signedOut.idle",
             actions: [
               "clearError",
               send({
-                type: "write to the log",
+                type: "WRITE TO THE LOG",
                 log: "Database connection established. No user signed in.",
               }),
             ],
           },
-          "userbase.init() raised an error": {
+          "USERBASE.INIT() RAISED AN ERROR": {
             /**
              * From idle, if we aren't signed in we just go to the idle
              * signedOut state, not signedOut.signInFailure. Because this isn't
@@ -170,36 +170,41 @@ export const authMachine = Machine<
         states: {
           idle: {
             on: {
-              "attempt signin": {
+              "ATTEMPT SIGNIN": {
                 target: "tryingSignIn",
               },
-              "switch to the signup page": {
+              "SWITCH TO THE SIGNUP PAGE": {
                 target: "#authMachine.signUp",
               },
             },
           },
           signInFailed: {
             on: {
-              "attempt signin": {
+              "ATTEMPT SIGNIN": {
                 target: "tryingSignIn",
               },
-              "switch to the signup page": {
+              "SWITCH TO THE SIGNUP PAGE": {
                 target:
                   "#authMachine.signUp.direWarningAboutE2EEncryptionNotAcknowledged",
               },
             },
           },
           tryingSignIn: {
-            entry: [send({ type: "write to the log", log: "Trying sign in." })],
+            entry: [
+              send({
+                type: "WRITE TO THE LOG",
+                log: "Trying sign in.",
+              }),
+            ],
             invoke: {
               src: "userbaseSignIn",
             },
             on: {
-              "a user is signed in": {
+              "A USER IS SIGNED IN": {
                 target: "#authMachine.signedIn.idle",
                 actions: ["assignUser", "clearError"],
               },
-              "userbase.signIn() raised an error": {
+              "USERBASE.SIGNIN() RAISED AN ERROR": {
                 /**
                  * If we just tried to sign in, and it failed, go to the special
                  * signedOut.signInFailed state. We use this to report things to
@@ -212,16 +217,22 @@ export const authMachine = Machine<
           },
           tryingSignOut: {
             entry: [
-              send({ type: "write to the log", log: "Trying sign out." }),
+              send({
+                type: "WRITE TO THE LOG",
+                log: "Trying sign out.",
+              }),
             ],
             invoke: {
               src: "userbaseSignOut",
             },
             exit: [
-              send({ type: "write to the log", log: "Sign out successful." }),
+              send({
+                type: "WRITE TO THE LOG",
+                log: "Sign out successful.",
+              }),
             ],
             on: {
-              "the user was signed out": {
+              "THE USER WAS SIGNED OUT": {
                 /**
                  * userbase.signOut() did its job, so it has gracefully set the
                  * localStorage item to `signedIn: false`.
@@ -229,7 +240,7 @@ export const authMachine = Machine<
                 target: "#authMachine.signedOut",
                 actions: ["clearError", "clearUser"],
               },
-              "signout failed, so we force it anyway": {
+              "SIGNOUT FAILED, SO WE FORCE IT ANYWAY": {
                 /**
                  * userbase.signOut() couldn't do its job, so to be sure we
                  * remove the localStorage item ourselves. Not as graceful, so
@@ -246,14 +257,14 @@ export const authMachine = Machine<
         type: "compound",
         initial: "direWarningAboutE2EEncryptionNotAcknowledged",
         on: {
-          "switch to the signin page": {
+          "SWITCH TO THE SIGNIN PAGE": {
             target: "#authMachine.signedOut.idle",
             actions: [
               send({
-                type: "clear the log",
+                type: "CLEAR THE LOG",
               }),
               send({
-                type: "write to the log",
+                type: "WRITE TO THE LOG",
                 log: "Switch to sign in page.",
               }),
             ],
@@ -263,15 +274,15 @@ export const authMachine = Machine<
           direWarningAboutE2EEncryptionNotAcknowledged: {
             entry: [
               send({
-                type: "clear the log",
+                type: "CLEAR THE LOG",
               }),
               send({
-                type: "write to the log",
+                type: "WRITE TO THE LOG",
                 log: 'Switch to sign up page. User needs to accept dire warning about end-to-end encryption. More information can be found <a href="https://userbase.com/docs/faq/" class="underline text-red">here</a>.',
               }),
             ],
             on: {
-              "acknowledge dire warning about e2e encryption": {
+              "ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION": {
                 target: "#authMachine.signUp.okayToTrySignUp",
               },
             },
@@ -279,7 +290,7 @@ export const authMachine = Machine<
           okayToTrySignUp: {
             entry: [
               send({
-                type: "write to the log",
+                type: "WRITE TO THE LOG",
                 log: 'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
               }),
               () => {
@@ -289,7 +300,7 @@ export const authMachine = Machine<
               },
             ],
             on: {
-              "attempt signup": {
+              "ATTEMPT SIGNUP": {
                 target: "tryingSignUp",
               },
             },
@@ -297,7 +308,7 @@ export const authMachine = Machine<
           tryingSignUp: {
             entry: [
               send({
-                type: "write to the log",
+                type: "WRITE TO THE LOG",
                 log: "Attempting sign up.",
               }),
             ],
@@ -305,16 +316,16 @@ export const authMachine = Machine<
               src: "userbaseSignUp",
             },
             on: {
-              "signup was successful": {
+              "SIGNUP WAS SUCCESSFUL": {
                 target: "#authMachine.signedIn.idle",
                 actions: [
                   send({
-                    type: "write to the log",
+                    type: "WRITE TO THE LOG",
                     log: "Sign up successful.",
                   }),
                 ],
               },
-              "signup failed": {
+              "SIGNUP FAILED": {
                 target: "#authMachine.signUp.signUpFailed",
               },
             },
@@ -322,7 +333,7 @@ export const authMachine = Machine<
           signUpFailed: {
             entry: ["assignAndLogError"],
             on: {
-              "attempt signup": {
+              "ATTEMPT SIGNUP": {
                 target: "#authMachine.signUp.tryingSignUp",
               },
             },
@@ -335,7 +346,7 @@ export const authMachine = Machine<
         states: {
           idle: {
             entry: [
-              send({ type: "write to the log", log: "Sign in successful." }),
+              send({ type: "WRITE TO THE LOG", log: "Sign in successful." }),
             ],
             invoke: {
               id: "databaseMachine",
@@ -344,10 +355,10 @@ export const authMachine = Machine<
           },
         },
         on: {
-          "attempt signout": {
+          "ATTEMPT SIGNOUT": {
             target: "signedOut.tryingSignOut",
           },
-          "update user profile": {
+          "UPDATE USER PROFILE": {
             actions: [
               immerAssign((context, event) => {
                 if (context.user) {
@@ -420,7 +431,7 @@ export const authMachine = Machine<
                * We have a user, so a user is signed in.
                */
               sendBack({
-                type: "a user is signed in",
+                type: "A USER IS SIGNED IN",
                 user: session.user,
               });
             } else {
@@ -429,7 +440,7 @@ export const authMachine = Machine<
                * a signed-in user.
                */
               sendBack({
-                type: "no user is signed in",
+                type: "NO USER IS SIGNED IN",
                 info: "Database connection established. No user signed in.",
               });
             }
@@ -445,7 +456,10 @@ export const authMachine = Machine<
              *
              * // TODO: sort this out.
              */
-            sendBack({ type: "userbase.init() raised an error", error });
+            sendBack({
+              type: "USERBASE.INIT() RAISED AN ERROR",
+              error,
+            });
           });
       },
 
@@ -473,12 +487,15 @@ export const authMachine = Machine<
             })
             .then((user) => {
               sendBack({
-                type: "a user is signed in",
+                type: "A USER IS SIGNED IN",
                 user,
               });
             })
             .catch((error) => {
-              sendBack({ type: "userbase.signIn() raised an error", error });
+              sendBack({
+                type: "USERBASE.SIGNIN() RAISED AN ERROR",
+                error,
+              });
             });
         },
 
@@ -492,10 +509,16 @@ export const authMachine = Machine<
               password: event.data.password,
             })
             .then((user) => {
-              sendBack({ type: "signup was successful", user });
+              sendBack({
+                type: "SIGNUP WAS SUCCESSFUL",
+                user,
+              });
             })
             .catch((error) => {
-              sendBack({ type: "signup failed", error });
+              sendBack({
+                type: "SIGNUP FAILED",
+                error,
+              });
             });
         },
 
@@ -505,10 +528,14 @@ export const authMachine = Machine<
         userbase
           .signOut()
           .then(() => {
-            sendBack({ type: "the user was signed out" });
+            sendBack({
+              type: "THE USER WAS SIGNED OUT",
+            });
           })
           .catch((error) => {
-            sendBack({ type: "signout failed, so we force it anyway" });
+            sendBack({
+              type: "SIGNOUT FAILED, SO WE FORCE IT ANYWAY",
+            });
           });
       },
     },
