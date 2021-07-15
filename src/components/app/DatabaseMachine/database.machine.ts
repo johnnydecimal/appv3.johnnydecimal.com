@@ -38,36 +38,11 @@ export interface DatabaseMachineContext {
 
 export type DatabaseMachineEvent =
   /**
-   * ubGetDatabases returns GOT ARRAY OF DATABASES as long as the connection to
+   * ubGetDatabases returns GOT DATABASES as long as the connection to
    * Userbase was successful. `databases` could be an empty array.
    */
   | { type: "GOT DATABASES"; databases: Database[] }
   | { type: "CURRENT DATABASE UPDATED"; currentDatabase: string }
-  /**
-   * countingDatabases returns depending on the length of the databases array.
-   */
-  // | { type: "ZERO DATABASES DETECTED" }
-  // | { type: "ONE OR MORE DATABASES DETECTED" }
-
-  /**
-   * ubCreateFirstDatabase
-   */
-  // | { type: "FIRST DATABASE CREATED" }
-
-  /**
-   * ubOpenDatabase.
-   */
-  // The changeHandler fires this.
-  // | { type: "USERBASEITEMS UPDATED"; userbaseItems: Item[] }
-
-  // When we want to create a new project.
-  // | { type: "CREATE PROJECT"; projectNumber: string }
-
-  // When we open a database.
-  // | { type: "DATABASE OPENED" }
-
-  // Testing/building
-  | { type: "TEST" }
 
   // Errors
   | { type: "ERROR"; error: UserbaseError };
