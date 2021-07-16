@@ -1,6 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { assign, sendParent } from "xstate";
-// import { Machine } from "@xstate/compiled";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database, Item } from "userbase-js";
 
@@ -22,15 +21,20 @@ const dbModel = createModel(
     /**
      * currentDatabase is the 3-digit project which we have open. Corresponds to
      * the databaseName in Userbase.
+     *
+     * This context is overwritten by auth.machine when it invokes this machine.
      */
     currentDatabase: "",
+
     /**
      * The array of the user's available database objects, returned by Userbase.
      * The `databaseName` property on each object is the 3-digit JD project
      * code, which is a string.
      */
     databases: [] as Database[],
+
     error: {} as UserbaseError,
+
     /**
      * When we open any given database, `userbaseItems` is the array of Items
      * which makes up that database.
@@ -43,14 +47,17 @@ const dbModel = createModel(
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
       "GOT DATABASES": (value: Database[]) => ({ value }),
+
       /**
        * Sent back to the parent so it can update the user's profile.
        */
       "CURRENT DATABASE UPDATED": (value: string) => ({ value }),
+
       /**
        * Sent by the changeHandler() when the remote database changes.
        */
       "DATABASE ITEMS UPDATED": (value: JDUserbaseItem[]) => ({ value }),
+
       /**
        * Sent by ubOpenDatabase when it opens a database.
        */
@@ -69,7 +76,6 @@ export const databaseMachine = dbModel.createMachine(
     id: "databaseMachine",
     type: "parallel",
     context: dbModel.initialContext,
-    on: {},
     states: {
       databaseGetter: {
         type: "compound",
@@ -128,7 +134,6 @@ export const databaseMachine = dbModel.createMachine(
   },
   {
     services: {
-      // @ts-ignore
       ubGetDatabases: () => (sendBack: (event: any) => void) => {
         // () => (sendBack: (event: DatabaseMachineEvent) => void) => {
         /**
@@ -141,7 +146,6 @@ export const databaseMachine = dbModel.createMachine(
           })
           .catch((error: UserbaseError) => sendBack({ type: "ERROR", error }));
       },
-      // @ts-ignore
       ubOpenDatabase: (context) => (sendBack: (event: any) => void) => {
         // (sendBack: (event: DatabaseMachineEvent) => void) => {
         const databaseName = context.currentDatabase || "001";
@@ -157,7 +161,7 @@ export const databaseMachine = dbModel.createMachine(
             sendBack({ type: "DATABASE OPENED" });
           })
           .catch((error) => {
-            /* TODO handle */
+            sendParent({ type: "ERROR", error });
           });
       },
     },
