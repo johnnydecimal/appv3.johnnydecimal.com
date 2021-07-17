@@ -11,7 +11,7 @@ import {
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { Sender } from "@xstate/react/lib/types";
 import { Database } from "userbase-js";
-import { DatabaseMachineEvent } from "./database.machine";
+// import { DatabaseMachineEvent } from "./database.machine";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -58,7 +58,8 @@ export const DatabaseMachine = () => {
   } = useContext(AuthMachineReactContext);
 
   // TODO: fix this `any` typing.
-  const [state]: [any, Sender<DatabaseMachineEvent>] = useActor(
+  const [state]: [any, Sender<any>] = useActor(
+    // const [state]: [any, Sender<DatabaseMachineEvent>] = useActor(
     authState.children.databaseMachine
   );
 

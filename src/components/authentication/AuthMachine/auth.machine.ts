@@ -1,11 +1,11 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { Machine, assign, send } from "@xstate/compiled";
+import { assign, send } from "xstate";
+import { createModel } from "xstate/lib/model";
 import { assign as immerAssign } from "@xstate/immer";
-import userbase from "userbase-js";
+import userbase, { Userbase } from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// Can't import from components, breaks xstate-codegen
-import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
+import { databaseMachine } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -18,71 +18,73 @@ interface UserbaseError {
   status: number; // 401
 }
 
-interface AuthMachineContext {
-  /**
-   * The most recent error. (This is the `message` part of `UserbaseError`.)
-   */
-  error?: string;
-  /**
-   * The most recent information (not called 'event' to avoid confusion).
-   *
-   * We separate the two to allow us to log them differently
-   * (e.g. errors appear in red).
-   */
-  info?: string;
-  /**
-   * The log is the list of errors and events as they occurred.
-   *
-   * Each action should log to the log as it handles the error/event.
-   */
-  log: string[];
-  /**
-   * The user object, if signed in.
-   */
-  user?: UserResult;
-  /**
-   * A reference to the invoked `appMachine`.
-   * // TODO: clean up the any.
-   */
-  appMachine?: any;
-}
+const authModel = createModel(
+  {
+    /**
+     * A reference to the invoked `appMachine`.
+     */
+    appMachine: undefined,
 
-type AuthMachineEvent =
-  // Initialising the machine
-  | { type: "A USER IS SIGNED IN"; user: UserResult }
-  | { type: "NO USER IS SIGNED IN"; info: string }
-  | { type: "USERBASE.INIT() RAISED AN ERROR"; error: UserbaseError }
-  // Signing in
-  | { type: "ATTEMPT SIGNIN"; data: ISignInFormData }
-  | { type: "USERBASE.SIGNIN() RAISED AN ERROR"; error: UserbaseError }
-  // Signing out
-  | { type: "ATTEMPT SIGNOUT" }
-  | { type: "THE USER WAS SIGNED OUT" }
-  | { type: "SIGNOUT FAILED, SO WE FORCE IT ANYWAY" }
-  // Moving around the interface
-  | { type: "SWITCH TO THE SIGNIN PAGE" }
-  | { type: "SWITCH TO THE SIGNUP PAGE" }
-  // Signing up
-  | { type: "ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION" }
-  | { type: "ATTEMPT SIGNUP"; data: ISignUpFormData }
-  | { type: "SIGNUP WAS SUCCESSFUL"; user: UserResult }
-  | { type: "SIGNUP FAILED"; error: UserbaseError }
-  // Updating
-  | { type: "UPDATE USER PROFILE"; profile: any }
-  | { type: "CURRENT DATABASE UPDATED"; databaseName: string }
-  // Helpers
-  | { type: "WRITE TO THE LOG"; log: string }
-  | { type: "CLEAR THE LOG" }
-  // Errors
-  | { type: "CATASTROPHIC_ERROR"; error: UserbaseError };
+    /**
+     * The most recent error. (This is the `message` part of `UserbaseError`.)
+     */
+    error: undefined as string | undefined,
+
+    /**
+     * The most recent information (not called 'event' to avoid confusion).
+     *
+     * We separate the two to allow us to log them differently
+     * (e.g. errors appear in red).
+     */
+    info: undefined as string | undefined,
+
+    /**
+     * The log is the list of errors and events as they occurred.
+     *
+     * Each action should log to the log as it handles the error/event.
+     */
+    log: [] as string[],
+
+    /**
+     * The user object, if signed in.
+     */
+    user: undefined as UserResult | undefined,
+  },
+  {
+    events: {
+      "A USER IS SIGNED IN": (value: UserResult) => ({ value }),
+      "NO USER IS SIGNED IN": (value: string) => ({ value }),
+      "USERBASE.INIT() RAISED AN ERROR": (value: UserbaseError) => ({ value }),
+      "ATTEMPT SIGNIN": (value: ISignInFormData) => ({ value }),
+      "USERBASE.SIGNIN() RAISED AN ERROR": (value: UserbaseError) => ({
+        value,
+      }),
+      "ATTEMPT SIGNOUT": () => ({}),
+      "THE USER WAS SIGNED OUT": () => ({}),
+      "SIGNOUT FAILED, SO WE FORCE IT ANYWAY": () => ({}),
+      "SWITCH TO THE SIGNIN PAGE": () => ({}),
+      "SWITCH TO THE SIGNUP PAGE": () => ({}),
+      "ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION": () => ({}),
+      "ATTEMPT SIGNUP": (value: ISignUpFormData) => ({ value }),
+      "SIGNUP WAS SUCCESSFUL": (value: UserResult) => ({ value }),
+      "SIGNUP FAILED": (value: UserbaseError) => ({ value }),
+      "UPDATE USER PROFILE": (value: any) => ({ value }),
+      "CURRENT DATABASE UPDATED": (value: string) => ({ value }),
+      "WRITE TO THE LOG": (value: string) => ({ value }),
+      "CLEAR THE LOG": () => ({}),
+    },
+  }
+);
 
 // === Utility functions    ===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * A standard function to write to the log, which is the thing that appears
  * on-screen as you're signing in/up.
  */
+// TODO: 4.22.1
 const addToLog = (
-  context: AuthMachineContext, // Current machine context.
+  context: any, // Current machine context.
+  // context: AuthMachineContext, // Current machine context.
   message: string = "addToLog() was called without a `message` parameter.", // The new message to write to the log.
   className?: string // Optional className to style the event.
 ): string[] => {
@@ -93,20 +95,17 @@ const addToLog = (
 };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const authMachine = Machine<
-  AuthMachineContext,
-  AuthMachineEvent,
-  "authMachine"
->(
+export const authMachine = authModel.createMachine(
   {
     id: "authMachine",
     initial: "init",
     context: {
+      ...authModel.initialContext,
       log: [`${new Date().toTimeString().slice(0, 8)}: Initialised.`],
     },
     on: {
       "WRITE TO THE LOG": {
-        actions: [(context, event) => addToLog(context, event.log)],
+        actions: [(context, event) => addToLog(context, event.value)],
       },
       "CLEAR THE LOG": {
         actions: [
@@ -120,8 +119,9 @@ export const authMachine = Machine<
           immerAssign((context, event) => {
             if (context.user && !context.user.profile) {
               /**
-               * A signed-in user who has never had a database updated might
-               * not yet have a user.profile object (it doesn't)
+               * A signed-in user who has never had a database updated doesn't
+               * have a user.profile object yet. (The first 'update' happens
+               * after the automatic creation of their first database.)
                */
               context.user.profile = {};
             }
@@ -129,7 +129,7 @@ export const authMachine = Machine<
               /**
                * Which it must as we just created it.
                */
-              context.user.profile.currentDatabase = event.databaseName;
+              context.user.profile.currentDatabase = event.value;
             }
           }),
         ],
@@ -343,8 +343,8 @@ export const authMachine = Machine<
                     type: "WRITE TO THE LOG",
                     log: "Sign up successful.",
                   }),
-                  assign({
-                    user: (_, event) => event.user,
+                  authModel.assign({
+                    user: (_, event) => event.value,
                   }),
                 ],
               },
@@ -385,7 +385,7 @@ export const authMachine = Machine<
             actions: [
               immerAssign((context, event) => {
                 if (context.user) {
-                  context.user.profile = event.profile;
+                  context.user.profile = event.value;
                 }
               }),
             ],
@@ -397,18 +397,21 @@ export const authMachine = Machine<
   },
   {
     actions: {
-      assignUser: assign({
-        user: (_context, event) => event.user,
-      }),
-      assignAndLogError: assign({
-        error: (_context, event) => event.error.message,
+      assignUser: authModel.assign(
+        {
+          user: (_, event) => event.value,
+        },
+        "A USER IS SIGNED IN"
+      ),
+      assignAndLogError: authModel.assign({
+        error: (_context, event) => event.value.message,
         log: (context, event) =>
-          addToLog(context, event.error.message, "text-red"),
+          addToLog(context, event.value.message, "text-red"),
       }),
-      clearUser: assign({
+      clearUser: authModel.assign({
         user: (_context, _event) => undefined,
       }),
-      clearError: assign({
+      clearError: authModel.assign({
         error: (_context, _event) => undefined,
       }),
       forceSignOut: (_context, _event) => {
@@ -428,7 +431,9 @@ export const authMachine = Machine<
        */
       // @ts-ignore
       userbaseInit:
-        (context) => (sendBack: (event: AuthMachineEvent) => void) => {
+        // TODO: 4.22.1
+        (context) => (sendBack: (event: any) => void) => {
+          // (context) => (sendBack: (event: AuthMachineEvent) => void) => {
           userbase
             .init({
               appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
@@ -502,14 +507,16 @@ export const authMachine = Machine<
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       userbaseSignIn:
-        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        // TODO: 4.22.1
+        (_, event) => (sendBack: (event: any) => void) => {
+          // (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
           /**
            * If we're testing this using the inspector, the button-click isn't
            * sending any event.data. Pick that up, and load some dummy values.
            * // TODO: this is just for testing, pull it out in prod.
            */
-          if (!event.data) {
-            event.data = {
+          if (!event.value) {
+            event.value = {
               username: "john",
               password: "test123",
             };
@@ -517,8 +524,8 @@ export const authMachine = Machine<
 
           userbase
             .signIn({
-              username: event.data.username,
-              password: event.data.password,
+              username: event.value.username,
+              password: event.value.password,
               rememberMe: "local",
             })
             .then((user) => {
@@ -538,11 +545,13 @@ export const authMachine = Machine<
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       userbaseSignUp:
-        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        // TODO: 4.22.1
+        (_, event) => (sendBack: (event: any) => void) => {
+          // (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
           userbase
             .signUp({
-              username: event.data.username,
-              password: event.data.password,
+              username: event.value.username,
+              password: event.value.password,
             })
             .then((user) => {
               /**
@@ -566,7 +575,9 @@ export const authMachine = Machine<
 
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
-      userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {
+      // TODO: 4.22.1
+      userbaseSignOut: () => (sendBack: (event: any) => void) => {
+        // userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {
         userbase
           .signOut()
           .then(() => {
