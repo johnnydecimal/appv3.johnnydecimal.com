@@ -1,21 +1,29 @@
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { Item } from "userbase-js";
+
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { JDItem } from ".";
 
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
- * Each `UserbaseItem` is an object with a `JDItem` on the `item` property and
- * a Userbase-generated GUID on the `itemId` property.
+ * `Item` is the base Userbase item type. We extend it by specifying that the
+ * `item` property must be a `JDItem`.
  */
-interface UserbaseItem {
+export interface UserbaseItem extends Item {
   item: JDItem;
-  itemId: string;
 }
 
 /**
  * The `UserbaseData` array is an array of `UserbaseItem`s as returned by
  * `userbase.openDatabase()`.
- *
- * When we sort this data and it becomes a `:JDProject`, we keep this structure
- * for simplicity.
  */
-type UserbaseData = UserbaseItem[];
+export type UserbaseData = UserbaseItem[];
 
-export type { UserbaseItem, UserbaseData };
+/**
+ * `UserbaseError` is the shape of all errors returned by the Userbase API.
+ */
+export interface UserbaseError {
+  name: string; // UsernameOrPasswordMismatch
+  message: string; // Username or password mismatch.
+  status: number; // 401
+}
