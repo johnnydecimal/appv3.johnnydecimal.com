@@ -199,8 +199,11 @@ export const authMachine = authModel.createMachine(
         },
       },
       signedOut: {
-        // type: "compound",
-        // initial: "idle",
+        type: "compound",
+        initial: "idle",
+        states: {
+          idle: {},
+        },
         // states: {
         //   idle: {
         //     on: {
