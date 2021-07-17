@@ -5,6 +5,10 @@ import userbase, { Database } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserbaseError, UserbaseItem } from "@types";
+import {
+  AuthMachineContext,
+  AuthMachineEvent,
+} from "components/authentication/AuthMachine/auth.machine";
 
 const dbModel = createModel(
   {
@@ -34,7 +38,6 @@ const dbModel = createModel(
   },
   {
     events: {
-      // == This machine ==-==-==
       /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
@@ -56,14 +59,6 @@ const dbModel = createModel(
        * An error.
        */
       ERROR: (error: UserbaseError) => ({ error }),
-
-      // == Parent machine ==-==-==
-      /**
-       * Sent back to the parent so it can update the user's profile.
-       */
-      CURRENT_DATABASE_UPDATED: (currentDatabase: string) => ({
-        currentDatabase,
-      }),
     },
   }
 );
@@ -175,11 +170,14 @@ export const databaseMachine = dbModel.createMachine(
               },
             })
             .then(() => {
-              sendParent({ type: "CURRENT_DATABASE_UPDATED", databaseName });
+              sendParent<any, any, AuthMachineEvent>({
+                type: "CURRENT_DATABASE_UPDATED",
+                databaseName,
+              });
               sendBack({ type: "DATABASE_OPENED" });
             })
             .catch((error: UserbaseError) => {
-              sendParent({
+              sendParent<any, any, AuthMachineEvent>({
                 type: "ERROR",
                 error,
               });

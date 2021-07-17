@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { useMachine } from "@xstate/compiled/react";
+import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
@@ -32,56 +32,56 @@ export const AuthMachine = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree.
    */
-  const handleSignIn = (data: ISignInFormData) => {
-    send({
-      type: "ATTEMPT SIGNIN",
-      data,
-    });
-  };
+  // const handleSignIn = (formData: ISignInFormData) => {
+  //   send({
+  //     type: "ATTEMPT SIGNIN",
+  //     formData,
+  //   });
+  // };
 
-  const handleSignUp = (data: ISignUpFormData) => {
-    send({
-      type: "ATTEMPT SIGNUP",
-      data,
-    });
-  };
+  // const handleSignUp = (formData: ISignUpFormData) => {
+  //   send({
+  //     type: "ATTEMPT SIGNUP",
+  //     formData,
+  //   });
+  // };
 
-  const handleSignOut = () => {
-    send("ATTEMPT SIGNOUT");
-  };
+  // const handleSignOut = () => {
+  //   send("ATTEMPT SIGNOUT");
+  // };
 
-  const switchToSignIn = () => {
-    send("SWITCH TO THE SIGNIN PAGE");
-  };
+  // const switchToSignIn = () => {
+  //   send("SWITCH TO THE SIGNIN PAGE");
+  // };
 
-  const switchToSignUp = () => {
-    send("SWITCH TO THE SIGNUP PAGE");
-  };
+  // const switchToSignUp = () => {
+  //   send("SWITCH TO THE SIGNUP PAGE");
+  // };
 
-  const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
-    send("ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION");
-  };
+  // const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
+  //   send("ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION");
+  // };
 
-  const updateUserProfile = (profile: any) => {
-    send({
-      type: "UPDATE USER PROFILE",
-      profile,
-    });
-  };
+  // const updateUserProfile = (profile: any) => {
+  //   send({
+  //     type: "UPDATE USER PROFILE",
+  //     profile,
+  //   });
+  // };
 
   /**
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
    */
   const AuthReactContextValue = {
-    handleAcknowledgeDireWarningAboutE2EEncryption,
-    handleSignIn,
-    handleSignOut,
-    handleSignUp,
-    state,
-    switchToSignIn,
-    switchToSignUp,
-    updateUserProfile,
+    // handleAcknowledgeDireWarningAboutE2EEncryption,
+    // handleSignIn,
+    // handleSignOut,
+    // handleSignUp,
+    // state,
+    // switchToSignIn,
+    // switchToSignUp,
+    // updateUserProfile,
   };
 
   let RenderComponent;
