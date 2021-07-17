@@ -9,9 +9,10 @@ import {
 } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { Sender } from "@xstate/react/lib/types";
+// import { Sender } from "@xstate/react/lib/types";
 import { Database } from "userbase-js";
-// import { DatabaseMachineEvent } from "./database.machine";
+import { databaseMachine } from "./database.machine";
+import { ActorRefFrom } from "xstate";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -21,6 +22,7 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
+/**
 const ProjectViewer = ({
   projectNumber,
   projectTitle,
@@ -34,6 +36,7 @@ const ProjectViewer = ({
     </div>
   );
 };
+*/
 
 const ProjectPicker = ({ projects }: { projects: Database[] }) => {
   return (
@@ -57,19 +60,19 @@ export const DatabaseMachine = () => {
     updateUserProfile,
   } = useContext(AuthMachineReactContext);
 
-  // TODO: fix this `any` typing.
-  const [state]: [any, Sender<any>] = useActor(
-    // const [state]: [any, Sender<DatabaseMachineEvent>] = useActor(
-    authState.children.databaseMachine
+  /**
+   * We invoked `dbMachine` from `authMachine`. Grab its state/send actions.
+   * // TODO: fix the `any state.
+   */
+  const [state] = useActor(
+    authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
   );
 
-  // const createProject = (projectNumber: string) => {
-  //   send({
-  //     type: "CREATE PROJECT",
-  //     projectNumber,
-  //   });
-  // };
-
+  /**
+   * `DatabaseReactContextValue` contains all of the helper/sender functions,
+   * declared here, that are passed down in React Context for use by child
+   * components.
+   */
   const DatabaseReactContextValue = {
     // createProject,
   };
@@ -82,10 +85,10 @@ export const DatabaseMachine = () => {
       <hr className="my-2" />
       <ProjectPicker projects={state.context.databases} />
       <hr className="my-2" />
-      <ProjectViewer
+      {/* <ProjectViewer
         projectNumber={state.context.databases.databaseName}
         projectTitle="Passed in by props"
-      />
+      /> */}
       <hr className="my-2" />
       <button onClick={() => updateUserProfile({ currentDatabase: "001" })}>
         Create 005
