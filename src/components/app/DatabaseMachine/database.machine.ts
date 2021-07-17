@@ -1,21 +1,10 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, sendParent } from "xstate";
-// import { Machine } from "@xstate/compiled";
+import { assign, ContextFrom, EventFrom, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
-import userbase, { Database, Item } from "userbase-js";
+import userbase, { Database } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JDItem } from "@types";
-
-interface UserbaseError {
-  name: string; // UsernameOrPasswordMismatch
-  message: string; // Username or password mismatch.
-  status: number; // 401
-}
-
-interface JDUserbaseItem extends Item {
-  item: JDItem;
-}
+import { UserbaseError, UserbaseItem } from "@types";
 
 const dbModel = createModel(
   {
@@ -24,44 +13,63 @@ const dbModel = createModel(
      * the databaseName in Userbase.
      */
     currentDatabase: "",
+
     /**
      * The array of the user's available database objects, returned by Userbase.
      * The `databaseName` property on each object is the 3-digit JD project
      * code, which is a string.
      */
     databases: [] as Database[],
+
+    /**
+     * The latest error.
+     */
     error: {} as UserbaseError,
+
     /**
      * When we open any given database, `userbaseItems` is the array of Items
      * which makes up that database.
      */
-    userbaseItems: [] as JDUserbaseItem[],
+    userbaseItems: [] as UserbaseItem[],
   },
   {
     events: {
+      // == This machine ==-==-==
       /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
-      "GOT DATABASES": (value: Database[]) => ({ value }),
-      /**
-       * Sent back to the parent so it can update the user's profile.
-       */
-      "CURRENT DATABASE UPDATED": (value: string) => ({ value }),
+      GOT_DATABASES: (databases: Database[]) => ({ databases }),
+
       /**
        * Sent by the changeHandler() when the remote database changes.
        */
-      "DATABASE ITEMS UPDATED": (value: JDUserbaseItem[]) => ({ value }),
+      DATABASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
+        userbaseItems,
+      }),
+
       /**
        * Sent by ubOpenDatabase when it opens a database.
        */
-      "DATABASE OPENED": () => ({}),
+      DATABASE_OPENED: () => ({}),
+
+      /**
+       * An error.
+       */
+      ERROR: (error: UserbaseError) => ({ error }),
+
+      // == Parent machine ==-==-==
+      /**
+       * Sent back to the parent so it can update the user's profile.
+       */
+      CURRENT_DATABASE_UPDATED: (currentDatabase: string) => ({
+        currentDatabase,
+      }),
     },
   }
 );
 
-// Is 4.22.1 released yet?
-// export type DatabaseMachineContext = ContextFrom<typeof databaseModel>;
-// export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
+export type DatabaseMachineContext = ContextFrom<typeof dbModel>;
+export type DatabaseMachineEvent = EventFrom<typeof dbModel>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = dbModel.createMachine(
@@ -72,6 +80,12 @@ export const databaseMachine = dbModel.createMachine(
     on: {},
     states: {
       databaseGetter: {
+        /**
+         * This state loops itself every 60s and is responsible for getting the
+         * current list of databases. This is assigned to context but nothing
+         * else is done: it's just so that we have the list available if we want
+         * to switch databases.
+         */
         type: "compound",
         initial: "gettingDatabases",
         states: {
@@ -80,10 +94,10 @@ export const databaseMachine = dbModel.createMachine(
               src: "ubGetDatabases",
             },
             on: {
-              "GOT DATABASES": {
+              GOT_DATABASES: {
                 actions: [
                   assign({
-                    databases: (_, event) => event.value,
+                    databases: (_, event) => event.databases,
                   }),
                 ],
                 target: "idle",
@@ -100,23 +114,30 @@ export const databaseMachine = dbModel.createMachine(
         },
       },
       databaseOpener: {
+        /**
+         * This is where we actually open our database.
+         */
         type: "compound",
         initial: "init",
+        invoke: {
+          /**
+           * We need a top-level `invoke` because the `changeHandler` which is
+           * set up in this service needs to stay alive.
+           */
+          src: "ubOpenDatabase",
+        },
         states: {
           init: {
-            invoke: {
-              src: "ubOpenDatabase",
-            },
             on: {
-              "DATABASE OPENED": "databaseOpen",
+              DATABASE_OPENED: "databaseOpen",
             },
           },
           databaseOpen: {
             on: {
-              "DATABASE ITEMS UPDATED": {
+              DATABASE_ITEMS_UPDATED: {
                 actions: [
                   dbModel.assign({
-                    userbaseItems: (_, event) => event.value,
+                    userbaseItems: (_, event) => event.userbaseItems,
                   }),
                 ],
               },
@@ -128,38 +149,42 @@ export const databaseMachine = dbModel.createMachine(
   },
   {
     services: {
-      // @ts-ignore
-      ubGetDatabases: () => (sendBack: (event: any) => void) => {
-        // () => (sendBack: (event: DatabaseMachineEvent) => void) => {
-        /**
-         * Get the array of databases. Is always returned, can be empty.
-         */
-        userbase
-          .getDatabases()
-          .then(({ databases }) => {
-            sendBack({ type: "GOT DATABASES", databases });
-          })
-          .catch((error: UserbaseError) => sendBack({ type: "ERROR", error }));
-      },
-      // @ts-ignore
-      ubOpenDatabase: (context) => (sendBack: (event: any) => void) => {
-        // (sendBack: (event: DatabaseMachineEvent) => void) => {
-        const databaseName = context.currentDatabase || "001";
-        userbase
-          .openDatabase({
-            databaseName,
-            changeHandler: (items) => {
-              sendBack({ type: "DATABASE ITEMS UPDATED", items });
-            },
-          })
-          .then(() => {
-            sendParent({ type: "CURRENT DATABASE UPDATED", databaseName });
-            sendBack({ type: "DATABASE OPENED" });
-          })
-          .catch((error) => {
-            /* TODO handle */
-          });
-      },
+      ubGetDatabases:
+        () => (sendBack: (event: DatabaseMachineEvent) => void) => {
+          /**
+           * Get the array of databases. Is always returned, can be empty.
+           */
+          userbase
+            .getDatabases()
+            .then(({ databases }) => {
+              sendBack({ type: "GOT_DATABASES", databases });
+            })
+            .catch((error: UserbaseError) =>
+              sendBack({ type: "ERROR", error })
+            );
+        },
+      ubOpenDatabase:
+        (context: DatabaseMachineContext) =>
+        (sendBack: (event: DatabaseMachineEvent) => void) => {
+          const databaseName = context.currentDatabase || "001";
+          userbase
+            .openDatabase({
+              databaseName,
+              changeHandler: (userbaseItems) => {
+                sendBack({ type: "DATABASE_ITEMS_UPDATED", userbaseItems });
+              },
+            })
+            .then(() => {
+              sendParent({ type: "CURRENT_DATABASE_UPDATED", databaseName });
+              sendBack({ type: "DATABASE_OPENED" });
+            })
+            .catch((error: UserbaseError) => {
+              sendParent({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
     },
   }
 );
