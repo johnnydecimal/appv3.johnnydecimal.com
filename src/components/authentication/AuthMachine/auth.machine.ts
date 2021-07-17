@@ -40,8 +40,6 @@ const authModel = createModel(
 
     /**
      * The log is the list of errors and events as they occurred.
-     *
-     * Each action should log to the log as it handles the error/event.
      */
     log: [] as string[],
 
@@ -129,7 +127,6 @@ export const authMachine = authModel.createMachine(
     initial: "init",
     context: {
       ...authModel.initialContext,
-      // log: [`${new Date().toTimeString().slice(0, 8)}: Initialised.`],
     },
     on: {
       LOG: {
@@ -165,6 +162,12 @@ export const authMachine = authModel.createMachine(
     },
     states: {
       init: {
+        entry: [
+          send<any, any, AuthMachineEvent>({
+            type: "LOG",
+            message: "Initialised.",
+          }),
+        ],
         invoke: {
           src: "userbaseInit",
           onError: {
@@ -180,14 +183,7 @@ export const authMachine = authModel.createMachine(
         },
         on: {
           A_USER_IS_SIGNED_IN: {
-            actions: [
-              "assignUser",
-              "clearError",
-              send<any, any, AuthMachineEvent>({
-                type: "LOG",
-                message: "yeah",
-              }),
-            ],
+            actions: ["assignUser", "clearError"],
             target: "#authMachine.signedIn",
           },
           NO_USER_IS_SIGNED_IN: {
@@ -195,7 +191,7 @@ export const authMachine = authModel.createMachine(
               "clearError",
               send<any, any, AuthMachineEvent>({
                 type: "LOG",
-                message: "Database connection established. No user signed in.",
+                message: "Connection established. No user signed in.",
               }),
             ],
             target: "#authMachine.signedOut",
