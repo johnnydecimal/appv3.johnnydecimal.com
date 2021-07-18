@@ -150,9 +150,7 @@ export const authMachine = authModel.createMachine(
   {
     id: "authMachine",
     initial: "init",
-    context: {
-      ...authModel.initialContext,
-    },
+    context: authModel.initialContext,
     on: {
       LOG: {
         actions: [(context, event) => addToLog(context, event.message)],
@@ -429,33 +427,35 @@ export const authMachine = authModel.createMachine(
         // },
       },
       signedIn: {
-        // type: "compound",
-        // initial: "idle",
-        // states: {
-        //   idle: {
-        //     entry: [
-        //       send({ type: "WRITE TO THE LOG", log: "Sign in successful." }),
-        //     ],
-        //     invoke: {
-        //       id: "databaseMachine",
-        //       src: databaseMachine,
-        //     },
-        //   },
-        // },
-        // on: {
-        //   "ATTEMPT SIGNOUT": {
-        //     target: "signedOut.tryingSignOut",
-        //   },
-        //   "UPDATE USER PROFILE": {
-        //     actions: [
-        //       immerAssign((context, event) => {
-        //         if (context.user) {
-        //           context.user.profile = event.profile;
-        //         }
-        //       }),
-        //     ],
-        //   },
-        // },
+        type: "compound",
+        initial: "idle",
+        states: {
+          idle: {
+            entry: [
+              send<any, any, AuthMachineEvent>({
+                type: "LOG",
+                message: "Sign in successful.",
+              }),
+            ],
+            invoke: {
+              id: "databaseMachine",
+              src: databaseMachine,
+            },
+          },
+          // on: {
+          //   "ATTEMPT SIGNOUT": {
+          //     target: "signedOut.tryingSignOut",
+          //   },
+          //   "UPDATE USER PROFILE": {
+          //     actions: [
+          //       immerAssign((context, event) => {
+          //         if (context.user) {
+          //           context.user.profile = event.profile;
+          //         }
+          //       }),
+          //     ],
+          //   },
+        },
       },
       catastrophicError: {},
     },
