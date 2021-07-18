@@ -28,7 +28,7 @@ const authModel = createModel(
     /**
      * The most recent error. (This is the `message` part of `UserbaseError`.)
      */
-    error: undefined as string | undefined,
+    error: undefined as string,
 
     // /**
     //  * The most recent information (not called 'event' to avoid confusion).
@@ -48,7 +48,7 @@ const authModel = createModel(
     /**
      * The user object, if signed in.
      */
-    user: undefined as UserResult | undefined,
+    user: undefined as UserResult,
   },
   {
     events: {
@@ -122,6 +122,17 @@ const addToLog = (
 export type AuthMachineContext = ContextFrom<typeof authModel>;
 export type AuthMachineEvent = EventFrom<typeof authModel>;
 
+// === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+const assignUser = authModel.assign(
+  {
+    user: (_, event) => event.user,
+  },
+  "A_USER_IS_SIGNED_IN"
+);
+const clearError = authModel.assign({
+  error: (_context, _event) => undefined,
+});
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const authMachine = authModel.createMachine(
   {
@@ -181,8 +192,8 @@ export const authMachine = authModel.createMachine(
         on: {
           A_USER_IS_SIGNED_IN: {
             actions: [
-              "assignUser",
-              "clearError",
+              assignUser,
+              clearError,
               send<any, any, AuthMachineEvent>({
                 type: "LOG",
                 message: "yeah",
@@ -192,7 +203,7 @@ export const authMachine = authModel.createMachine(
           },
           NO_USER_IS_SIGNED_IN: {
             actions: [
-              "clearError",
+              clearError,
               send<any, any, AuthMachineEvent>({
                 type: "LOG",
                 message: "Database connection established. No user signed in.",
@@ -415,12 +426,12 @@ export const authMachine = authModel.createMachine(
   },
   {
     actions: {
-      assignUser: authModel.assign(
-        {
-          user: (_, event) => event.user,
-        },
-        "A_USER_IS_SIGNED_IN"
-      ),
+      // assignUser: authModel.assign(
+      //   {
+      //     user: (_, event) => event.user,
+      //   },
+      //   "A_USER_IS_SIGNED_IN"
+      // ),
       // assignAndLogError: authModel.assign({
       //   error: (_context, event) => event.error.message,
       //   log: (context, event) =>
@@ -429,9 +440,9 @@ export const authMachine = authModel.createMachine(
       // clearUser: authModel.assign({
       //   user: (_context, _event) => undefined,
       // }),
-      clearError: authModel.assign({
-        error: (_context, _event) => undefined,
-      }),
+      // clearError: authModel.assign({
+      //   error: (_context, _event) => undefined,
+      // }),
       // forceSignOut: (_context, _event) => {
       //   window.localStorage.removeItem("userbaseCurrentSession");
       // },
