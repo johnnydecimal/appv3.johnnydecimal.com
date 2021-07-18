@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, ContextFrom, EventFrom, send } from "xstate";
+import { ContextFrom, EventFrom, send } from "xstate";
 import { createModel } from "xstate/lib/model";
 import { assign as immerAssign } from "@xstate/immer";
 import userbase, { Userbase } from "userbase-js";
@@ -26,9 +26,9 @@ const authModel = createModel(
     // appMachine: undefined,
 
     /**
-     * The most recent error. (This is the `message` part of `UserbaseError`.)
+     * The most recent error.
      */
-    error: undefined as string,
+    error: undefined as UserbaseError,
 
     // /**
     //  * The most recent information (not called 'event' to avoid confusion).
@@ -58,6 +58,14 @@ const authModel = createModel(
       // -- From services.userbaseInit()
       A_USER_IS_SIGNED_IN: (user: UserResult) => ({ user }),
       NO_USER_IS_SIGNED_IN: () => ({}),
+
+      // -- From the signedOut state
+      /**
+       * Invokes `userbaseSignIn`, which checks that this was the event that
+       * invoked it and immediately returns if not (for TS).
+       */
+      ATTEMPT_SIGNIN: (formData: ISignInFormData) => ({ formData }),
+      SIGNED_IN: (user: UserResult) => ({ user }),
 
       // == Sent up from databaseMachine ==-==-==
       /**
@@ -121,14 +129,20 @@ export type AuthMachineContext = ContextFrom<typeof authModel>;
 export type AuthMachineEvent = EventFrom<typeof authModel>;
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-const assignUser = authModel.assign(
-  {
-    user: (_, event) => event.user,
-  },
-  "A_USER_IS_SIGNED_IN"
-);
-const clearError = authModel.assign({
+const assignUser = authModel.assign<"A_USER_IS_SIGNED_IN" | "SIGNED_IN">({
+  user: (_, event) => event.user,
+});
+const assignAndLogError = authModel.assign<"ERROR">({
+  error: (_context, event) => event.error,
+  log: (context, event) => addToLog(context, event.error.message, "text-red"),
+});
+const clearError = authModel.assign<
+  "A_USER_IS_SIGNED_IN" | "NO_USER_IS_SIGNED_IN" | "SIGNED_IN"
+>({
   error: (_context, _event) => undefined,
+});
+const clearUser = authModel.assign<"ERROR">({
+  user: (_context, _event) => undefined,
 });
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -220,19 +234,44 @@ export const authMachine = authModel.createMachine(
         type: "compound",
         initial: "idle",
         states: {
-          idle: {},
+          idle: {
+            on: {
+              ATTEMPT_SIGNIN: {
+                target: "tryingSignIn",
+              },
+              //       "SWITCH TO THE SIGNUP PAGE": {
+              //         target: "#authMachine.signUp",
+              //       },
+            },
+          },
+          tryingSignIn: {
+            entry: [
+              send<any, any, AuthMachineEvent>({
+                type: "LOG",
+                message: "Trying sign in.",
+              }),
+            ],
+            invoke: {
+              src: "userbaseSignIn",
+            },
+            on: {
+              SIGNED_IN: {
+                actions: [assignUser, clearError],
+                target: "#authMachine.signedIn",
+              },
+              ERROR: {
+                /**
+                 * We're using the generic ERROR event, and in this case we're
+                 * catching it here as it indicates that the signIn process
+                 * didn't work.
+                 */
+                actions: [clearUser, assignAndLogError],
+                target: "#authMachine.signedOut.signInFailed",
+              },
+            },
+          },
+          signInFailed: {},
         },
-        // states: {
-        //   idle: {
-        //     on: {
-        //       "ATTEMPT SIGNIN": {
-        //         target: "tryingSignIn",
-        //       },
-        //       "SWITCH TO THE SIGNUP PAGE": {
-        //         target: "#authMachine.signUp",
-        //       },
-        //     },
-        //   },
         //   signInFailed: {
         //     on: {
         //       "ATTEMPT SIGNIN": {
@@ -245,15 +284,6 @@ export const authMachine = authModel.createMachine(
         //     },
         //   },
         //   tryingSignIn: {
-        //     entry: [
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: "Trying sign in.",
-        //       }),
-        //     ],
-        //     invoke: {
-        //       src: "userbaseSignIn",
-        //     },
         //     on: {
         //       "A USER IS SIGNED IN": {
         //         target: "#authMachine.signedIn.idle",
@@ -516,7 +546,7 @@ export const authMachine = authModel.createMachine(
                 });
               }
             })
-            .catch((error) => {
+            .catch((error: UserbaseError) => {
               /**
                * Now *this* is an error. Something janky happened with the
                * `init` call. We shit the bed at this stage.
@@ -535,41 +565,56 @@ export const authMachine = authModel.createMachine(
         },
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      // @ts-ignore
-      // userbaseSignIn:
-      //   // TODO: 4.22.1
-      //   (_, event) => (sendBack: (event: any) => void) => {
-      //     // (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
-      //     /**
-      //      * If we're testing this using the inspector, the button-click isn't
-      //      * sending any event.data. Pick that up, and load some dummy values.
-      //      * // TODO: this is just for testing, pull it out in prod.
-      //      */
-      //     if (!event.value) {
-      //       event.value = {
-      //         username: "john",
-      //         password: "test123",
-      //       };
-      //     }
-      //     userbase
-      //       .signIn({
-      //         username: event.value.username,
-      //         password: event.value.password,
-      //         rememberMe: "local",
-      //       })
-      //       .then((user) => {
-      //         sendBack({
-      //           type: "A USER IS SIGNED IN",
-      //           user,
-      //         });
-      //       })
-      //       .catch((error) => {
-      //         sendBack({
-      //           type: "USERBASE.SIGNIN() RAISED AN ERROR",
-      //           error,
-      //         });
-      //       });
-      //   },
+      userbaseSignIn:
+        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+          if (event.type !== "ATTEMPT_SIGNIN") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendBack({
+              type: "ERROR",
+              error: {
+                name: "UserbaseSignInCallError",
+                message: `userbaseSignIn() was invoked from a state that wasn't
+                  reached by sending ATTEMPT_SIGNIN. As a result,
+                  'event.formData' won't exist, so this function will now
+                  return.`,
+                status: 901, // Customise me later
+              },
+            });
+            return;
+          }
+          /**
+           * If we're testing this using the inspector, the button-click isn't
+           * sending formData. Pick that up, and load some dummy values.
+           * // TODO: this is just for testing, pull it out in prod.
+           */
+          if (!event.formData) {
+            event.formData = {
+              username: "john",
+              password: "test123",
+            };
+          }
+          userbase
+            .signIn({
+              username: event.formData.username,
+              password: event.formData.password,
+              rememberMe: "local",
+            })
+            .then((user) => {
+              sendBack({
+                type: "SIGNED_IN",
+                user,
+              });
+            })
+            .catch((error: UserbaseError) => {
+              sendBack({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
+
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       // @ts-ignore
       // userbaseSignUp:

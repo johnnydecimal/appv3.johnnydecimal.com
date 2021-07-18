@@ -32,12 +32,12 @@ export const AuthMachine = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree.
    */
-  // const handleSignIn = (formData: ISignInFormData) => {
-  //   send({
-  //     type: "ATTEMPT SIGNIN",
-  //     formData,
-  //   });
-  // };
+  const handleSignIn = (formData: ISignInFormData) => {
+    send({
+      type: "ATTEMPT_SIGNIN",
+      formData,
+    });
+  };
 
   // const handleSignUp = (formData: ISignUpFormData) => {
   //   send({
@@ -75,7 +75,7 @@ export const AuthMachine = () => {
    */
   const AuthReactContextValue = {
     // handleAcknowledgeDireWarningAboutE2EEncryption,
-    // handleSignIn,
+    handleSignIn,
     // handleSignOut,
     // handleSignUp,
     state,
