@@ -78,7 +78,7 @@ export const AuthMachine = () => {
     // handleSignIn,
     // handleSignOut,
     // handleSignUp,
-    // state,
+    state,
     // switchToSignIn,
     // switchToSignUp,
     // updateUserProfile,
