@@ -7,7 +7,7 @@ import {
   AuthMachineReactContext,
   SignInForm,
   SignUpForm,
-  DatabaseMachine,
+  // DatabaseMachine,
 } from "../../../components";
 
 import { ISignInFormData } from "../SignInForm/SignInForm";
@@ -96,7 +96,8 @@ export const AuthMachine = () => {
       RenderComponent = <SignUpForm />;
       break;
     case state.matches("signedIn"):
-      RenderComponent = <DatabaseMachine />;
+      // RenderComponent = <DatabaseMachine />;
+      RenderComponent = <div>Ah-ha! 2</div>;
       break;
     default:
       RenderComponent = <FourOhFour />;

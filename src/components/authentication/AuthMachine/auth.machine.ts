@@ -6,6 +6,8 @@ import userbase, { Userbase } from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "../../../components";
+// import { simpleMachine } from "../../app/simpleMachine/simpleMachine";
+import { newDatabaseMachine } from "../../app/NewDatabaseMachine/newDatabase.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -437,9 +439,13 @@ export const authMachine = authModel.createMachine(
                 message: "Sign in successful.",
               }),
             ],
+            // invoke: {
+            //   id: "databaseMachine",
+            //   src: databaseMachine,
+            // },
             invoke: {
-              id: "databaseMachine",
-              src: databaseMachine,
+              id: "newDatabaseMachine",
+              src: newDatabaseMachine,
             },
           },
           // on: {
@@ -522,19 +528,19 @@ export const authMachine = authModel.createMachine(
                  */
               },
             })
-            .then(({ user }) => {
+            .then((session) => {
               /**
                * This only tells us that the SDK initialised successfully, *not*
                * that there is an active user. For that we need `session.user`
                * to contain a user object.
                */
-              if (user) {
+              if (session.user) {
                 /**
                  * We have a user, so a user is signed in.
                  */
                 sendBack({
                   type: "A_USER_IS_SIGNED_IN",
-                  user,
+                  user: session.user,
                 });
               } else {
                 /**
