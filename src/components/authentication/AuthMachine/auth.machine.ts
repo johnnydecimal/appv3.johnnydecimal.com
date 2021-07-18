@@ -439,14 +439,14 @@ export const authMachine = authModel.createMachine(
                 message: "Sign in successful.",
               }),
             ],
-            // invoke: {
-            //   id: "databaseMachine",
-            //   src: databaseMachine,
-            // },
             invoke: {
-              id: "newDatabaseMachine",
-              src: newDatabaseMachine,
+              id: "databaseMachine",
+              src: databaseMachine,
             },
+            // invoke: {
+            //   id: "newDatabaseMachine",
+            //   src: newDatabaseMachine,
+            // },
           },
           // on: {
           //   "ATTEMPT SIGNOUT": {
