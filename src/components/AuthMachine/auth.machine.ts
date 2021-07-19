@@ -28,7 +28,7 @@ const authModel = createModel(
     /**
      * The most recent error.
      */
-    error: undefined as UserbaseError,
+    error: undefined as unknown as UserbaseError,
 
     // /**
     //  * The most recent information (not called 'event' to avoid confusion).
@@ -46,7 +46,7 @@ const authModel = createModel(
     /**
      * The user object, if signed in.
      */
-    user: undefined as UserResult,
+    user: undefined as unknown as UserResult,
   },
   {
     events: {
