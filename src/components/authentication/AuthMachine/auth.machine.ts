@@ -64,8 +64,9 @@ const authModel = createModel(
       SIGNED_IN: (user: UserResult) => ({ user }),
       SWITCH_TO_THE_SIGNUP_PAGE: () => ({}),
       ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION: () => ({}),
+      THE_USER_WAS_SIGNED_OUT: () => ({}),
 
-      // -- From the signedOut state
+      // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
 
       // == Sent up from databaseMachine ==-==-==
@@ -138,14 +139,17 @@ const assignAndLogError = authModel.assign<"ERROR">({
   log: (context, event) => addToLog(context, event.error.message, "text-red"),
 });
 const clearError = authModel.assign<
-  "A_USER_IS_SIGNED_IN" | "NO_USER_IS_SIGNED_IN" | "SIGNED_IN"
+  | "A_USER_IS_SIGNED_IN"
+  | "NO_USER_IS_SIGNED_IN"
+  | "SIGNED_IN"
+  | "THE_USER_WAS_SIGNED_OUT"
 >({
   error: (_context, _event) => undefined,
 });
 const clearLog = authModel.assign({
   log: () => [],
 });
-const clearUser = authModel.assign<"ERROR">({
+const clearUser = authModel.assign<"ERROR" | "THE_USER_WAS_SIGNED_OUT">({
   user: (_context, _event) => undefined,
 });
 
@@ -276,6 +280,33 @@ export const authMachine = authModel.createMachine(
             },
           },
           signInFailed: {},
+          tryingSignOut: {
+            entry: [
+              send<any, any, AuthMachineEvent>({
+                type: "LOG",
+                message: "Trying sign out.",
+              }),
+            ],
+            invoke: {
+              src: "userbaseSignOut",
+            },
+            on: {
+              THE_USER_WAS_SIGNED_OUT: {
+                /**
+                 * userbase.signOut() did its job, so it has gracefully set the
+                 * localStorage item to `signedIn: false`.
+                 */
+                target: "#authMachine.signedOut",
+                actions: [clearError, clearUser],
+              },
+            },
+            exit: [
+              send<any, any, AuthMachineEvent>({
+                type: "LOG",
+                message: "Sign out successful.",
+              }),
+            ],
+          },
         },
         //   signInFailed: {
         //     on: {
@@ -305,22 +336,7 @@ export const authMachine = authModel.createMachine(
         //       },
         //     },
         //   },
-        //   tryingSignOut: {
-        //     entry: [
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: "Trying sign out.",
-        //       }),
-        //     ],
-        //     invoke: {
-        //       src: "userbaseSignOut",
-        //     },
-        //     exit: [
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: "Sign out successful.",
-        //       }),
-        //     ],
+        // tryingSignOut: {
         //     on: {
         //       "THE USER WAS SIGNED OUT": {
         //         /**
@@ -340,7 +356,7 @@ export const authMachine = authModel.createMachine(
         //         actions: ["clearError", "clearUser", "forceSignOut"],
         //       },
         //     },
-        //   },
+        // },
         // },
       },
       signUp: {
@@ -449,20 +465,21 @@ export const authMachine = authModel.createMachine(
               id: "databaseMachine",
               src: databaseMachine,
             },
+            on: {
+              ATTEMPT_SIGNOUT: {
+                target: "#authMachine.signedOut.tryingSignOut",
+              },
+              //   "UPDATE USER PROFILE": {
+              //     actions: [
+              //       immerAssign((context, event) => {
+              //         if (context.user) {
+              //           context.user.profile = event.profile;
+              //         }
+              //       }),
+              //     ],
+              // },
+            },
           },
-          // on: {
-          //   "ATTEMPT SIGNOUT": {
-          //     target: "signedOut.tryingSignOut",
-          //   },
-          //   "UPDATE USER PROFILE": {
-          //     actions: [
-          //       immerAssign((context, event) => {
-          //         if (context.user) {
-          //           context.user.profile = event.profile;
-          //         }
-          //       }),
-          //     ],
-          //   },
         },
       },
       catastrophicError: {},
