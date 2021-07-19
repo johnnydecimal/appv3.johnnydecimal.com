@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ContextFrom, EventFrom, send } from "xstate";
+import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
 // import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
@@ -135,8 +135,9 @@ const addToLog = (
 
 export type AuthMachineContext = ContextFrom<typeof authModel>;
 export type AuthMachineEvent = EventFrom<typeof authModel>;
-// export type AuthMachineContext = ContextFrom<typeof authModel>;
-// export type AuthMachineEvent = EventFrom<typeof authModel>;
+
+const send = (event: AuthMachineEvent) =>
+  xstateSend<any, any, AuthMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const assignUser = authModel.assign<"A_USER_IS_SIGNED_IN" | "SIGNED_IN">({
@@ -203,7 +204,7 @@ export const authMachine = authModel.createMachine(
     states: {
       init: {
         entry: [
-          send<any, any, AuthMachineEvent>({
+          send({
             type: "LOG",
             message: "Initialised.",
           }),
@@ -229,7 +230,7 @@ export const authMachine = authModel.createMachine(
             actions: [
               assignUser,
               clearError,
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Signed-in user detected.",
               }),
@@ -239,7 +240,7 @@ export const authMachine = authModel.createMachine(
           NO_USER_IS_SIGNED_IN: {
             actions: [
               clearError,
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Connection established. No user signed in.",
               }),
@@ -264,7 +265,7 @@ export const authMachine = authModel.createMachine(
           },
           tryingSignIn: {
             entry: [
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Trying sign in.",
               }),
@@ -291,7 +292,7 @@ export const authMachine = authModel.createMachine(
           signInFailed: {},
           tryingSignOut: {
             entry: [
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Trying sign out.",
               }),
@@ -319,7 +320,7 @@ export const authMachine = authModel.createMachine(
               },
             },
             exit: [
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Sign out successful.",
               }),
@@ -382,7 +383,7 @@ export const authMachine = authModel.createMachine(
         initial: "direWarningAboutE2EEncryptionNotAcknowledged",
         entry: [
           clearLog,
-          send<any, any, AuthMachineEvent>({
+          send({
             type: "LOG",
             message: `Switch to sign up page. User needs to accept dire warning
               about end-to-end encryption. More information can be found
@@ -395,7 +396,7 @@ export const authMachine = authModel.createMachine(
             target: "#authMachine.signedOut.idle",
             actions: [
               clearLog,
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Switch to sign in page.",
               }),
@@ -412,7 +413,7 @@ export const authMachine = authModel.createMachine(
           },
           okayToTrySignUp: {
             entry: [
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message:
                   'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
@@ -473,7 +474,7 @@ export const authMachine = authModel.createMachine(
         states: {
           idle: {
             entry: [
-              send<any, any, AuthMachineEvent>({
+              send({
                 type: "LOG",
                 message: "Sign in successful.",
               }),
