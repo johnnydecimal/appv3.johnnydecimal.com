@@ -2,18 +2,17 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  authMachine,
-  AuthMachineReactContext,
-  SignInForm,
-  SignUpForm,
-  DatabaseMachine,
-} from "../../../components";
+import { authMachine } from "./auth.machine";
+import { AuthMachineReactContext } from "./context";
+import { DatabaseMachine } from "components/app/DatabaseMachine/DatabaseMachine";
+import { SignInForm } from "../SignInForm/SignInForm";
+import { SignUpForm } from "../SignUpForm/SignUpForm";
 
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ISignInFormData } from "../SignInForm/SignInForm";
-import { ISignUpFormData } from "../SignUpForm/SignUpForm";
+// import { ISignUpFormData } from "../SignUpForm/SignUpForm";
 
-// === TEST ===
+// == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;
 const WaitOne = () => <div>Wait one. Doing networks.</div>;
 
