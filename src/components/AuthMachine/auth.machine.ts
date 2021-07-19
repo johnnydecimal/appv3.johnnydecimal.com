@@ -10,7 +10,7 @@ import { databaseMachine } from "../DatabaseMachine/database.machine";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
-// import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
+import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
@@ -20,24 +20,11 @@ interface UserbaseError {
 
 const authModel = createModel(
   {
-    // /**
-    //  * A reference to the invoked `appMachine`.
-    //  */
-    // appMachine: undefined,
-
     /**
      * The most recent error. This can be `undefined`, in the case where there
      * is no error.
      */
     error: undefined as undefined | UserbaseError,
-
-    // /**
-    //  * The most recent information (not called 'event' to avoid confusion).
-    //  *
-    //  * We separate the two to allow us to log them differently
-    //  * (e.g. errors appear in red).
-    //  */
-    // info: undefined as string | undefined,
 
     /**
      * The log is the list of errors and events as they occurred.
@@ -71,6 +58,9 @@ const authModel = createModel(
 
       // -- From the signUp state
       SWITCH_TO_THE_SIGNIN_PAGE: () => ({}),
+      ATTEMPT_SIGNUP: (formData: ISignUpFormData) => ({ formData }),
+      SIGNUP_WAS_SUCCESSFUL: (user: UserResult) => ({ user }),
+      SIGNUP_FAILED: (error: UserbaseError) => ({ error }),
 
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
@@ -92,27 +82,6 @@ const authModel = createModel(
        * This is the only ERROR state; children also send their errors here.
        */
       ERROR: (error: UserbaseError) => ({ error }),
-
-      // == All the old shit
-      // "A USER IS SIGNED IN": (value: UserResult) => ({ value }),
-      // "NO USER IS SIGNED IN": (value: string) => ({ value }),
-      // "USERBASE.INIT() RAISED AN ERROR": (value: UserbaseError) => ({ value }),
-      // "ATTEMPT SIGNIN": (formData: ISignInFormData) => ({ formData }),
-      // "USERBASE.SIGNIN() RAISED AN ERROR": (value: UserbaseError) => ({
-      //   value,
-      // }),
-      // "ATTEMPT SIGNOUT": () => ({}),
-      // "THE USER WAS SIGNED OUT": () => ({}),
-      // "SIGNOUT FAILED, SO WE FORCE IT ANYWAY": () => ({}),
-      // "SWITCH TO THE SIGNIN PAGE": () => ({}),
-      // "SWITCH TO THE SIGNUP PAGE": () => ({}),
-      // "ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION": () => ({}),
-      // "ATTEMPT SIGNUP": (formData: ISignUpFormData) => ({ formData }),
-      // "SIGNUP WAS SUCCESSFUL": (value: UserResult) => ({ value }),
-      // "SIGNUP FAILED": (value: UserbaseError) => ({ value }),
-      // "UPDATE USER PROFILE": (profile: any) => ({ profile }),
-      // "WRITE TO THE LOG": (value: string) => ({ value }),
-      // "CLEAR THE LOG": () => ({}),
     },
   }
 );
@@ -140,7 +109,9 @@ const send = (event: AuthMachineEvent) =>
   xstateSend<any, any, AuthMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-const assignUser = authModel.assign<"A_USER_IS_SIGNED_IN" | "SIGNED_IN">({
+const assignUser = authModel.assign<
+  "A_USER_IS_SIGNED_IN" | "SIGNED_IN" | "SIGNUP_WAS_SUCCESSFUL"
+>({
   user: (_, event) => event.user,
 });
 const assignAndLogError = authModel.assign<"ERROR">({
@@ -415,49 +386,56 @@ export const authMachine = authModel.createMachine(
             entry: [
               send({
                 type: "LOG",
-                message:
-                  'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
+                message: `User has accepted dire warning. (Seriously, use
+                    <a href="https://1password.com" class="underline text-red">
+                    a password manager</a>.)`,
               }),
               () => {
+                /**
+                 * It seems to want a brief moment to render, after which we
+                 * ensure that the username field has focus.
+                 */
                 setTimeout(() => {
                   document.getElementById("username")?.focus();
                 }, 50);
               },
             ],
-            //     on: {
-            //       "ATTEMPT SIGNUP": {
-            //         target: "tryingSignUp",
-            //       },
-            //     },
+            on: {
+              ATTEMPT_SIGNUP: {
+                target: "tryingSignUp",
+              },
+            },
           },
-          //   tryingSignUp: {
-          //     entry: [
-          //       send({
-          //         type: "WRITE TO THE LOG",
-          //         log: "Attempting sign up.",
-          //       }),
-          //     ],
-          //     invoke: {
-          //       src: "userbaseSignUp",
-          //     },
-          //     on: {
-          //       "SIGNUP WAS SUCCESSFUL": {
-          //         target: "#authMachine.signedIn.idle",
-          //         actions: [
-          //           send({
-          //             type: "WRITE TO THE LOG",
-          //             log: "Sign up successful.",
-          //           }),
-          //           authModel.assign({
-          //             user: (_, event) => event.value,
-          //           }),
-          //         ],
-          //       },
-          //       "SIGNUP FAILED": {
-          //         target: "#authMachine.signUp.signUpFailed",
-          //       },
-          //     },
-          //   },
+          tryingSignUp: {
+            entry: [
+              send({
+                type: "LOG",
+                message: "Attempting sign up.",
+              }),
+            ],
+            invoke: {
+              src: "userbaseSignUp",
+            },
+            on: {
+              SIGNUP_WAS_SUCCESSFUL: {
+                target: "#authMachine.signedIn.idle",
+                actions: [
+                  send({
+                    type: "LOG",
+                    message: "Sign up successful.",
+                  }),
+                  assignUser,
+                ],
+              },
+              SIGNUP_FAILED: {
+                target: "#authMachine.signUp.signUpFailed",
+              },
+            },
+          },
+          /**
+           * This is where you are - you haven't tested the stuff immediately
+           * above.
+           */
           //   signUpFailed: {
           //     entry: ["assignAndLogError"],
           //     on: {
@@ -659,35 +637,49 @@ export const authMachine = authModel.createMachine(
         },
 
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      // @ts-ignore
-      // userbaseSignUp:
-      //   // TODO: 4.22.1
-      //   (_, event) => (sendBack: (event: any) => void) => {
-      //     // (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
-      //     userbase
-      //       .signUp({
-      //         username: event.value.username,
-      //         password: event.value.password,
-      //       })
-      //       .then((user) => {
-      //         /**
-      //          * Brand-new users need a first database.
-      //          */
-      //         user.profile = {
-      //           currentDatabase: "001",
-      //         };
-      //         sendBack({
-      //           type: "SIGNUP WAS SUCCESSFUL",
-      //           user,
-      //         });
-      //       })
-      //       .catch((error) => {
-      //         sendBack({
-      //           type: "SIGNUP FAILED",
-      //           error,
-      //         });
-      //       });
-      //   },
+      userbaseSignUp:
+        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+          if (event.type !== "ATTEMPT_SIGNUP") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendBack({
+              type: "ERROR",
+              error: {
+                name: "UserbaseSignUpCallError",
+                message: `userbaseSignUp() was invoked from a state that wasn't
+                  reached by sending ATTEMPT_SIGNUP. As a result,
+                  'event.formData' won't exist, so this function will now
+                  return.`,
+                status: 902, // Customise me later
+              },
+            });
+            return;
+          }
+          userbase
+            .signUp({
+              username: event.formData.username,
+              password: event.formData.password,
+            })
+            .then((user) => {
+              /**
+               * Brand-new users need a first database.
+               */
+              user.profile = {
+                currentDatabase: "001",
+              };
+              sendBack({
+                type: "SIGNUP_WAS_SUCCESSFUL",
+                user,
+              });
+            })
+            .catch((error) => {
+              sendBack({
+                type: "SIGNUP_FAILED",
+                error,
+              });
+            });
+        },
 
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {

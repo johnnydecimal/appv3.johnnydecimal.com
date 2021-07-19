@@ -60,7 +60,6 @@ export const DatabaseMachine = () => {
 
   /**
    * We invoked `dbMachine` from `authMachine`. Grab its state/send actions.
-   * // TODO: fix the `any state.
    */
   const [state] = useActor(
     authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
