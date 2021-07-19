@@ -157,6 +157,9 @@ const clearLog = authModel.assign({
 const clearUser = authModel.assign<"ERROR" | "THE_USER_WAS_SIGNED_OUT">({
   user: (_context, _event) => undefined,
 });
+const forceSignOut = () => {
+  window.localStorage.removeItem("userbaseCurrentSession");
+};
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const authMachine = authModel.createMachine(
@@ -305,6 +308,15 @@ export const authMachine = authModel.createMachine(
                  */
                 target: "#authMachine.signedOut",
                 actions: [clearError, clearUser],
+              },
+              SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY: {
+                /**
+                 * userbase.signOut() couldn't do its job, so to be sure we
+                 * remove the localStorage item ourselves. Not as graceful, so
+                 * we don't do it by default.
+                 */
+                target: "#authMachine.signedOut",
+                actions: [clearError, clearUser, forceSignOut],
               },
             },
             exit: [
