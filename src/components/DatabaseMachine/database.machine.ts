@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, sendParent } from "xstate";
+import { assign, ContextFrom, EventFrom, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
@@ -60,10 +60,10 @@ const dbModel = createModel(
   }
 );
 
-// export type DatabaseMachineContext = ContextFrom<typeof dbModel>;
-// export type DatabaseMachineEvent = EventFrom<typeof dbModel>;
-export type DatabaseMachineContext = any;
-export type DatabaseMachineEvent = any;
+export type DatabaseMachineContext = ContextFrom<typeof dbModel>;
+export type DatabaseMachineEvent = EventFrom<typeof dbModel>;
+// export type DatabaseMachineContext = any;
+// export type DatabaseMachineEvent = any;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = dbModel.createMachine(

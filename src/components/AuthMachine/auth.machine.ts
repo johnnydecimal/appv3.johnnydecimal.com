@@ -129,6 +129,8 @@ const addToLog = (
 
 export type AuthMachineContext = ContextFrom<typeof authModel>;
 export type AuthMachineEvent = EventFrom<typeof authModel>;
+// export type AuthMachineContext = ContextFrom<typeof authModel>;
+// export type AuthMachineEvent = EventFrom<typeof authModel>;
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const assignUser = authModel.assign<"A_USER_IS_SIGNED_IN" | "SIGNED_IN">({
@@ -163,6 +165,7 @@ export const authMachine = authModel.createMachine(
       LOG: {
         actions: [(context, event) => addToLog(context, event.message)],
       },
+      /*
       // "CLEAR THE LOG": {
       //   actions: [
       //     assign({
@@ -178,18 +181,19 @@ export const authMachine = authModel.createMachine(
       //          * A signed-in user who has never had a database updated doesn't
       //          * have a user.profile object yet. (The first 'update' happens
       //          * after the automatic creation of their first database.)
-      //          */
+      //          
       //         context.user.profile = {};
       //       }
       //       if (context.user && context.user.profile) {
       //         /**
       //          * Which it must as we just created it.
-      //          */
+      //          
       //         context.user.profile.currentDatabase = event.value;
       //       }
       //     }),
       //   ],
       // },
+      */
     },
     states: {
       init: {
