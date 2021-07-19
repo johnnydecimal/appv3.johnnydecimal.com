@@ -69,6 +69,9 @@ const authModel = createModel(
       THE_USER_WAS_SIGNED_OUT: () => ({}),
       SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY: () => ({}),
 
+      // -- From the signUp state
+      SWITCH_TO_THE_SIGNIN_PAGE: () => ({}),
+
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
 
@@ -175,13 +178,6 @@ export const authMachine = authModel.createMachine(
         actions: [(context, event) => addToLog(context, event.message)],
       },
       /*
-      // "CLEAR THE LOG": {
-      //   actions: [
-      //     assign({
-      //       log: (_context, _event) => [],
-      //     }),
-      //   ],
-      // },
       // "CURRENT DATABASE UPDATED": {
       //   actions: [
       //     immerAssign((context, event) => {
@@ -394,20 +390,18 @@ export const authMachine = authModel.createMachine(
               class="underline text-red">here</a>.`,
           }),
         ],
-        // on: {
-        //   "SWITCH TO THE SIGNIN PAGE": {
-        //     target: "#authMachine.signedOut.idle",
-        //     actions: [
-        //       send({
-        //         type: "CLEAR THE LOG",
-        //       }),
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: "Switch to sign in page.",
-        //       }),
-        //     ],
-        //   },
-        // },
+        on: {
+          SWITCH_TO_THE_SIGNIN_PAGE: {
+            target: "#authMachine.signedOut.idle",
+            actions: [
+              clearLog,
+              send<any, any, AuthMachineEvent>({
+                type: "LOG",
+                message: "Switch to sign in page.",
+              }),
+            ],
+          },
+        },
         states: {
           direWarningAboutE2EEncryptionNotAcknowledged: {
             on: {
@@ -417,17 +411,18 @@ export const authMachine = authModel.createMachine(
             },
           },
           okayToTrySignUp: {
-            //     entry: [
-            //       send({
-            //         type: "WRITE TO THE LOG",
-            //         log: 'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
-            //       }),
-            //       () => {
-            //         setTimeout(() => {
-            //           document.getElementById("username")?.focus();
-            //         }, 50);
-            //       },
-            //     ],
+            entry: [
+              send<any, any, AuthMachineEvent>({
+                type: "LOG",
+                message:
+                  'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
+              }),
+              () => {
+                setTimeout(() => {
+                  document.getElementById("username")?.focus();
+                }, 50);
+              },
+            ],
             //     on: {
             //       "ATTEMPT SIGNUP": {
             //         target: "tryingSignUp",

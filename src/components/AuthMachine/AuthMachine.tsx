@@ -48,17 +48,17 @@ export const AuthMachine = () => {
     send({ type: "ATTEMPT_SIGNOUT" });
   };
 
-  // const switchToSignIn = () => {
-  //   send("SWITCH TO THE SIGNIN PAGE");
-  // };
+  const switchToSignIn = () => {
+    send("SWITCH_TO_THE_SIGNIN_PAGE");
+  };
 
   const switchToSignUp = () => {
     send("SWITCH_TO_THE_SIGNUP_PAGE");
   };
 
-  // const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
-  //   send("ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION");
-  // };
+  const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
+    send("ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION");
+  };
 
   // const updateUserProfile = (profile: any) => {
   //   send({
@@ -72,12 +72,12 @@ export const AuthMachine = () => {
    * value, passing it down to child components.
    */
   const AuthReactContextValue = {
-    // handleAcknowledgeDireWarningAboutE2EEncryption,
+    handleAcknowledgeDireWarningAboutE2EEncryption,
     handleSignIn,
     handleSignOut,
     // handleSignUp,
     state,
-    // switchToSignIn,
+    switchToSignIn,
     switchToSignUp,
     // updateUserProfile,
   };
