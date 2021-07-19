@@ -27,7 +27,7 @@
     "typeface-fira-sans": "^1.1.13",
     "userbase-js": "^2.8.0",
     "web-vitals": "^1.0.1",
-    "xstate": "^4.23.0"
+    "xstate": "4.22.0"
   },
   "scripts": {
     "start": "craco start",
