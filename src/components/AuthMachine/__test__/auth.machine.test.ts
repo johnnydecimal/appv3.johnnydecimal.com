@@ -1,6 +1,6 @@
 import { UserResult } from "userbase-js";
 import { interpret } from "xstate";
-import { authMachine } from "../auth.machine";
+import { authMachine, AuthMachineEvent } from "../auth.machine";
 
 const user: UserResult = {
   username: "john",
@@ -110,6 +110,37 @@ it("should sign out a user", (done) => {
 
   authService.start();
   authService.send({ type: "ATTEMPT_SIGNOUT" });
+});
+
+it("should sign up a new user", (done) => {
+  const mockAuthMachine = authMachine.withConfig({
+    services: {
+      userbaseInit: () => (sendBack: (event: AuthMachineEvent) => void) => {
+        sendBack({ type: "NO_USER_IS_SIGNED_IN" });
+      },
+      userbaseSignUp: () => (sendBack) => {
+        sendBack({ type: "SIGNUP_WAS_SUCCESSFUL", user });
+      },
+    },
+  });
+
+  const authService = interpret(mockAuthMachine).onTransition((state) => {
+    // this is where we expect it to end up
+    if (state.matches({ signedIn: "idle" })) {
+      done();
+    }
+  });
+
+  authService.start();
+  authService.send({ type: "SWITCH_TO_THE_SIGNUP_PAGE" });
+  authService.send({ type: "ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION" });
+  authService.send({
+    type: "ATTEMPT_SIGNUP",
+    formData: {
+      username: "dummy",
+      password: "dummy",
+    },
+  });
 });
 
 // figure out how to do this. later.

@@ -114,7 +114,7 @@ const assignUser = authModel.assign<
 >({
   user: (_, event) => event.user,
 });
-const assignAndLogError = authModel.assign<"ERROR">({
+const assignAndLogError = authModel.assign<"ERROR" | "SIGNUP_FAILED">({
   error: (_context, event) => event.error,
   log: (context, event) => addToLog(context, event.error.message, "text-red"),
 });
@@ -428,6 +428,7 @@ export const authMachine = authModel.createMachine(
                 ],
               },
               SIGNUP_FAILED: {
+                actions: [assignAndLogError],
                 target: "#authMachine.signUp.signUpFailed",
               },
             },
@@ -435,15 +436,17 @@ export const authMachine = authModel.createMachine(
           /**
            * This is where you are - you haven't tested the stuff immediately
            * above.
+           *
+           * Now you have but you should test this condition immediately below:
+           * a signup is attempted, it fails, and is re-tried.
            */
-          //   signUpFailed: {
-          //     entry: ["assignAndLogError"],
-          //     on: {
-          //       "ATTEMPT SIGNUP": {
-          //         target: "#authMachine.signUp.tryingSignUp",
-          //       },
-          //     },
-          //   },
+          signUpFailed: {
+            on: {
+              ATTEMPT_SIGNUP: {
+                target: "#authMachine.signUp.tryingSignUp",
+              },
+            },
+          },
         },
       },
       signedIn: {
