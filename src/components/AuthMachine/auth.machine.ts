@@ -67,6 +67,7 @@ const authModel = createModel(
       SWITCH_TO_THE_SIGNUP_PAGE: () => ({}),
       ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION: () => ({}),
       THE_USER_WAS_SIGNED_OUT: () => ({}),
+      SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY: () => ({}),
 
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
@@ -676,24 +677,22 @@ export const authMachine = authModel.createMachine(
       //         });
       //       });
       //   },
+
       // == userbaseSignOut  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      // @ts-ignore
-      // TODO: 4.22.1
-      // userbaseSignOut: () => (sendBack: (event: any) => void) => {
-      //   // userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {
-      //   userbase
-      //     .signOut()
-      //     .then(() => {
-      //       sendBack({
-      //         type: "THE USER WAS SIGNED OUT",
-      //       });
-      //     })
-      //     .catch((error) => {
-      //       sendBack({
-      //         type: "SIGNOUT FAILED, SO WE FORCE IT ANYWAY",
-      //       });
-      //     });
-      // },
+      userbaseSignOut: () => (sendBack: (event: AuthMachineEvent) => void) => {
+        userbase
+          .signOut()
+          .then(() => {
+            sendBack({
+              type: "THE_USER_WAS_SIGNED_OUT",
+            });
+          })
+          .catch((error) => {
+            sendBack({
+              type: "SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY",
+            });
+          });
+      },
     },
   }
 );

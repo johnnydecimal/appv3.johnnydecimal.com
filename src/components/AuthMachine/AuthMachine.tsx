@@ -52,9 +52,9 @@ export const AuthMachine = () => {
   //   send("SWITCH TO THE SIGNIN PAGE");
   // };
 
-  // const switchToSignUp = () => {
-  //   send("SWITCH TO THE SIGNUP PAGE");
-  // };
+  const switchToSignUp = () => {
+    send("SWITCH_TO_THE_SIGNUP_PAGE");
+  };
 
   // const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
   //   send("ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION");
@@ -78,7 +78,7 @@ export const AuthMachine = () => {
     // handleSignUp,
     state,
     // switchToSignIn,
-    // switchToSignUp,
+    switchToSignUp,
     // updateUserProfile,
   };
 
