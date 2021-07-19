@@ -148,13 +148,16 @@ const clearError = authModel.assign<
   | "NO_USER_IS_SIGNED_IN"
   | "SIGNED_IN"
   | "THE_USER_WAS_SIGNED_OUT"
+  | "SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY"
 >({
   error: (_context, _event) => undefined,
 });
 const clearLog = authModel.assign({
   log: () => [],
 });
-const clearUser = authModel.assign<"ERROR" | "THE_USER_WAS_SIGNED_OUT">({
+const clearUser = authModel.assign<
+  "ERROR" | "THE_USER_WAS_SIGNED_OUT" | "SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY"
+>({
   user: (_context, _event) => undefined,
 });
 const forceSignOut = () => {
