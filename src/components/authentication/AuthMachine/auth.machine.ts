@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ContextFrom, EventFrom, send } from "xstate";
+import { send } from "xstate";
 import { createModel } from "xstate/lib/model";
 // import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
@@ -127,8 +127,10 @@ const addToLog = (
   return newLog;
 };
 
-export type AuthMachineContext = ContextFrom<typeof authModel>;
-export type AuthMachineEvent = EventFrom<typeof authModel>;
+// export type AuthMachineContext = ContextFrom<typeof authModel>;
+// export type AuthMachineEvent = EventFrom<typeof authModel>;
+export type AuthMachineContext = any;
+export type AuthMachineEvent = any;
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const assignUser = authModel.assign<"A_USER_IS_SIGNED_IN" | "SIGNED_IN">({

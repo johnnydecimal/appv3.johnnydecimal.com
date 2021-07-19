@@ -3,7 +3,6 @@ import { AuthMachineEvent } from "components/authentication/AuthMachine/auth.mac
 import userbase, { Database } from "userbase-js";
 import { sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
-import { ContextFrom, EventFrom } from "xstate/lib/types";
 
 const newDatabaseModel = createModel(
   {
@@ -58,8 +57,10 @@ const newDatabaseModel = createModel(
   }
 );
 
-export type DatabaseMachineContext = ContextFrom<typeof newDatabaseModel>;
-export type DatabaseMachineEvent = EventFrom<typeof newDatabaseModel>;
+// export type DatabaseMachineContext = ContextFrom<typeof newDatabaseModel>;
+// export type DatabaseMachineEvent = EventFrom<typeof newDatabaseModel>;
+export type DatabaseMachineContext = any;
+export type DatabaseMachineEvent = any;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const newDatabaseMachine = newDatabaseModel.createMachine(
