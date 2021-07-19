@@ -1,5 +1,14 @@
+import { UserResult } from "userbase-js";
 import { interpret } from "xstate";
 import { authMachine } from "../auth.machine";
+
+const user: UserResult = {
+  username: "john",
+  userId: "dummy",
+  authToken: "dummy",
+  creationDate: new Date(),
+  paymentsMode: "disabled",
+};
 
 it("should reach signedOut.idle", (done) => {
   const mockAuthMachine = authMachine.withConfig({
@@ -26,7 +35,7 @@ it("should reach signedIn.idle", (done) => {
   const mockAuthMachine = authMachine.withConfig({
     services: {
       userbaseInit: () => (sendBack) => {
-        sendBack({ type: "A_USER_IS_SIGNED_IN", user: undefined });
+        sendBack({ type: "A_USER_IS_SIGNED_IN", user });
       },
     },
   });
@@ -47,7 +56,7 @@ it("should spawn the database.machine", (done) => {
   const mockAuthMachine = authMachine.withConfig({
     services: {
       userbaseInit: () => (sendBack) => {
-        sendBack({ type: "A_USER_IS_SIGNED_IN", user: undefined });
+        sendBack({ type: "A_USER_IS_SIGNED_IN", user });
       },
     },
   });
