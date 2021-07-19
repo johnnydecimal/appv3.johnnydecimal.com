@@ -4,8 +4,8 @@ import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { UserbaseError, UserbaseItem } from "@types";
-import { AuthMachineEvent } from "components/authentication/AuthMachine/auth.machine";
+import { UserbaseError, UserbaseItem } from "../../@types";
+import { AuthMachineEvent } from "../AuthMachine/auth.machine";
 
 const dbModel = createModel(
   {

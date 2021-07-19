@@ -5,12 +5,12 @@ import { createModel } from "xstate/lib/model";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
+import { databaseMachine } from "../DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
-import { ISignInFormData } from "../SignInForm/SignInForm";
-// import { ISignUpFormData } from "../SignUpForm/SignUpForm";
+import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
+// import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch

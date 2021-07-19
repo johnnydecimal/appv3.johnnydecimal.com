@@ -4,13 +4,13 @@ import { useMachine } from "@xstate/react";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { authMachine } from "./auth.machine";
 import { AuthMachineReactContext } from "./context";
-import { DatabaseMachine } from "components/app/DatabaseMachine/DatabaseMachine";
-import { SignInForm } from "../SignInForm/SignInForm";
-import { SignUpForm } from "../SignUpForm/SignUpForm";
+import { DatabaseMachine } from "../DatabaseMachine/DatabaseMachine";
+import { SignInForm } from "../authentication/SignInForm/SignInForm";
+import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ISignInFormData } from "../SignInForm/SignInForm";
-// import { ISignUpFormData } from "../SignUpForm/SignUpForm";
+import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
+// import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
 // == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;

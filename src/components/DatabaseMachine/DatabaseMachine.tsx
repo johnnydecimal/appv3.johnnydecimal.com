@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { useActor } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext } from "components/authentication/AuthMachine/context";
+import { AuthMachineReactContext } from "../AuthMachine/context";
 import { DatabaseMachineReactContext } from "./context";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
