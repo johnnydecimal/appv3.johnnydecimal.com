@@ -10,7 +10,7 @@ const user: UserResult = {
   paymentsMode: "disabled",
 };
 
-it("should reach signedOut.idle", (done) => {
+it("should reach signedOut.idle if no user is signed in", (done) => {
   const mockAuthMachine = authMachine.withConfig({
     services: {
       userbaseInit: () => (sendBack) => {
@@ -27,11 +27,9 @@ it("should reach signedOut.idle", (done) => {
   });
 
   authService.start();
-
-  // Send events here if needed, but we shouldn't have to because of the invoke
 });
 
-it("should reach signedIn.idle", (done) => {
+it("should reach signedIn.idle if a user is signed in", (done) => {
   const mockAuthMachine = authMachine.withConfig({
     services: {
       userbaseInit: () => (sendBack) => {
@@ -48,11 +46,9 @@ it("should reach signedIn.idle", (done) => {
   });
 
   authService.start();
-
-  // Send events here if needed, but we shouldn't have to because of the invoke
 });
 
-it("should spawn the database.machine", (done) => {
+it("should spawn the database.machine if a user is signed in", (done) => {
   const mockAuthMachine = authMachine.withConfig({
     services: {
       userbaseInit: () => (sendBack) => {
@@ -69,6 +65,24 @@ it("should spawn the database.machine", (done) => {
   });
 
   authService.start();
-
-  // Send events here if needed, but we shouldn't have to because of the invoke
 });
+
+// figure out how to do this. later.
+// it("should open a database if a user is signed in", (done) => {
+//   const mockAuthMachine = authMachine.withConfig({
+//     services: {
+//       userbaseInit: () => (sendBack) => {
+//         sendBack({ type: "A_USER_IS_SIGNED_IN", user });
+//       },
+//     },
+//   });
+
+//   const authService = interpret(mockAuthMachine).onTransition((state) => {
+//     // this is where we expect it to end up
+//     if (state.children.databaseMachine) {
+//       done();
+//     }
+//   });
+
+//   authService.start();
+// });
