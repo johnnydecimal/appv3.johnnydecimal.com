@@ -2,10 +2,7 @@
 import { inspect } from "@xstate/inspect";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// import { Sandbox } from "./playing/Sandbox";
-// import { JargonLoader } from "./playing/JargonLoader";
-import { AuthMachine } from "./components";
-// import { SignInForm } from "./signIn";
+import { AuthMachine } from "./components/AuthMachine/AuthMachine";
 
 /**
  * The XState inspector popup.
@@ -24,9 +21,6 @@ export const App = () => {
       <div className="max-w-4xl mx-auto mt-2 font-jdcode">
         <h1 className="border-b-2 border-black">Johnny&bull;Decimal</h1>
         <AuthMachine />
-        {/* <JargonLoader /> */}
-        {/* <Sandbox /> */}
-        {/* <SignInForm /> */}
       </div>
     </div>
   );

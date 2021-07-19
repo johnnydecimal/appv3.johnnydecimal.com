@@ -3,7 +3,8 @@ import { useContext } from "react";
 import { useActor } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext, DatabaseMachineReactContext } from "../..";
+import { AuthMachineReactContext } from "../AuthMachine/context";
+import { DatabaseMachineReactContext } from "./context";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sender } from "@xstate/react/lib/types";
@@ -19,19 +20,21 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
-// const ProjectViewer = ({
-//   projectNumber,
-//   projectTitle,
-// }: {
-//   projectNumber: string;
-//   projectTitle: string;
-// }) => {
-//   return (
-//     <div>
-//       {projectNumber}: {projectTitle}
-//     </div>
-//   );
-// };
+/*
+const ProjectViewer = ({
+  projectNumber,
+  projectTitle,
+}: {
+  projectNumber: string;
+  projectTitle: string;
+}) => {
+  return (
+    <div>
+      {projectNumber}: {projectTitle}
+    </div>
+  );
+};
+*/
 
 const ProjectPicker = ({ projects }: { projects: Database[] }) => {
   return (

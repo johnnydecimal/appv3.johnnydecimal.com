@@ -2,7 +2,7 @@
  * The functions to CRUD Userbase item.
  */
 
-import type { JDItem } from "../../../@types";
+import type { JDItem } from "../../@types";
 
 /**
  * # insertJdItem

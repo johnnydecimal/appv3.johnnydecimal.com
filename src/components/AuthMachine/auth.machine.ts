@@ -1,16 +1,16 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { send } from "xstate";
+import { ContextFrom, EventFrom, send } from "xstate";
 import { createModel } from "xstate/lib/model";
 // import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { databaseMachine } from "../../../components";
+import { databaseMachine } from "../DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
-import { ISignInFormData } from "../SignInForm/SignInForm";
-// import { ISignUpFormData } from "../SignUpForm/SignUpForm";
+import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
+// import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
@@ -127,10 +127,8 @@ const addToLog = (
   return newLog;
 };
 
-// export type AuthMachineContext = ContextFrom<typeof authModel>;
-// export type AuthMachineEvent = EventFrom<typeof authModel>;
-export type AuthMachineContext = any;
-export type AuthMachineEvent = any;
+export type AuthMachineContext = ContextFrom<typeof authModel>;
+export type AuthMachineEvent = EventFrom<typeof authModel>;
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const assignUser = authModel.assign<"A_USER_IS_SIGNED_IN" | "SIGNED_IN">({
