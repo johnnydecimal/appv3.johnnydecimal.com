@@ -19,7 +19,6 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
-/**
 const ProjectViewer = ({
   projectNumber,
   projectTitle,
@@ -33,7 +32,6 @@ const ProjectViewer = ({
     </div>
   );
 };
-*/
 
 const ProjectPicker = ({ projects }: { projects: Database[] }) => {
   return (
@@ -61,9 +59,9 @@ export const DatabaseMachine = () => {
    * We invoked `dbMachine` from `authMachine`. Grab its state/send actions.
    * // TODO: fix the `any state.
    */
-  // const [state] = useActor(
-  //   authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
-  // );
+  const [state] = useActor(
+    authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
+  );
 
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,
@@ -75,25 +73,24 @@ export const DatabaseMachine = () => {
   };
 
   return (
-    <div>Umm wat</div>
-    // <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
-    //   <div>JD App</div>
-    //   <hr className="my-2" />
-    //   <button onClick={handleSignOut}>Sign out</button>
-    //   <hr className="my-2" />
-    //   <ProjectPicker projects={state.context.databases} />
-    //   <hr className="my-2" />
-    //   {/* <ProjectViewer
-    //     projectNumber={state.context.databases.databaseName}
-    //     projectTitle="Passed in by props"
-    //   /> */}
-    //   <hr className="my-2" />
-    //   <button onClick={() => updateUserProfile({ currentDatabase: "001" })}>
-    //     Create 005
-    //   </button>
-    //   <hr className="my-2" />
-    //   <div>appMachine.state: {JSON.stringify(state.value)}</div>
-    //   <Log value={state.context} />
-    // </DatabaseMachineReactContext.Provider>
+    <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
+      <div>JD App</div>
+      <hr className="my-2" />
+      <button onClick={handleSignOut}>Sign out</button>
+      <hr className="my-2" />
+      <ProjectPicker projects={state.context.databases} />
+      <hr className="my-2" />
+      {/* <ProjectViewer
+        projectNumber={state.context.databases.databaseName}
+        projectTitle="Passed in by props"
+      /> */}
+      <hr className="my-2" />
+      <button onClick={() => updateUserProfile({ currentDatabase: "001" })}>
+        Create 005
+      </button>
+      <hr className="my-2" />
+      <div>appMachine.state: {JSON.stringify(state.value)}</div>
+      <Log value={state.context} />
+    </DatabaseMachineReactContext.Provider>
   );
 };

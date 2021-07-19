@@ -60,12 +60,13 @@ const authModel = createModel(
       NO_USER_IS_SIGNED_IN: () => ({}),
 
       // -- From the signedOut state
-      /**
-       * Invokes `userbaseSignIn`, which checks that this was the event that
-       * invoked it and immediately returns if not (for TS).
-       */
       ATTEMPT_SIGNIN: (formData: ISignInFormData) => ({ formData }),
       SIGNED_IN: (user: UserResult) => ({ user }),
+      SWITCH_TO_THE_SIGNUP_PAGE: () => ({}),
+      ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION: () => ({}),
+
+      // -- From the signedOut state
+      ATTEMPT_SIGNOUT: () => ({}),
 
       // == Sent up from databaseMachine ==-==-==
       /**
@@ -141,6 +142,9 @@ const clearError = authModel.assign<
 >({
   error: (_context, _event) => undefined,
 });
+const clearLog = authModel.assign({
+  log: () => [],
+});
 const clearUser = authModel.assign<"ERROR">({
   user: (_context, _event) => undefined,
 });
@@ -200,6 +204,9 @@ export const authMachine = authModel.createMachine(
              * even send us an event. I dunno what that would be.
              *
              * Everything else is handled in the `userbaseInit` service.
+             *
+             * // TODO: Actually handle this. Or probably just route it to
+             * the normal error state.
              */
             target: "catastrophicError",
           },
@@ -211,7 +218,7 @@ export const authMachine = authModel.createMachine(
               clearError,
               send<any, any, AuthMachineEvent>({
                 type: "LOG",
-                message: "yeah",
+                message: "Signed-in user detected.",
               }),
             ],
             target: "#authMachine.signedIn",
@@ -237,9 +244,9 @@ export const authMachine = authModel.createMachine(
               ATTEMPT_SIGNIN: {
                 target: "tryingSignIn",
               },
-              //       "SWITCH TO THE SIGNUP PAGE": {
-              //         target: "#authMachine.signUp",
-              //       },
+              SWITCH_TO_THE_SIGNUP_PAGE: {
+                target: "#authMachine.signUp",
+              },
             },
           },
           tryingSignIn: {
@@ -337,8 +344,18 @@ export const authMachine = authModel.createMachine(
         // },
       },
       signUp: {
-        // type: "compound",
-        // initial: "direWarningAboutE2EEncryptionNotAcknowledged",
+        type: "compound",
+        initial: "direWarningAboutE2EEncryptionNotAcknowledged",
+        entry: [
+          clearLog,
+          send<any, any, AuthMachineEvent>({
+            type: "LOG",
+            message: `Switch to sign up page. User needs to accept dire warning
+              about end-to-end encryption. More information can be found
+              <a href="https://userbase.com/docs/faq/"
+              class="underline text-red">here</a>.`,
+          }),
+        ],
         // on: {
         //   "SWITCH TO THE SIGNIN PAGE": {
         //     target: "#authMachine.signedOut.idle",
@@ -353,78 +370,69 @@ export const authMachine = authModel.createMachine(
         //     ],
         //   },
         // },
-        // states: {
-        //   direWarningAboutE2EEncryptionNotAcknowledged: {
-        //     entry: [
-        //       send({
-        //         type: "CLEAR THE LOG",
-        //       }),
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: 'Switch to sign up page. User needs to accept dire warning about end-to-end encryption. More information can be found <a href="https://userbase.com/docs/faq/" class="underline text-red">here</a>.',
-        //       }),
-        //     ],
-        //     on: {
-        //       "ACKNOWLEDGE DIRE WARNING ABOUT E2E ENCRYPTION": {
-        //         target: "#authMachine.signUp.okayToTrySignUp",
-        //       },
-        //     },
-        //   },
-        //   okayToTrySignUp: {
-        //     entry: [
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: 'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
-        //       }),
-        //       () => {
-        //         setTimeout(() => {
-        //           document.getElementById("username")?.focus();
-        //         }, 50);
-        //       },
-        //     ],
-        //     on: {
-        //       "ATTEMPT SIGNUP": {
-        //         target: "tryingSignUp",
-        //       },
-        //     },
-        //   },
-        //   tryingSignUp: {
-        //     entry: [
-        //       send({
-        //         type: "WRITE TO THE LOG",
-        //         log: "Attempting sign up.",
-        //       }),
-        //     ],
-        //     invoke: {
-        //       src: "userbaseSignUp",
-        //     },
-        //     on: {
-        //       "SIGNUP WAS SUCCESSFUL": {
-        //         target: "#authMachine.signedIn.idle",
-        //         actions: [
-        //           send({
-        //             type: "WRITE TO THE LOG",
-        //             log: "Sign up successful.",
-        //           }),
-        //           authModel.assign({
-        //             user: (_, event) => event.value,
-        //           }),
-        //         ],
-        //       },
-        //       "SIGNUP FAILED": {
-        //         target: "#authMachine.signUp.signUpFailed",
-        //       },
-        //     },
-        //   },
-        //   signUpFailed: {
-        //     entry: ["assignAndLogError"],
-        //     on: {
-        //       "ATTEMPT SIGNUP": {
-        //         target: "#authMachine.signUp.tryingSignUp",
-        //       },
-        //     },
-        //   },
-        // },
+        states: {
+          direWarningAboutE2EEncryptionNotAcknowledged: {
+            on: {
+              ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION: {
+                target: "#authMachine.signUp.okayToTrySignUp",
+              },
+            },
+          },
+          okayToTrySignUp: {
+            //     entry: [
+            //       send({
+            //         type: "WRITE TO THE LOG",
+            //         log: 'User has accepted dire warning. (Seriously, use <a href="https://1password.com" class="underline text-red">a password manager</a>.)',
+            //       }),
+            //       () => {
+            //         setTimeout(() => {
+            //           document.getElementById("username")?.focus();
+            //         }, 50);
+            //       },
+            //     ],
+            //     on: {
+            //       "ATTEMPT SIGNUP": {
+            //         target: "tryingSignUp",
+            //       },
+            //     },
+          },
+          //   tryingSignUp: {
+          //     entry: [
+          //       send({
+          //         type: "WRITE TO THE LOG",
+          //         log: "Attempting sign up.",
+          //       }),
+          //     ],
+          //     invoke: {
+          //       src: "userbaseSignUp",
+          //     },
+          //     on: {
+          //       "SIGNUP WAS SUCCESSFUL": {
+          //         target: "#authMachine.signedIn.idle",
+          //         actions: [
+          //           send({
+          //             type: "WRITE TO THE LOG",
+          //             log: "Sign up successful.",
+          //           }),
+          //           authModel.assign({
+          //             user: (_, event) => event.value,
+          //           }),
+          //         ],
+          //       },
+          //       "SIGNUP FAILED": {
+          //         target: "#authMachine.signUp.signUpFailed",
+          //       },
+          //     },
+          //   },
+          //   signUpFailed: {
+          //     entry: ["assignAndLogError"],
+          //     on: {
+          //       "ATTEMPT SIGNUP": {
+          //         target: "#authMachine.signUp.tryingSignUp",
+          //       },
+          //     },
+          //   },
+        },
       },
       signedIn: {
         type: "compound",

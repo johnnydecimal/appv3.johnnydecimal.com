@@ -7,7 +7,7 @@ import {
   AuthMachineReactContext,
   SignInForm,
   SignUpForm,
-  // DatabaseMachine,
+  DatabaseMachine,
 } from "../../../components";
 
 import { ISignInFormData } from "../SignInForm/SignInForm";
@@ -16,7 +16,6 @@ import { ISignUpFormData } from "../SignUpForm/SignUpForm";
 // === TEST ===
 const FourOhFour = () => <div>404</div>;
 const WaitOne = () => <div>Wait one. Doing networks.</div>;
-// const SignInForm = () => <div>SignInForm</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const AuthMachine = () => {
@@ -46,9 +45,9 @@ export const AuthMachine = () => {
   //   });
   // };
 
-  // const handleSignOut = () => {
-  //   send("ATTEMPT SIGNOUT");
-  // };
+  const handleSignOut = () => {
+    send({ type: "ATTEMPT_SIGNOUT" });
+  };
 
   // const switchToSignIn = () => {
   //   send("SWITCH TO THE SIGNIN PAGE");
@@ -76,7 +75,7 @@ export const AuthMachine = () => {
   const AuthReactContextValue = {
     // handleAcknowledgeDireWarningAboutE2EEncryption,
     handleSignIn,
-    // handleSignOut,
+    handleSignOut,
     // handleSignUp,
     state,
     // switchToSignIn,
@@ -96,8 +95,8 @@ export const AuthMachine = () => {
       RenderComponent = <SignUpForm />;
       break;
     case state.matches("signedIn"):
-      // RenderComponent = <DatabaseMachine />;
-      RenderComponent = <div>Ah-ha! 2</div>;
+      RenderComponent = <DatabaseMachine />;
+      // RenderComponent = <div>Ah-ha! 2</div>;
       break;
     default:
       RenderComponent = <FourOhFour />;
