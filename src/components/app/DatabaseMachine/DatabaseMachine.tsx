@@ -19,19 +19,19 @@ const Log = ({ value = {}, replacer = null, space = 2 }) => (
   </pre>
 );
 
-const ProjectViewer = ({
-  projectNumber,
-  projectTitle,
-}: {
-  projectNumber: string;
-  projectTitle: string;
-}) => {
-  return (
-    <div>
-      {projectNumber}: {projectTitle}
-    </div>
-  );
-};
+// const ProjectViewer = ({
+//   projectNumber,
+//   projectTitle,
+// }: {
+//   projectNumber: string;
+//   projectTitle: string;
+// }) => {
+//   return (
+//     <div>
+//       {projectNumber}: {projectTitle}
+//     </div>
+//   );
+// };
 
 const ProjectPicker = ({ projects }: { projects: Database[] }) => {
   return (
