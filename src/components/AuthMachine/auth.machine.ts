@@ -26,9 +26,10 @@ const authModel = createModel(
     // appMachine: undefined,
 
     /**
-     * The most recent error.
+     * The most recent error. This can be `undefined`, in the case where there
+     * is no error.
      */
-    error: undefined as UserbaseError,
+    error: undefined as undefined | UserbaseError,
 
     // /**
     //  * The most recent information (not called 'event' to avoid confusion).
@@ -44,9 +45,10 @@ const authModel = createModel(
     log: [] as string[],
 
     /**
-     * The user object, if signed in.
+     * The user object, if signed in. This can be `undefined`, in the case
+     * where there is no signed in user.
      */
-    user: undefined as UserResult,
+    user: undefined as undefined | UserResult,
   },
   {
     events: {
