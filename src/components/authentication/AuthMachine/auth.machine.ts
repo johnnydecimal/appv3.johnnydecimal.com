@@ -5,9 +5,7 @@ import { assign as immerAssign } from "@xstate/immer";
 import userbase, { Userbase } from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { databaseMachine } from "../../../components";
-// import { simpleMachine } from "../../app/simpleMachine/simpleMachine";
-import { newDatabaseMachine } from "../../app/NewDatabaseMachine/newDatabase.machine";
+import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
@@ -439,13 +437,9 @@ export const authMachine = authModel.createMachine(
                 message: "Sign in successful.",
               }),
             ],
-            // invoke: {
-            //   id: "databaseMachine",
-            //   src: databaseMachine,
-            // },
             invoke: {
-              id: "newDatabaseMachine",
-              src: newDatabaseMachine,
+              id: "databaseMachine",
+              src: databaseMachine,
             },
           },
           // on: {
