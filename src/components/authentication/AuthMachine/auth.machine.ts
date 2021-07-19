@@ -5,7 +5,7 @@ import { assign as immerAssign } from "@xstate/immer";
 import userbase, { Userbase } from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { databaseMachine } from "../../app/DatabaseMachine/database.machine";
+import { databaseMachine } from "../../../components";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
