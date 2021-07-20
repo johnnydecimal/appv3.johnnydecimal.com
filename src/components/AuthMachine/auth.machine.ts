@@ -683,6 +683,9 @@ export const authMachine = authModel.createMachine(
             .signUp({
               username: event.formData.username,
               password: event.formData.password,
+              profile: {
+                currentDatabase: "001",
+              },
             })
             .then((user) => {
               /**
@@ -691,28 +694,10 @@ export const authMachine = authModel.createMachine(
               user.profile = {
                 currentDatabase: "001",
               };
-              /**
-               * We have to update Userbase with this value, it doesn't happen
-               * by magic.
-               */
-              userbase
-                .updateUser({
-                  profile: {
-                    currentDatabase: "001",
-                  },
-                })
-                .then(() => {
-                  sendBack({
-                    type: "SIGNUP_WAS_SUCCESSFUL",
-                    user,
-                  });
-                })
-                .catch((error) => {
-                  sendBack({
-                    type: "ERROR",
-                    error,
-                  });
-                });
+              sendBack({
+                type: "SIGNUP_WAS_SUCCESSFUL",
+                user,
+              });
             })
             .catch((error) => {
               sendBack({
