@@ -54,6 +54,16 @@ const databaseModel = createModel(
       GET_DATABASES: () => ({}),
 
       /**
+       * Sent by the changeDatabase(newDatabase) helper function when we want
+       * to open a new or existing database -- `newDatabase` refers to the new
+       * one to open, it might not actually be new. Not that the API call to
+       * Userbase cares either way.
+       */
+      OPEN_DATABASE: (newDatabase: string) => ({
+        newDatabase,
+      }),
+
+      /**
        * Sent by the changeHandler() when the remote database changes.
        */
       DATABASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
@@ -93,6 +103,9 @@ export const databaseMachine = databaseModel.createMachine(
     on: {
       GET_DATABASES: {
         target: "#databaseMachine.databaseGetter",
+      },
+      OPEN_DATABASE: {
+        target: "#databaseMachine.databaseOpener",
       },
     },
     states: {

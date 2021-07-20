@@ -1,4 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import React from "react";
 import { useContext } from "react";
 import { useActor } from "@xstate/react";
 
@@ -9,7 +10,7 @@ import { DatabaseMachineReactContext } from "./context";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sender } from "@xstate/react/lib/types";
 // import { Database } from "userbase-js";
-import { ActorRefFrom } from "xstate";
+import { ActorRefFrom, send } from "xstate";
 import { databaseMachine } from "./database.machine";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -61,9 +62,21 @@ export const DatabaseMachine = () => {
   /**
    * We invoked `dbMachine` from `authMachine`. Grab its state/send actions.
    */
-  const [state] = useActor(
+  const [state, send] = useActor(
     authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
   );
+
+  /**
+   * Declare the functions which are the things we're going to pass down to our
+   * child components. These are the functions which send events, so we don't
+   * ever send `send` down the tree.
+   */
+  const changeDatabase = (newDatabase: string) => {
+    send({
+      type: "OPEN_DATABASE",
+      newDatabase,
+    });
+  };
 
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,
@@ -71,8 +84,15 @@ export const DatabaseMachine = () => {
    * components.
    */
   const DatabaseReactContextValue = {
-    // createProject,
+    changeDatabase,
   };
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    changeDatabase(formRef!.current!.value);
+  };
+
+  const formRef = React.createRef<HTMLInputElement>();
 
   return (
     <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
@@ -80,19 +100,29 @@ export const DatabaseMachine = () => {
       <hr className="my-2" />
       <button onClick={handleSignOut}>Sign out</button>
       <hr className="my-2" />
-      {/* <ProjectPicker projects={state.context.databases} />
-      <hr className="my-2" /> */}
-      {/* <ProjectViewer
-        projectNumber={state.context.databases.databaseName}
-        projectTitle="Passed in by props"
-      /> */}
-      <hr className="my-2" />
-      <button onClick={() => updateUserProfile({ currentDatabase: "001" })}>
-        Create 005
-      </button>
+      <form onSubmit={handleSubmit}>
+        <label>
+          New project:
+          <input type="text" ref={formRef} />
+          <input type="submit" value="submit" />
+        </label>
+      </form>
       <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} />
     </DatabaseMachineReactContext.Provider>
   );
 };
+
+/**
+ * Okay let's just chew the fat here. If we're going to 'open or create' another
+ * database, where does that happen? What needs to happen?
+ *
+ * 1. We need to actually open that database. Presumably it's enough to set
+ *    context.currentDatabase here on db.machine and `init`.
+ * 2. We need to set user.profile.currentDatabase so that the next time they
+ *    log in they're using this database. But we specifically do NOT want that
+ *    change to propagate to any active sessions.
+ *
+ * Getting there, going to bed.
+ */
