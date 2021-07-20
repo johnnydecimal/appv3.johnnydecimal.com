@@ -74,9 +74,13 @@ const authModel = createModel(
        * `currentDatabase` to `databaseMachine` when we invoke it, but never
        * again during its life. Otherwise we're affecting state on one session
        * from another and that's not what we want.
+       *
+       * Update: we've made this a generic user-updater and will use XState's
+       * immer assign to update whatever specific part -- say the
+       * currentDatabase -- we need to.
        */
-      CURRENT_DATABASE_UPDATED: (currentDatabase: string) => ({
-        currentDatabase,
+      UPDATE_USER_PROFILE: (user: UserResult) => ({
+        user,
       }),
 
       // == Catch-all error for the whole app ==-==-==
@@ -155,19 +159,16 @@ export const authMachine = authModel.createMachine(
         actions: [assignAndLogError],
         target: "#authMachine.error",
       },
-      CURRENT_DATABASE_UPDATED: {
+      UPDATE_USER_PROFILE: {
         /**
          * Sent up from database.machine, this event causes us to update the
          * user's profile. Given that we only care about this value when we sign
          * in, it's fine to update it remotely and have the changeHandler push
          * the change locally.
+         *
+         * So let's catch the event, invoke a service which calls
+         * userbase.updateUser, and make sure it succeeds.
          */
-        // TODO: Stick an event on `signedIn`, UPDATE_USER_PROFILE?
-        // actions: [
-        //   immerAssign((context, event) => {
-        //     context.user!.profile!.currentDatabase = event.currentDatabase;
-        //   }),
-        // ],
       },
     },
     states: {

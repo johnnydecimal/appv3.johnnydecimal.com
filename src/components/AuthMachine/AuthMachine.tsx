@@ -2,7 +2,7 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { authMachine } from "./auth.machine";
+import { authMachine, AuthMachineContext } from "./auth.machine";
 import { AuthMachineReactContext } from "./context";
 import { DatabaseMachine } from "../DatabaseMachine/DatabaseMachine";
 import { SignInForm } from "../authentication/SignInForm/SignInForm";
@@ -11,6 +11,7 @@ import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
+import { UserResult } from "userbase-js";
 
 // == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;
@@ -62,8 +63,12 @@ export const AuthMachine = () => {
 
   const updateUserProfileWithCurrentDatabase = (currentDatabase: string) => {
     send({
-      type: "CURRENT_DATABASE_UPDATED",
-      currentDatabase,
+      type: "UPDATE_USER_PROFILE",
+      user: (context: AuthMachineContext) => {
+        const newUser = { ...context.user };
+        newUser.profile!.currentDatabase = currentDatabase;
+        return newUser;
+      },
     });
   };
 
