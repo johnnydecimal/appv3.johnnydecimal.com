@@ -269,6 +269,7 @@ export const authMachine = authModel.createMachine(
           signInFailed: {},
           tryingSignOut: {
             entry: [
+              clearLog,
               send({
                 type: "LOG",
                 message: "Trying sign out.",
