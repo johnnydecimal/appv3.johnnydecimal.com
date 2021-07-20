@@ -1,5 +1,11 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
+import {
+  assign,
+  ContextFrom,
+  EventFrom,
+  send as xstateSend,
+  sendParent,
+} from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
@@ -73,6 +79,11 @@ export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
 const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
+// === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+const assignUserbaseItems = databaseModel.assign<"DATABASE_ITEMS_UPDATED">({
+  userbaseItems: (_context, event) => event.userbaseItems,
+});
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = databaseModel.createMachine(
   {
@@ -136,25 +147,24 @@ export const databaseMachine = databaseModel.createMachine(
           init: {
             on: {
               DATABASE_OPENED: {
-                // actions: [
-                //   send({
-                //     type: "GET_DATABASES",
-                //   })
-                // ],
+                //     // actions: [
+                //     //   send({
+                //     //     type: "GET_DATABASES",
+                //     //   })
+                //     // ],
                 target: "databaseOpen",
+              },
             },
           },
-          // databaseOpen: {
-          //   on: {
-          //     DATABASE_ITEMS_UPDATED: {
-          //       actions: [
-          //         databaseModel.assign({
-          //           userbaseItems: (_, event) => event.userbaseItems,
-          //         }),
-          //       ],
-          //     },
-          //   },
-          // },
+          anyOtherState: {},
+          aThirdState: {},
+          databaseOpen: {
+            on: {
+              DATABASE_ITEMS_UPDATED: {
+                actions: [assignUserbaseItems],
+              },
+            },
+          },
         },
       },
     },
