@@ -7,11 +7,12 @@ import userbase, { Database } from "userbase-js";
 import { UserbaseError, UserbaseItem } from "../../@types";
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
 
-const dbModel = createModel(
+const databaseModel = createModel(
   {
     /**
      * currentDatabase is the 3-digit project which we have open. Corresponds to
-     * the databaseName in Userbase.
+     * the databaseName in Userbase. We send this value down when we invoke
+     * the machine.
      */
     currentDatabase: "",
 
@@ -60,17 +61,15 @@ const dbModel = createModel(
   }
 );
 
-export type DatabaseMachineContext = ContextFrom<typeof dbModel>;
-export type DatabaseMachineEvent = EventFrom<typeof dbModel>;
-// export type DatabaseMachineContext = any;
-// export type DatabaseMachineEvent = any;
+export type DatabaseMachineContext = ContextFrom<typeof databaseModel>;
+export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const databaseMachine = dbModel.createMachine(
+export const databaseMachine = databaseModel.createMachine(
   {
     id: "databaseMachine",
     type: "parallel",
-    context: dbModel.initialContext,
+    context: databaseModel.initialContext,
     on: {},
     states: {
       databaseGetter: {
@@ -130,7 +129,7 @@ export const databaseMachine = dbModel.createMachine(
             on: {
               DATABASE_ITEMS_UPDATED: {
                 actions: [
-                  dbModel.assign({
+                  databaseModel.assign({
                     userbaseItems: (_, event) => event.userbaseItems,
                   }),
                 ],
