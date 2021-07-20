@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, ContextFrom, EventFrom, sendParent } from "xstate";
+import { assign, ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
@@ -42,6 +42,12 @@ const databaseModel = createModel(
       GOT_DATABASES: (databases: Database[]) => ({ databases }),
 
       /**
+       * Sits on the root and transitions to `databaseGetter` whenever we
+       * need it to.
+       */
+      GET_DATABASES: () => ({}),
+
+      /**
        * Sent by the changeHandler() when the remote database changes.
        */
       DATABASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
@@ -64,13 +70,20 @@ const databaseModel = createModel(
 export type DatabaseMachineContext = ContextFrom<typeof databaseModel>;
 export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
 
+const send = (event: DatabaseMachineEvent) =>
+  xstateSend<any, any, DatabaseMachineEvent>(event);
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = databaseModel.createMachine(
   {
     id: "databaseMachine",
     type: "parallel",
     context: databaseModel.initialContext,
-    on: {},
+    on: {
+      GET_DATABASES: {
+        target: "#databaseMachine.databaseGetter",
+      },
+    },
     states: {
       databaseGetter: {
         /**
@@ -122,20 +135,26 @@ export const databaseMachine = databaseModel.createMachine(
         states: {
           init: {
             on: {
-              DATABASE_OPENED: "databaseOpen",
+              DATABASE_OPENED: {
+                // actions: [
+                //   send({
+                //     type: "GET_DATABASES",
+                //   })
+                // ],
+                target: "databaseOpen",
             },
           },
-          databaseOpen: {
-            on: {
-              DATABASE_ITEMS_UPDATED: {
-                actions: [
-                  databaseModel.assign({
-                    userbaseItems: (_, event) => event.userbaseItems,
-                  }),
-                ],
-              },
-            },
-          },
+          // databaseOpen: {
+          //   on: {
+          //     DATABASE_ITEMS_UPDATED: {
+          //       actions: [
+          //         databaseModel.assign({
+          //           userbaseItems: (_, event) => event.userbaseItems,
+          //         }),
+          //       ],
+          //     },
+          //   },
+          // },
         },
       },
     },
@@ -159,19 +178,14 @@ export const databaseMachine = databaseModel.createMachine(
       ubOpenDatabase:
         (context: DatabaseMachineContext) =>
         (sendBack: (event: DatabaseMachineEvent) => void) => {
-          const databaseName = context.currentDatabase || "001";
           userbase
             .openDatabase({
-              databaseName,
+              databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
                 sendBack({ type: "DATABASE_ITEMS_UPDATED", userbaseItems });
               },
             })
             .then(() => {
-              sendParent<any, any, AuthMachineEvent>({
-                type: "CURRENT_DATABASE_UPDATED",
-                databaseName,
-              });
               sendBack({ type: "DATABASE_OPENED" });
             })
             .catch((error: UserbaseError) => {
