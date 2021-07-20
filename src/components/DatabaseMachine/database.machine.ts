@@ -93,6 +93,9 @@ const send = (event: DatabaseMachineEvent) =>
 const assignUserbaseItems = databaseModel.assign<"DATABASE_ITEMS_UPDATED">({
   userbaseItems: (_context, event) => event.userbaseItems,
 });
+const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
+  currentDatabase: (_context, event) => event.newDatabase,
+});
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = databaseModel.createMachine(
@@ -105,6 +108,7 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
+        actions: [assignNewDatabase],
         target: "#databaseMachine.databaseOpener",
       },
     },
