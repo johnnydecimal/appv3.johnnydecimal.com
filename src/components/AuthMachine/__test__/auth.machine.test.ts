@@ -8,6 +8,9 @@ const user: UserResult = {
   authToken: "dummy",
   creationDate: new Date(),
   paymentsMode: "disabled",
+  profile: {
+    currentDatabase: "001",
+  },
 };
 
 it("should reach signedOut.idle if no user is signed in", (done) => {

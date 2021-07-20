@@ -150,9 +150,7 @@ export const authMachine = authModel.createMachine(
         actions: [(context, event) => addToLog(context, event.message)],
       },
       ERROR: {
-        actions: [
-          (context, event) => console.log("🚨context, event:", context, event),
-        ],
+        actions: [assignAndLogError],
         target: "#authMachine.error",
       },
       /*
@@ -266,7 +264,16 @@ export const authMachine = authModel.createMachine(
               },
             },
           },
-          signInFailed: {},
+          signInFailed: {
+            on: {
+              ATTEMPT_SIGNIN: {
+                target: "tryingSignIn",
+              },
+              SWITCH_TO_THE_SIGNUP_PAGE: {
+                target: "#authMachine.signUp",
+              },
+            },
+          },
           tryingSignOut: {
             entry: [
               clearLog,
@@ -305,56 +312,6 @@ export const authMachine = authModel.createMachine(
             ],
           },
         },
-        //   signInFailed: {
-        //     on: {
-        //       "ATTEMPT SIGNIN": {
-        //         target: "tryingSignIn",
-        //       },
-        //       "SWITCH TO THE SIGNUP PAGE": {
-        //         target:
-        //           "#authMachine.signUp.direWarningAboutE2EEncryptionNotAcknowledged",
-        //       },
-        //     },
-        //   },
-        //   tryingSignIn: {
-        //     on: {
-        //       "A USER IS SIGNED IN": {
-        //         target: "#authMachine.signedIn.idle",
-        //         actions: ["assignUser", "clearError"],
-        //       },
-        //       "USERBASE.SIGNIN() RAISED AN ERROR": {
-        //         /**
-        //          * If we just tried to sign in, and it failed, go to the special
-        //          * signedOut.signInFailed state. We use this to report things to
-        //          * the hapless user.
-        //          */
-        //         target: "#authMachine.signedOut.signInFailed",
-        //         actions: ["clearUser", "assignAndLogError"],
-        //       },
-        //     },
-        //   },
-        // tryingSignOut: {
-        //     on: {
-        //       "THE USER WAS SIGNED OUT": {
-        //         /**
-        //          * userbase.signOut() did its job, so it has gracefully set the
-        //          * localStorage item to `signedIn: false`.
-        //          */
-        //         target: "#authMachine.signedOut",
-        //         actions: ["clearError", "clearUser"],
-        //       },
-        //       "SIGNOUT FAILED, SO WE FORCE IT ANYWAY": {
-        //         /**
-        //          * userbase.signOut() couldn't do its job, so to be sure we
-        //          * remove the localStorage item ourselves. Not as graceful, so
-        //          * we don't do it by default.
-        //          */
-        //         target: "#authMachine.signedOut",
-        //         actions: ["clearError", "clearUser", "forceSignOut"],
-        //       },
-        //     },
-        // },
-        // },
       },
       signUp: {
         type: "compound",
@@ -466,7 +423,6 @@ export const authMachine = authModel.createMachine(
                 type: "LOG",
                 message: "Sign in successful.",
               }),
-              (context) => console.log("🎃 context:", context),
             ],
             invoke: {
               id: "databaseMachine",
@@ -505,28 +461,6 @@ export const authMachine = authModel.createMachine(
     },
   },
   {
-    actions: {
-      // assignUser: authModel.assign(
-      //   {
-      //     user: (_, event) => event.user,
-      //   },
-      //   "A_USER_IS_SIGNED_IN"
-      // ),
-      // assignAndLogError: authModel.assign({
-      //   error: (_context, event) => event.error.message,
-      //   log: (context, event) =>
-      //     addToLog(context, event.value.message, "text-red"),
-      // }),
-      // clearUser: authModel.assign({
-      //   user: (_context, _event) => undefined,
-      // }),
-      // clearError: authModel.assign({
-      //   error: (_context, _event) => undefined,
-      // }),
-      // forceSignOut: (_context, _event) => {
-      //   window.localStorage.removeItem("userbaseCurrentSession");
-      // },
-    },
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       /**
