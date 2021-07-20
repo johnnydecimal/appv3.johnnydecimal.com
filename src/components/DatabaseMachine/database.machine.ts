@@ -147,17 +147,21 @@ export const databaseMachine = databaseModel.createMachine(
           init: {
             on: {
               DATABASE_OPENED: {
-                //     // actions: [
-                //     //   send({
-                //     //     type: "GET_DATABASES",
-                //     //   })
-                //     // ],
+                actions: [
+                  /**
+                   * This is specifically for the case where a new user has had
+                   * their first database just created. We don't want to wait
+                   * ~60s for the databaseGetter to trigger, so we fire it
+                   * manually.
+                   */
+                  send({
+                    type: "GET_DATABASES",
+                  }),
+                ],
                 target: "databaseOpen",
               },
             },
           },
-          anyOtherState: {},
-          aThirdState: {},
           databaseOpen: {
             on: {
               DATABASE_ITEMS_UPDATED: {
