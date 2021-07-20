@@ -60,12 +60,12 @@ export const AuthMachine = () => {
     send("ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION");
   };
 
-  // const updateUserProfile = (profile: any) => {
-  //   send({
-  //     type: "UPDATE USER PROFILE",
-  //     profile,
-  //   });
-  // };
+  const updateUserProfileWithCurrentDatabase = (currentDatabase: string) => {
+    send({
+      type: "CURRENT_DATABASE_UPDATED",
+      currentDatabase,
+    });
+  };
 
   /**
    * Wrap these functions and `state` in an object which we'll use as context
@@ -79,7 +79,7 @@ export const AuthMachine = () => {
     state,
     switchToSignIn,
     switchToSignUp,
-    // updateUserProfile,
+    updateUserProfileWithCurrentDatabase,
   };
 
   let RenderComponent;

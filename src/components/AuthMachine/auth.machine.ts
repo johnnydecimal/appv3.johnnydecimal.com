@@ -1,6 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
+import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -74,7 +75,9 @@ const authModel = createModel(
        * again during its life. Otherwise we're affecting state on one session
        * from another and that's not what we want.
        */
-      CURRENT_DATABASE_UPDATED: (databaseName: string) => ({ databaseName }),
+      CURRENT_DATABASE_UPDATED: (currentDatabase: string) => ({
+        currentDatabase,
+      }),
 
       // == Catch-all error for the whole app ==-==-==
       /**
@@ -152,29 +155,20 @@ export const authMachine = authModel.createMachine(
         actions: [assignAndLogError],
         target: "#authMachine.error",
       },
-      /*
-      // TODO: block here
-      // "CURRENT DATABASE UPDATED": {
-      //   actions: [
-      //     immerAssign((context, event) => {
-      //       if (context.user && !context.user.profile) {
-      //         /**
-      //          * A signed-in user who has never had a database updated doesn't
-      //          * have a user.profile object yet. (The first 'update' happens
-      //          * after the automatic creation of their first database.)
-      //          
-      //         context.user.profile = {};
-      //       }
-      //       if (context.user && context.user.profile) {
-      //         /**
-      //          * Which it must as we just created it.
-      //          
-      //         context.user.profile.currentDatabase = event.value;
-      //       }
-      //     }),
-      //   ],
-      // },
-      */
+      CURRENT_DATABASE_UPDATED: {
+        /**
+         * Sent up from database.machine, this event causes us to update the
+         * user's profile. Given that we only care about this value when we sign
+         * in, it's fine to update it remotely and have the changeHandler push
+         * the change locally.
+         */
+        // TODO: Stick an event on `signedIn`, UPDATE_USER_PROFILE?
+        // actions: [
+        //   immerAssign((context, event) => {
+        //     context.user!.profile!.currentDatabase = event.currentDatabase;
+        //   }),
+        // ],
+      },
     },
     states: {
       init: {
@@ -415,6 +409,10 @@ export const authMachine = authModel.createMachine(
       signedIn: {
         type: "compound",
         initial: "idle",
+        on: {
+          // UPDATE_USER_PROFILE: {
+          // }
+        },
         states: {
           idle: {
             entry: [

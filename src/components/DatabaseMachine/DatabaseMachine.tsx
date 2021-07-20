@@ -56,7 +56,7 @@ export const DatabaseMachine = () => {
   const {
     handleSignOut,
     state: authState,
-    // updateUserProfile,
+    updateUserProfileWithCurrentDatabase,
   } = useContext(AuthMachineReactContext);
 
   /**
@@ -76,6 +76,7 @@ export const DatabaseMachine = () => {
       type: "OPEN_DATABASE",
       newDatabase,
     });
+    updateUserProfileWithCurrentDatabase(newDatabase);
   };
 
   /**
