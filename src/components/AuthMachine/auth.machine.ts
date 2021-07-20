@@ -112,7 +112,7 @@ const send = (event: AuthMachineEvent) =>
 const assignUser = authModel.assign<
   "A_USER_IS_SIGNED_IN" | "SIGNED_IN" | "SIGNUP_WAS_SUCCESSFUL"
 >({
-  user: (_, event) => event.user,
+  user: (_context, event) => event.user,
 });
 const assignAndLogError = authModel.assign<"ERROR" | "SIGNUP_FAILED">({
   error: (_context, event) => event.error,
@@ -148,6 +148,12 @@ export const authMachine = authModel.createMachine(
     on: {
       LOG: {
         actions: [(context, event) => addToLog(context, event.message)],
+      },
+      ERROR: {
+        actions: [
+          (context, event) => console.log("🚨context, event:", context, event),
+        ],
+        target: "#authMachine.error",
       },
       /*
       // "CURRENT DATABASE UPDATED": {
@@ -459,10 +465,20 @@ export const authMachine = authModel.createMachine(
                 type: "LOG",
                 message: "Sign in successful.",
               }),
+              (context) => console.log("🎃 context:", context),
             ],
             invoke: {
               id: "databaseMachine",
               src: databaseMachine,
+              data: {
+                /**
+                 * We tell TS that this property must exist because we create
+                 * it when a new user is created, and only ever update (vs.
+                 * delete) it.
+                 */
+                currentDatabase: (context: AuthMachineContext) =>
+                  context.user!.profile!.currentDatabase,
+              },
             },
             on: {
               ATTEMPT_SIGNOUT: {
@@ -482,6 +498,9 @@ export const authMachine = authModel.createMachine(
         },
       },
       catastrophicError: {},
+      error: {
+        type: "final",
+      },
     },
   },
   {
@@ -671,10 +690,28 @@ export const authMachine = authModel.createMachine(
               user.profile = {
                 currentDatabase: "001",
               };
-              sendBack({
-                type: "SIGNUP_WAS_SUCCESSFUL",
-                user,
-              });
+              /**
+               * We have to update Userbase with this value, it doesn't happen
+               * by magic.
+               */
+              userbase
+                .updateUser({
+                  profile: {
+                    currentDatabase: "001",
+                  },
+                })
+                .then(() => {
+                  sendBack({
+                    type: "SIGNUP_WAS_SUCCESSFUL",
+                    user,
+                  });
+                })
+                .catch((error) => {
+                  sendBack({
+                    type: "ERROR",
+                    error,
+                  });
+                });
             })
             .catch((error) => {
               sendBack({

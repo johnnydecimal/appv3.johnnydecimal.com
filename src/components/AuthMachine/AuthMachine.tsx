@@ -10,7 +10,7 @@ import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
-// import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
+import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
 // == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;
@@ -37,12 +37,12 @@ export const AuthMachine = () => {
     });
   };
 
-  // const handleSignUp = (formData: ISignUpFormData) => {
-  //   send({
-  //     type: "ATTEMPT SIGNUP",
-  //     formData,
-  //   });
-  // };
+  const handleSignUp = (formData: ISignUpFormData) => {
+    send({
+      type: "ATTEMPT_SIGNUP",
+      formData,
+    });
+  };
 
   const handleSignOut = () => {
     send({ type: "ATTEMPT_SIGNOUT" });
@@ -75,7 +75,7 @@ export const AuthMachine = () => {
     handleAcknowledgeDireWarningAboutE2EEncryption,
     handleSignIn,
     handleSignOut,
-    // handleSignUp,
+    handleSignUp,
     state,
     switchToSignIn,
     switchToSignUp,

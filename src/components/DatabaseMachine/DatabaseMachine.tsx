@@ -8,9 +8,9 @@ import { DatabaseMachineReactContext } from "./context";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sender } from "@xstate/react/lib/types";
-import { Database } from "userbase-js";
-import { databaseMachine } from "./database.machine";
+// import { Database } from "userbase-js";
 import { ActorRefFrom } from "xstate";
+import { databaseMachine } from "./database.machine";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -36,19 +36,19 @@ const ProjectViewer = ({
 };
 */
 
-const ProjectPicker = ({ projects }: { projects: Database[] }) => {
-  return (
-    <div>
-      <select id="project" name="project">
-        {projects.map((project) => (
-          <option key={project.databaseName} value={project.databaseName}>
-            {project.databaseName}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-};
+// const ProjectPicker = ({ projects }: { projects: Database[] }) => {
+//   return (
+//     <div>
+//       <select id="project" name="project">
+//         {projects.map((project) => (
+//           <option key={project.databaseName} value={project.databaseName}>
+//             {project.databaseName}
+//           </option>
+//         ))}
+//       </select>
+//     </div>
+//   );
+// };
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
@@ -80,8 +80,8 @@ export const DatabaseMachine = () => {
       <hr className="my-2" />
       <button onClick={handleSignOut}>Sign out</button>
       <hr className="my-2" />
-      <ProjectPicker projects={state.context.databases} />
-      <hr className="my-2" />
+      {/* <ProjectPicker projects={state.context.databases} />
+      <hr className="my-2" /> */}
       {/* <ProjectViewer
         projectNumber={state.context.databases.databaseName}
         projectTitle="Passed in by props"
