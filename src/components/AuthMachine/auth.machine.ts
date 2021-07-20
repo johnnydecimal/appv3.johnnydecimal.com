@@ -153,6 +153,7 @@ export const authMachine = authModel.createMachine(
         target: "#authMachine.error",
       },
       /*
+      // TODO: block here
       // "CURRENT DATABASE UPDATED": {
       //   actions: [
       //     immerAssign((context, event) => {
@@ -264,6 +265,9 @@ export const authMachine = authModel.createMachine(
             },
           },
           signInFailed: {
+            /**
+             * Used for styling on the form.
+             */
             on: {
               ATTEMPT_SIGNIN: {
                 target: "tryingSignIn",
@@ -383,11 +387,11 @@ export const authMachine = authModel.createMachine(
               SIGNUP_WAS_SUCCESSFUL: {
                 target: "#authMachine.signedIn.idle",
                 actions: [
+                  assignUser,
                   send({
                     type: "LOG",
                     message: "Sign up successful.",
                   }),
-                  assignUser,
                 ],
               },
               SIGNUP_FAILED: {
@@ -396,14 +400,10 @@ export const authMachine = authModel.createMachine(
               },
             },
           },
-          /**
-           * This is where you are - you haven't tested the stuff immediately
-           * above.
-           *
-           * Now you have but you should test this condition immediately below:
-           * a signup is attempted, it fails, and is re-tried.
-           */
           signUpFailed: {
+            /**
+             * Used for styling on the form.
+             */
             on: {
               ATTEMPT_SIGNUP: {
                 target: "#authMachine.signUp.tryingSignUp",
@@ -440,6 +440,7 @@ export const authMachine = authModel.createMachine(
               ATTEMPT_SIGNOUT: {
                 target: "#authMachine.signedOut.tryingSignOut",
               },
+              // TODO: block here
               //   "UPDATE USER PROFILE": {
               //     actions: [
               //       immerAssign((context, event) => {
@@ -462,15 +463,6 @@ export const authMachine = authModel.createMachine(
   {
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      /**
-       * - This is a function, which returns a function.
-       * - That function has an argument, `sendBack`.
-       * - That argument is a function! So we define its shape.
-       * - It takes an argument, `event`, which is of type `Event`.
-       * - It does not return a value.
-       *
-       * How the fuck you figured this out I do not know.
-       */
       userbaseInit:
         (context: AuthMachineContext) =>
         (sendBack: (event: AuthMachineEvent) => void) => {
