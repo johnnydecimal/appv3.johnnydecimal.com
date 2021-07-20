@@ -1,7 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
-// import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
