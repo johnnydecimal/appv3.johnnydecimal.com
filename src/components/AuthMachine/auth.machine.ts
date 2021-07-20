@@ -688,12 +688,6 @@ export const authMachine = authModel.createMachine(
               },
             })
             .then((user) => {
-              /**
-               * Brand-new users need a first database.
-               */
-              user.profile = {
-                currentDatabase: "001",
-              };
               sendBack({
                 type: "SIGNUP_WAS_SUCCESSFUL",
                 user,
