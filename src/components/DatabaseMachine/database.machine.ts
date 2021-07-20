@@ -98,6 +98,14 @@ const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
 });
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+/**
+ * There's only one way a database can be opened (or created): by changing
+ * context.currentDatabase and transitioning to #databaseMachine.databaseOpener.
+ * The root-level OPEN_DATABASE does this for us.
+ *
+ * This way we guarantee that context.currentDatabase is actually the database
+ * which is open.
+ */
 export const databaseMachine = databaseModel.createMachine(
   {
     id: "databaseMachine",
@@ -166,10 +174,10 @@ export const databaseMachine = databaseModel.createMachine(
               DATABASE_OPENED: {
                 actions: [
                   /**
-                   * This is specifically for the case where a new user has had
-                   * their first database just created. We don't want to wait
-                   * ~60s for the databaseGetter to trigger, so we fire it
-                   * manually.
+                   * Creating a new database doesn't automatically push it to
+                   * the local list of available databases: we short-circuit the
+                   * 60s refresh and fetch them immediately (after which 60s
+                   * sevice will resume).
                    */
                   send({
                     type: "GET_DATABASES",
@@ -180,6 +188,7 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           databaseOpen: {
+            entry: [],
             on: {
               DATABASE_ITEMS_UPDATED: {
                 actions: [assignUserbaseItems],

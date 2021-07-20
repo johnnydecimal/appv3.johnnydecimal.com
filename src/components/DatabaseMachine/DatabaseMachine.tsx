@@ -10,7 +10,7 @@ import { DatabaseMachineReactContext } from "./context";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // import { Sender } from "@xstate/react/lib/types";
 // import { Database } from "userbase-js";
-import { ActorRefFrom, send } from "xstate";
+import { ActorRefFrom } from "xstate";
 import { databaseMachine } from "./database.machine";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -56,7 +56,7 @@ export const DatabaseMachine = () => {
   const {
     handleSignOut,
     state: authState,
-    updateUserProfile,
+    // updateUserProfile,
   } = useContext(AuthMachineReactContext);
 
   /**
