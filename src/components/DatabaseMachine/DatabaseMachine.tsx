@@ -53,11 +53,9 @@ const ProjectViewer = ({
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
-  const {
-    handleSignOut,
-    state: authState,
-    updateUserProfileWithCurrentDatabase,
-  } = useContext(AuthMachineReactContext);
+  const { handleSignOut, state: authState } = useContext(
+    AuthMachineReactContext
+  );
 
   /**
    * We invoked `dbMachine` from `authMachine`. Grab its state/send actions.
@@ -76,7 +74,6 @@ export const DatabaseMachine = () => {
       type: "OPEN_DATABASE",
       newDatabase,
     });
-    updateUserProfileWithCurrentDatabase(newDatabase);
   };
 
   /**
