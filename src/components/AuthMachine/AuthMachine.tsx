@@ -11,7 +11,7 @@ import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
-import { UserResult } from "userbase-js";
+import { JDUserProfile } from "../../@types";
 
 // == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;
@@ -61,12 +61,16 @@ export const AuthMachine = () => {
     send({ type: "ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION" });
   };
 
-  const updateUserProfile = (currentDatabase: string) => {
+  const updateUserProfile = (
+    context: AuthMachineContext,
+    profile: JDUserProfile
+  ) => {
+    const newUser = { ...context.user };
+    newUser.profile!.currentDatabase = "";
+    newUser.profile = { ...newUser.profile, ...profile };
     send({
       type: "UPDATE_USER_PROFILE",
-      profile: {
-        currentDatabase: context.user!.profile!.currentDatabase,
-      },
+      profile: newUser.profile,
     });
   };
 
@@ -82,7 +86,7 @@ export const AuthMachine = () => {
     state,
     switchToSignIn,
     switchToSignUp,
-    updateUserProfileWithCurrentDatabase,
+    updateUserProfile,
   };
 
   let RenderComponent;

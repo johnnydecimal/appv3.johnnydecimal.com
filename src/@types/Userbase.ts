@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { Item } from "userbase-js";
+import { Item, UserProfile } from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { JDItem } from ".";
@@ -26,4 +26,11 @@ export interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
   message: string; // Username or password mismatch.
   status: number; // 401
+}
+
+/**
+ * `JDUserProfile` is the base profile interface with our custom stuff.
+ */
+export interface JDUserProfile extends UserProfile {
+  currentDatabase: string;
 }

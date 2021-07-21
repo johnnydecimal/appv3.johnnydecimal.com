@@ -9,6 +9,7 @@ import { databaseMachine } from "../DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserResult } from "userbase-js";
+import { JDUserProfile } from "../../@types";
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
@@ -16,10 +17,6 @@ interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
   message: string; // Username or password mismatch.
   status: number; // 401
-}
-
-interface UserProfile {
-  currentDatabase: string;
 }
 
 const authModel = createModel(
@@ -83,7 +80,7 @@ const authModel = createModel(
        * immer assign to update whatever specific part -- say the
        * currentDatabase -- we need to.
        */
-      UPDATE_USER_PROFILE: (profile: UserProfile) => ({
+      UPDATE_USER_PROFILE: (profile: JDUserProfile) => ({
         profile,
       }),
 
