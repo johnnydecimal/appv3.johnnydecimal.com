@@ -18,6 +18,10 @@ interface UserbaseError {
   status: number; // 401
 }
 
+interface UserProfile {
+  currentDatabase: string;
+}
+
 const authModel = createModel(
   {
     /**
@@ -79,8 +83,8 @@ const authModel = createModel(
        * immer assign to update whatever specific part -- say the
        * currentDatabase -- we need to.
        */
-      UPDATE_USER_PROFILE: (user: UserResult) => ({
-        user,
+      UPDATE_USER_PROFILE: (profile: UserProfile) => ({
+        profile,
       }),
 
       // == Catch-all error for the whole app ==-==-==
@@ -640,6 +644,46 @@ export const authMachine = authModel.createMachine(
             });
           });
       },
+
+      // == userbaseUpdateUserProfile  ==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseUpdateUserProfile:
+        (context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+          if (event.type !== "UPDATE_USER_PROFILE") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendBack({
+              type: "ERROR",
+              error: {
+                name: "UserbaseUpdateUserProfileCallError",
+                message: `userbaseUpdateUser() was invoked from a state that
+                  wasn't reached by sending UPDATE_USER_PROFILE. As a result,
+                  'context.user.profile' might not exist, so this function will
+                  now return.`,
+                status: 903, // Customise me later
+              },
+            });
+            return;
+          }
+          userbase
+            .updateUser({
+              profile: context.user!.profile!,
+            })
+            .then(() => {
+              /**
+               * There's nothing to sendBack() if this worked. It just worked.
+               * What's more interesting is if it *doesn't* work, in which case
+               * we should retry a few times rather than just chucking an error.
+               * // TODO: this.
+               */
+            })
+            .catch((error) => {
+              sendBack({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
     },
   }
 );
