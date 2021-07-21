@@ -8,7 +8,7 @@ import userbase from "userbase-js";
 import { databaseMachine } from "../DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { UserResult } from "userbase-js";
+import { UserProfile, UserResult } from "userbase-js";
 import { JDUserProfile } from "../../@types";
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
@@ -75,12 +75,8 @@ const authModel = createModel(
        * `currentDatabase` to `databaseMachine` when we invoke it, but never
        * again during its life. Otherwise we're affecting state on one session
        * from another and that's not what we want.
-       *
-       * Update: we've made this a generic user-updater and will use XState's
-       * immer assign to update whatever specific part -- say the
-       * currentDatabase -- we need to.
        */
-      UPDATE_USER_PROFILE: (profile: JDUserProfile) => ({
+      UPDATE_USERBASE_CURRENTDATABASE: (profile: UserProfile) => ({
         profile,
       }),
 
@@ -160,7 +156,7 @@ export const authMachine = authModel.createMachine(
         actions: [assignAndLogError],
         target: "#authMachine.error",
       },
-      UPDATE_USER_PROFILE: {
+      UPDATE_USERBASE_CURRENTDATABASE: {
         /**
          * Sent up from database.machine, this event causes us to update the
          * user's profile. Given that we only care about this value when we sign
@@ -642,21 +638,21 @@ export const authMachine = authModel.createMachine(
           });
       },
 
-      // == userbaseUpdateUserProfile  ==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      userbaseUpdateUserProfile:
+      // == userbaseUpdateCurrentDatabase   ==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseUpdateCurrentDatabase:
         (context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
-          if (event.type !== "UPDATE_USER_PROFILE") {
+          if (event.type !== "UPDATE_USERBASE_CURRENTDATABASE") {
             /**
              * Twist TypeScript's arm.
              */
             sendBack({
               type: "ERROR",
               error: {
-                name: "UserbaseUpdateUserProfileCallError",
-                message: `userbaseUpdateUser() was invoked from a state that
-                  wasn't reached by sending UPDATE_USER_PROFILE. As a result,
-                  'context.user.profile' might not exist, so this function will
-                  now return.`,
+                name: "UserbaseUpdateCurrentDatabaseCallError",
+                message: `userbaseUpdateCurrentDatabase() was invoked from a
+                  state that wasn't reached by sending UPDATE_USER_PROFILE. As
+                  a result, 'context.user.profile' might not exist, so this
+                  function will now return.`,
                 status: 903, // Customise me later
               },
             });

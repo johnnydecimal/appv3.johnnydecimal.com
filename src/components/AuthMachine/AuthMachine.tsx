@@ -12,6 +12,7 @@ import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 import { JDUserProfile } from "../../@types";
+import { UserProfile } from "userbase-js";
 
 // == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;
@@ -61,16 +62,24 @@ export const AuthMachine = () => {
     send({ type: "ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION" });
   };
 
-  const updateUserProfile = (
+  /**
+   * Didn't have the energy to write a deep-merge function, so this very
+   * specialised thing just updates the `currentDatabase` property of the
+   * Userbase user profile.
+   *
+   * Some day maybe replace this with a more generic thing that updates the
+   * profile by merging it with whatever new/updated values were passed.
+   */
+  const updateUserbaseProfileWithCurrentDatabase = (
     context: AuthMachineContext,
-    profile: JDUserProfile
+    currentDatabase: string
   ) => {
-    const newUser = { ...context.user };
-    newUser.profile!.currentDatabase = "";
-    newUser.profile = { ...newUser.profile, ...profile };
     send({
-      type: "UPDATE_USER_PROFILE",
-      profile: newUser.profile,
+      type: "UPDATE_USERBASE_CURRENTDATABASE",
+      profile: {
+        ...context.user!.profile,
+        currentDatabase,
+      },
     });
   };
 
@@ -86,7 +95,7 @@ export const AuthMachine = () => {
     state,
     switchToSignIn,
     switchToSignUp,
-    updateUserProfile,
+    updateUserbaseProfileWithCurrentDatabase,
   };
 
   let RenderComponent;
