@@ -31,8 +31,10 @@ const databaseModel = createModel(
 
     /**
      * The latest error.
+     * Update: we're moving all error reporting to the parent. Delete when
+     * confirmed.
+        error: {} as UserbaseError,
      */
-    error: {} as UserbaseError,
 
     /**
      * When we open any given database, `userbaseItems` is the array of Items
@@ -43,15 +45,15 @@ const databaseModel = createModel(
   {
     events: {
       /**
+       * Sits on the root and transitions to `databaseGetter` whenever we
+       * need it to. (We call it on demand.)
+       */
+      GET_DATABASES: () => ({}),
+
+      /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
       GOT_DATABASES: (databases: Database[]) => ({ databases }),
-
-      /**
-       * Sits on the root and transitions to `databaseGetter` whenever we
-       * need it to.
-       */
-      GET_DATABASES: () => ({}),
 
       /**
        * Sent by the changeDatabase(newDatabase) helper function when we want
@@ -71,14 +73,9 @@ const databaseModel = createModel(
       }),
 
       /**
-       * Sent by ubOpenDatabase when it opens a database.
+       * Sent by ubOpenDatabase when it successfully opens a database.
        */
-      DATABASE_OPENED: () => ({}),
-
-      /**
-       * An error.
-       */
-      ERROR: (error: UserbaseError) => ({ error }),
+      REPORT_DATABASE_OPENED: () => ({}),
     },
   }
 );
@@ -171,7 +168,7 @@ export const databaseMachine = databaseModel.createMachine(
         states: {
           init: {
             on: {
-              DATABASE_OPENED: {
+              REPORT_DATABASE_OPENED: {
                 actions: [
                   /**
                    * Creating a new database doesn't automatically push it to
@@ -212,7 +209,10 @@ export const databaseMachine = databaseModel.createMachine(
               sendBack({ type: "GOT_DATABASES", databases });
             })
             .catch((error: UserbaseError) =>
-              sendBack({ type: "ERROR", error })
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              })
             );
         },
       ubOpenDatabase:
@@ -226,7 +226,7 @@ export const databaseMachine = databaseModel.createMachine(
               },
             })
             .then(() => {
-              sendBack({ type: "DATABASE_OPENED" });
+              sendBack({ type: "REPORT_DATABASE_OPENED" });
             })
             .catch((error: UserbaseError) => {
               sendParent<any, any, AuthMachineEvent>({
