@@ -63,6 +63,8 @@ const authModel = createModel(
 
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
+      UPDATE_USER_PROFILE: () => ({}),
+      USER_PROFILE_UPDATED: () => ({}),
 
       // == Catch-all error for the whole app ==-==-==
       /**
@@ -412,7 +414,29 @@ export const authMachine = authModel.createMachine(
               },
             },
           },
-          profilePutter: {},
+          profilePutter: {
+            type: "compound",
+            initial: "idle",
+            states: {
+              idle: {
+                on: {
+                  UPDATE_USER_PROFILE: {
+                    target: "updatingUserProfile",
+                  },
+                },
+              },
+              updatingUserProfile: {
+                invoke: {
+                  src: "userbaseUpdateUserProfile",
+                },
+                on: {
+                  USER_PROFILE_UPDATED: {
+                    target: "idle",
+                  },
+                },
+              },
+            },
+          },
         },
       },
       catastrophicError: {},
@@ -496,7 +520,8 @@ export const authMachine = authModel.createMachine(
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignIn:
-        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        (_, event: AuthMachineEvent) =>
+        (sendBack: (event: AuthMachineEvent) => void) => {
           if (event.type !== "ATTEMPT_SIGNIN") {
             /**
              * Twist TypeScript's arm.
@@ -547,7 +572,8 @@ export const authMachine = authModel.createMachine(
 
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignUp:
-        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        (_, event: AuthMachineEvent) =>
+        (sendBack: (event: AuthMachineEvent) => void) => {
           if (event.type !== "ATTEMPT_SIGNUP") {
             /**
              * Twist TypeScript's arm.
@@ -605,7 +631,38 @@ export const authMachine = authModel.createMachine(
 
       // == userbaseUpdateUserProfile ==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseUpdateUserProfile:
-        (context) => (sendback: (event: AuthMachineEvent) => void) => {},
+        (context: AuthMachineContext, event: AuthMachineEvent) =>
+        (sendBack: (event: AuthMachineEvent) => void) => {
+          if (event.type !== "UPDATE_USER_PROFILE") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendBack({
+              type: "ERROR",
+              error: {
+                name: "UserbaseUpdateUserProfileError",
+                message: `userbaseUpdateUserProfile() was invoked from a state
+                  that wasn't reached by sending UPDATE_USER_PROFILE. While
+                  this probably won't cause any problems, it shouldn't
+                  have happened.`,
+                status: 903, // Customise me later
+              },
+            });
+            return;
+          }
+          userbase
+            .updateUser({
+              profile: context.user!.profile,
+            })
+            .then(() => {
+              sendBack({
+                type: "USER_PROFILE_UPDATED",
+              });
+            })
+            .catch((error) => {
+              sendBack({ type: "ERROR", error });
+            });
+        },
     },
   }
 );
