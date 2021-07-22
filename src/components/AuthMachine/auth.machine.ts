@@ -175,7 +175,7 @@ export const authMachine = authModel.createMachine(
                 message: "Signed-in user detected.",
               }),
             ],
-            target: "#authMachine.signedIn",
+            target: "#authMachine.signedIn.databaseOpener",
           },
           NO_USER_IS_SIGNED_IN: {
             actions: [
@@ -216,7 +216,7 @@ export const authMachine = authModel.createMachine(
             on: {
               SIGNED_IN: {
                 actions: [assignUser, clearError],
-                target: "#authMachine.signedIn",
+                target: "#authMachine.signedIn.databaseOpener",
               },
               ERROR: {
                 /**
@@ -350,7 +350,7 @@ export const authMachine = authModel.createMachine(
             },
             on: {
               SIGNUP_WAS_SUCCESSFUL: {
-                target: "#authMachine.signedIn.idle",
+                target: "#authMachine.signedIn.databaseOpener",
                 actions: [
                   assignUser,
                   send({
@@ -378,49 +378,41 @@ export const authMachine = authModel.createMachine(
         },
       },
       signedIn: {
-        type: "compound",
-        initial: "idle",
-        on: {
-          // UPDATE_USER_PROFILE: {
-          // }
-        },
+        type: "parallel",
         states: {
-          idle: {
-            entry: [
-              send({
-                type: "LOG",
-                message: "Sign in successful.",
-              }),
-            ],
-            invoke: {
-              id: "databaseMachine",
-              src: databaseMachine,
-              data: {
-                /**
-                 * We tell TS that this property must exist because we create
-                 * it when a new user is created, and only ever update (vs.
-                 * delete) it.
-                 */
-                currentDatabase: (context: AuthMachineContext) =>
-                  context.user!.profile!.currentDatabase,
+          databaseOpener: {
+            type: "compound",
+            initial: "idle",
+            states: {
+              idle: {
+                entry: [
+                  send({
+                    type: "LOG",
+                    message: "Sign in successful.",
+                  }),
+                ],
+                invoke: {
+                  id: "databaseMachine",
+                  src: databaseMachine,
+                  data: {
+                    /**
+                     * We tell TS that this property must exist because we create
+                     * it when a new user is created, and only ever update (vs.
+                     * delete) it.
+                     */
+                    currentDatabase: (context: AuthMachineContext) =>
+                      context.user!.profile!.currentDatabase,
+                  },
+                },
+                on: {
+                  ATTEMPT_SIGNOUT: {
+                    target: "#authMachine.signedOut.tryingSignOut",
+                  },
+                },
               },
-            },
-            on: {
-              ATTEMPT_SIGNOUT: {
-                target: "#authMachine.signedOut.tryingSignOut",
-              },
-              // TODO: block here
-              //   "UPDATE USER PROFILE": {
-              //     actions: [
-              //       immerAssign((context, event) => {
-              //         if (context.user) {
-              //           context.user.profile = event.profile;
-              //         }
-              //       }),
-              //     ],
-              // },
             },
           },
+          profilePutter: {},
         },
       },
       catastrophicError: {},
@@ -610,6 +602,10 @@ export const authMachine = authModel.createMachine(
             });
           });
       },
+
+      // == userbaseUpdateUserProfile ==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseUpdateUserProfile:
+        (context) => (sendback: (event: AuthMachineEvent) => void) => {},
     },
   }
 );
