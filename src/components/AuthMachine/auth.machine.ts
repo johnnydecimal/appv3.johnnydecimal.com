@@ -1,7 +1,8 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
+import { assign, ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
-import userbase from "userbase-js";
+import userbase, { UserProfile } from "userbase-js";
+import merge from "deepmerge";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "../DatabaseMachine/database.machine";
@@ -63,7 +64,7 @@ const authModel = createModel(
 
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
-      UPDATE_USER_PROFILE: () => ({}),
+      UPDATE_USER_PROFILE: (profile: UserProfile) => ({ profile }),
       USER_PROFILE_UPDATED: () => ({}),
 
       // == Catch-all error for the whole app ==-==-==
@@ -414,7 +415,7 @@ export const authMachine = authModel.createMachine(
               },
             },
           },
-          profilePutter: {
+          profileUpdater: {
             type: "compound",
             initial: "idle",
             states: {
@@ -426,6 +427,34 @@ export const authMachine = authModel.createMachine(
                 },
               },
               updatingUserProfile: {
+                entry: [
+                  /**
+                   * Take event.profile, deepmerge it with context.user.profile,
+                   * and update context.user.profile.
+                   */
+                  () => {
+                    console.log("Entered updatingUserProfile");
+                  },
+                  assign({
+                    user: (context, event) => {
+                      if (event.type !== "UPDATE_USER_PROFILE") {
+                        return context.user;
+                      }
+                      const newUserProfile = merge(
+                        context.user!.profile!,
+                        event.profile
+                      );
+                      const newUser = {
+                        ...(context.user as UserResult),
+                        profile: {
+                          ...newUserProfile,
+                        } as UserProfile,
+                      };
+                      console.log("updatingUserProfile entry:", newUser);
+                      return newUser;
+                    },
+                  }),
+                ],
                 invoke: {
                   src: "userbaseUpdateUserProfile",
                 },

@@ -18,7 +18,9 @@ const databaseModel = createModel(
     /**
      * currentDatabase is the 3-digit project which we have open. Corresponds to
      * the databaseName in Userbase. We send this value down when we invoke
-     * the machine.
+     * the machine, and the master
+     *
+     *
      */
     currentDatabase: "",
 
@@ -87,9 +89,9 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-const assignUserbaseItems = databaseModel.assign<"DATABASE_ITEMS_UPDATED">({
-  userbaseItems: (_context, event) => event.userbaseItems,
-});
+// const assignUserbaseItems = databaseModel.assign<"DATABASE_ITEMS_UPDATED">({
+//   userbaseItems: (_context, event) => event.userbaseItems,
+// });
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentDatabase: (_context, event) => event.newDatabase,
 });
@@ -113,7 +115,18 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [assignNewDatabase],
+        actions: [
+          assignNewDatabase,
+          () => {
+            console.log("db.m: firing sendParent(UPDATE_USER_PROFILE)");
+          },
+          sendParent<any, any, AuthMachineEvent>((context, event) => ({
+            type: "UPDATE_USER_PROFILE",
+            profile: {
+              currentDatabase: event.newDatabase,
+            },
+          })),
+        ],
         target: "#databaseMachine.databaseOpener",
       },
     },
@@ -157,7 +170,7 @@ export const databaseMachine = databaseModel.createMachine(
          * This is where we actually open our database.
          */
         type: "compound",
-        initial: "init",
+        initial: "openingDatabase",
         invoke: {
           /**
            * We need a top-level `invoke` because the `changeHandler` which is
@@ -166,7 +179,7 @@ export const databaseMachine = databaseModel.createMachine(
           src: "ubOpenDatabase",
         },
         states: {
-          init: {
+          openingDatabase: {
             on: {
               REPORT_DATABASE_OPENED: {
                 actions: [
@@ -187,9 +200,9 @@ export const databaseMachine = databaseModel.createMachine(
           databaseOpen: {
             entry: [],
             on: {
-              DATABASE_ITEMS_UPDATED: {
-                actions: [assignUserbaseItems],
-              },
+              // DATABASE_ITEMS_UPDATED: {
+              //   actions: [assignUserbaseItems],
+              // },
             },
           },
         },
