@@ -447,7 +447,6 @@ export const authMachine = authModel.createMachine(
                           ...newUserProfile,
                         } as UserProfile,
                       };
-                      console.log("updatingUserProfile entry:", newUser);
                       return newUser;
                     },
                   }),
