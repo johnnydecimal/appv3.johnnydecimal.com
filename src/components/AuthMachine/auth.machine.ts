@@ -432,9 +432,6 @@ export const authMachine = authModel.createMachine(
                    * Take event.profile, deepmerge it with context.user.profile,
                    * and update context.user.profile.
                    */
-                  () => {
-                    console.log("Entered updatingUserProfile");
-                  },
                   assign({
                     user: (context, event) => {
                       if (event.type !== "UPDATE_USER_PROFILE") {

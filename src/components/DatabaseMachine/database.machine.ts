@@ -70,7 +70,7 @@ const databaseModel = createModel(
       /**
        * Sent by the changeHandler() when the remote database changes.
        */
-      DATABASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
+      USERBASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
         userbaseItems,
       }),
 
@@ -89,7 +89,7 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// const assignUserbaseItems = databaseModel.assign<"DATABASE_ITEMS_UPDATED">({
+// const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
 //   userbaseItems: (_context, event) => event.userbaseItems,
 // });
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
@@ -115,18 +115,7 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [
-          assignNewDatabase,
-          () => {
-            console.log("db.m: firing sendParent(UPDATE_USER_PROFILE)");
-          },
-          sendParent<any, any, AuthMachineEvent>((context, event) => ({
-            type: "UPDATE_USER_PROFILE",
-            profile: {
-              currentDatabase: event.newDatabase,
-            },
-          })),
-        ],
+        actions: [assignNewDatabase],
         target: "#databaseMachine.databaseOpener",
       },
     },
@@ -192,19 +181,24 @@ export const databaseMachine = databaseModel.createMachine(
                   send({
                     type: "GET_DATABASES",
                   }),
+
+                  /**
+                   * Send auth.machine an update event. This causes its local
+                   * context to be updated, and it to update Userbase with the
+                   * new profile.
+                   */
+                  sendParent<any, any, AuthMachineEvent>((context) => ({
+                    type: "UPDATE_USER_PROFILE",
+                    profile: {
+                      currentDatabase: context.currentDatabase,
+                    },
+                  })),
                 ],
                 target: "databaseOpen",
               },
             },
           },
-          databaseOpen: {
-            entry: [],
-            on: {
-              // DATABASE_ITEMS_UPDATED: {
-              //   actions: [assignUserbaseItems],
-              // },
-            },
-          },
+          databaseOpen: {},
         },
       },
     },
@@ -235,13 +229,18 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
-                sendBack({ type: "DATABASE_ITEMS_UPDATED", userbaseItems });
+                sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
             .then(() => {
               sendBack({ type: "REPORT_DATABASE_OPENED" });
             })
             .catch((error: UserbaseError) => {
+              /**
+               * #TODO: errors need to be handled better here. You've already
+               *        set `currentDatabase`, so if this doesn't work we're
+               *        in a janky state.
+               */
               sendParent<any, any, AuthMachineEvent>({
                 type: "ERROR",
                 error,
