@@ -76,6 +76,24 @@ export const DatabaseMachine = () => {
     });
   };
 
+  const insertItem = () => {
+    send({
+      type: "INSERT_ITEM",
+      item: {
+        itemId: "blah",
+        item: {
+          jdType: "area",
+          jdNumber: "00-09",
+          jdTitle: "Hard-coded test",
+        },
+        createdBy: {
+          timestamp: new Date(),
+          // this is enough, the changeHandler will provide real values
+        },
+      },
+    });
+  };
+
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,
    * declared here, that are passed down in React Context for use by child
@@ -105,6 +123,8 @@ export const DatabaseMachine = () => {
           <input type="submit" value="submit" />
         </label>
       </form>
+      <hr className="my-2" />
+      <button onClick={() => insertItem()}>insert test item</button>
       <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} />

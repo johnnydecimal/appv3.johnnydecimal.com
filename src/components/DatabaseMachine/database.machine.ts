@@ -8,6 +8,7 @@ import {
 } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
+import merge from "deepmerge";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserbaseError, UserbaseItem } from "../../@types";
@@ -78,6 +79,9 @@ const databaseModel = createModel(
        * Sent by ubOpenDatabase when it successfully opens a database.
        */
       REPORT_DATABASE_OPENED: () => ({}),
+
+      INSERT_ITEM: (item: UserbaseItem) => ({ item }),
+      ITEM_INSERTED: () => ({}),
     },
   }
 );
@@ -89,9 +93,13 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
-//   userbaseItems: (_context, event) => event.userbaseItems,
-// });
+const assignUserbaseItems = databaseModel.assign<"INSERT_ITEM">({
+  userbaseItems: (context, event) => {
+    const newUserbaseItems = [...context.userbaseItems];
+    newUserbaseItems.push(event.item);
+    return newUserbaseItems;
+  },
+});
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentDatabase: (_context, event) => event.newDatabase,
 });
@@ -198,7 +206,46 @@ export const databaseMachine = databaseModel.createMachine(
               },
             },
           },
-          databaseOpen: {},
+          databaseOpen: {
+            on: {
+              INSERT_ITEM: {
+                target: "#databaseMachine.itemInserter.insertingItem",
+              },
+            },
+          },
+        },
+      },
+      itemInserter: {
+        type: "compound",
+        initial: "idle",
+        states: {
+          idle: {},
+          insertingItem: {
+            entry: [
+              /**
+               * Add the new item to the local context. This ensures an instant
+               * response in the UI.
+               *
+               * Okay, console.log shows that the event does get sent down here.
+               */
+              (_, event) => {
+                console.log("insertingItem: event", event);
+              },
+              assignUserbaseItems,
+            ],
+            invoke: [
+              /**
+               * Invoke a service to push the new item to Userbase. The
+               * changeHandler will then fire, overwriting our local context
+               * with the same item, so nothing should change.
+               */
+            ],
+            on: {
+              ITEM_INSERTED: {
+                target: "idle",
+              },
+            },
+          },
         },
       },
     },
