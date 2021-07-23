@@ -2,7 +2,7 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { authMachine, AuthMachineContext } from "./auth.machine";
+import { authMachine } from "./auth.machine";
 import { AuthMachineReactContext } from "./context";
 import { DatabaseMachine } from "../DatabaseMachine/DatabaseMachine";
 import { SignInForm } from "../authentication/SignInForm/SignInForm";
@@ -11,8 +11,6 @@ import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
-import { JDUserProfile } from "../../@types";
-import { UserProfile } from "userbase-js";
 
 // == Temp stuff while you build this out ==
 const FourOhFour = () => <div>404</div>;
@@ -63,27 +61,6 @@ export const AuthMachine = () => {
   };
 
   /**
-   * Didn't have the energy to write a deep-merge function, so this very
-   * specialised thing just updates the `currentDatabase` property of the
-   * Userbase user profile.
-   *
-   * Some day maybe replace this with a more generic thing that updates the
-   * profile by merging it with whatever new/updated values were passed.
-   */
-  const updateUserbaseProfileWithCurrentDatabase = (
-    context: AuthMachineContext,
-    currentDatabase: string
-  ) => {
-    send({
-      type: "UPDATE_USERBASE_CURRENTDATABASE",
-      profile: {
-        ...context.user!.profile,
-        currentDatabase,
-      },
-    });
-  };
-
-  /**
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
    */
@@ -95,7 +72,6 @@ export const AuthMachine = () => {
     state,
     switchToSignIn,
     switchToSignUp,
-    updateUserbaseProfileWithCurrentDatabase,
   };
 
   let RenderComponent;

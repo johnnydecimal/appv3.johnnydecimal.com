@@ -1,15 +1,13 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
-import { assign as immerAssign } from "@xstate/immer";
 import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "../DatabaseMachine/database.machine";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { UserProfile, UserResult } from "userbase-js";
-import { JDUserProfile } from "../../@types";
+import { UserResult } from "userbase-js";
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
 import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
 
@@ -65,20 +63,6 @@ const authModel = createModel(
 
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
-
-      // == Sent up from databaseMachine ==-==-==
-      /**
-       * If the user changes the current database, this event is sent here so
-       * we can update their profile.
-       *
-       * At this stage this doesn't affect any other signed in sessions: we send
-       * `currentDatabase` to `databaseMachine` when we invoke it, but never
-       * again during its life. Otherwise we're affecting state on one session
-       * from another and that's not what we want.
-       */
-      UPDATE_USERBASE_CURRENTDATABASE: (profile: UserProfile) => ({
-        profile,
-      }),
 
       // == Catch-all error for the whole app ==-==-==
       /**
@@ -156,17 +140,6 @@ export const authMachine = authModel.createMachine(
         actions: [assignAndLogError],
         target: "#authMachine.error",
       },
-      UPDATE_USERBASE_CURRENTDATABASE: {
-        /**
-         * Sent up from database.machine, this event causes us to update the
-         * user's profile. Given that we only care about this value when we sign
-         * in, it's fine to update it remotely and have the changeHandler push
-         * the change locally.
-         *
-         * So let's catch the event, invoke a service which calls
-         * userbase.updateUser, and make sure it succeeds.
-         */
-      },
     },
     states: {
       init: {
@@ -202,7 +175,7 @@ export const authMachine = authModel.createMachine(
                 message: "Signed-in user detected.",
               }),
             ],
-            target: "#authMachine.signedIn",
+            target: "#authMachine.signedIn.databaseOpener",
           },
           NO_USER_IS_SIGNED_IN: {
             actions: [
@@ -243,7 +216,7 @@ export const authMachine = authModel.createMachine(
             on: {
               SIGNED_IN: {
                 actions: [assignUser, clearError],
-                target: "#authMachine.signedIn",
+                target: "#authMachine.signedIn.databaseOpener",
               },
               ERROR: {
                 /**
@@ -377,7 +350,7 @@ export const authMachine = authModel.createMachine(
             },
             on: {
               SIGNUP_WAS_SUCCESSFUL: {
-                target: "#authMachine.signedIn.idle",
+                target: "#authMachine.signedIn.databaseOpener",
                 actions: [
                   assignUser,
                   send({
@@ -405,49 +378,41 @@ export const authMachine = authModel.createMachine(
         },
       },
       signedIn: {
-        type: "compound",
-        initial: "idle",
-        on: {
-          // UPDATE_USER_PROFILE: {
-          // }
-        },
+        type: "parallel",
         states: {
-          idle: {
-            entry: [
-              send({
-                type: "LOG",
-                message: "Sign in successful.",
-              }),
-            ],
-            invoke: {
-              id: "databaseMachine",
-              src: databaseMachine,
-              data: {
-                /**
-                 * We tell TS that this property must exist because we create
-                 * it when a new user is created, and only ever update (vs.
-                 * delete) it.
-                 */
-                currentDatabase: (context: AuthMachineContext) =>
-                  context.user!.profile!.currentDatabase,
+          databaseOpener: {
+            type: "compound",
+            initial: "idle",
+            states: {
+              idle: {
+                entry: [
+                  send({
+                    type: "LOG",
+                    message: "Sign in successful.",
+                  }),
+                ],
+                invoke: {
+                  id: "databaseMachine",
+                  src: databaseMachine,
+                  data: {
+                    /**
+                     * We tell TS that this property must exist because we create
+                     * it when a new user is created, and only ever update (vs.
+                     * delete) it.
+                     */
+                    currentDatabase: (context: AuthMachineContext) =>
+                      context.user!.profile!.currentDatabase,
+                  },
+                },
+                on: {
+                  ATTEMPT_SIGNOUT: {
+                    target: "#authMachine.signedOut.tryingSignOut",
+                  },
+                },
               },
-            },
-            on: {
-              ATTEMPT_SIGNOUT: {
-                target: "#authMachine.signedOut.tryingSignOut",
-              },
-              // TODO: block here
-              //   "UPDATE USER PROFILE": {
-              //     actions: [
-              //       immerAssign((context, event) => {
-              //         if (context.user) {
-              //           context.user.profile = event.profile;
-              //         }
-              //       }),
-              //     ],
-              // },
             },
           },
+          profilePutter: {},
         },
       },
       catastrophicError: {},
@@ -638,45 +603,9 @@ export const authMachine = authModel.createMachine(
           });
       },
 
-      // == userbaseUpdateCurrentDatabase   ==-==-==-==-==-==-==-==-==-==-==-==
-      userbaseUpdateCurrentDatabase:
-        (context, event) => (sendBack: (event: AuthMachineEvent) => void) => {
-          if (event.type !== "UPDATE_USERBASE_CURRENTDATABASE") {
-            /**
-             * Twist TypeScript's arm.
-             */
-            sendBack({
-              type: "ERROR",
-              error: {
-                name: "UserbaseUpdateCurrentDatabaseCallError",
-                message: `userbaseUpdateCurrentDatabase() was invoked from a
-                  state that wasn't reached by sending UPDATE_USER_PROFILE. As
-                  a result, 'context.user.profile' might not exist, so this
-                  function will now return.`,
-                status: 903, // Customise me later
-              },
-            });
-            return;
-          }
-          userbase
-            .updateUser({
-              profile: context.user!.profile!,
-            })
-            .then(() => {
-              /**
-               * There's nothing to sendBack() if this worked. It just worked.
-               * What's more interesting is if it *doesn't* work, in which case
-               * we should retry a few times rather than just chucking an error.
-               * // TODO: this.
-               */
-            })
-            .catch((error) => {
-              sendBack({
-                type: "ERROR",
-                error,
-              });
-            });
-        },
+      // == userbaseUpdateUserProfile ==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseUpdateUserProfile:
+        (context) => (sendback: (event: AuthMachineEvent) => void) => {},
     },
   }
 );
