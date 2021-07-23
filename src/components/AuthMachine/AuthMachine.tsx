@@ -49,23 +49,16 @@ export const AuthMachine = () => {
   };
 
   const switchToSignIn = () => {
-    send("SWITCH_TO_THE_SIGNIN_PAGE");
+    send({ type: "SWITCH_TO_THE_SIGNIN_PAGE" });
   };
 
   const switchToSignUp = () => {
-    send("SWITCH_TO_THE_SIGNUP_PAGE");
+    send({ type: "SWITCH_TO_THE_SIGNUP_PAGE" });
   };
 
   const handleAcknowledgeDireWarningAboutE2EEncryption = () => {
-    send("ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION");
+    send({ type: "ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION" });
   };
-
-  // const updateUserProfile = (profile: any) => {
-  //   send({
-  //     type: "UPDATE USER PROFILE",
-  //     profile,
-  //   });
-  // };
 
   /**
    * Wrap these functions and `state` in an object which we'll use as context
@@ -79,7 +72,6 @@ export const AuthMachine = () => {
     state,
     switchToSignIn,
     switchToSignUp,
-    // updateUserProfile,
   };
 
   let RenderComponent;

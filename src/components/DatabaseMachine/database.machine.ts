@@ -1,5 +1,11 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, ContextFrom, EventFrom, sendParent } from "xstate";
+import {
+  assign,
+  ContextFrom,
+  EventFrom,
+  send as xstateSend,
+  sendParent,
+} from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
@@ -12,7 +18,9 @@ const databaseModel = createModel(
     /**
      * currentDatabase is the 3-digit project which we have open. Corresponds to
      * the databaseName in Userbase. We send this value down when we invoke
-     * the machine.
+     * the machine, and the master
+     *
+     *
      */
     currentDatabase: "",
 
@@ -25,8 +33,10 @@ const databaseModel = createModel(
 
     /**
      * The latest error.
+     * Update: we're moving all error reporting to the parent. Delete when
+     * confirmed.
+        error: {} as UserbaseError,
      */
-    error: {} as UserbaseError,
 
     /**
      * When we open any given database, `userbaseItems` is the array of Items
@@ -37,26 +47,37 @@ const databaseModel = createModel(
   {
     events: {
       /**
+       * Sits on the root and transitions to `databaseGetter` whenever we
+       * need it to. (We call it on demand.)
+       */
+      GET_DATABASES: () => ({}),
+
+      /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
       GOT_DATABASES: (databases: Database[]) => ({ databases }),
 
       /**
+       * Sent by the changeDatabase(newDatabase) helper function when we want
+       * to open a new or existing database -- `newDatabase` refers to the new
+       * one to open, it might not actually be new. Not that the API call to
+       * Userbase cares either way.
+       */
+      OPEN_DATABASE: (newDatabase: string) => ({
+        newDatabase,
+      }),
+
+      /**
        * Sent by the changeHandler() when the remote database changes.
        */
-      DATABASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
+      USERBASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
         userbaseItems,
       }),
 
       /**
-       * Sent by ubOpenDatabase when it opens a database.
+       * Sent by ubOpenDatabase when it successfully opens a database.
        */
-      DATABASE_OPENED: () => ({}),
-
-      /**
-       * An error.
-       */
-      ERROR: (error: UserbaseError) => ({ error }),
+      REPORT_DATABASE_OPENED: () => ({}),
     },
   }
 );
@@ -64,13 +85,40 @@ const databaseModel = createModel(
 export type DatabaseMachineContext = ContextFrom<typeof databaseModel>;
 export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
 
+const send = (event: DatabaseMachineEvent) =>
+  xstateSend<any, any, DatabaseMachineEvent>(event);
+
+// === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+// const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+//   userbaseItems: (_context, event) => event.userbaseItems,
+// });
+const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
+  currentDatabase: (_context, event) => event.newDatabase,
+});
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+/**
+ * There's only one way a database can be opened (or created): by changing
+ * context.currentDatabase and transitioning to #databaseMachine.databaseOpener.
+ * The root-level OPEN_DATABASE does this for us.
+ *
+ * This way we guarantee that context.currentDatabase is actually the database
+ * which is open.
+ */
 export const databaseMachine = databaseModel.createMachine(
   {
     id: "databaseMachine",
     type: "parallel",
     context: databaseModel.initialContext,
-    on: {},
+    on: {
+      GET_DATABASES: {
+        target: "#databaseMachine.databaseGetter",
+      },
+      OPEN_DATABASE: {
+        actions: [assignNewDatabase],
+        target: "#databaseMachine.databaseOpener",
+      },
+    },
     states: {
       databaseGetter: {
         /**
@@ -111,7 +159,7 @@ export const databaseMachine = databaseModel.createMachine(
          * This is where we actually open our database.
          */
         type: "compound",
-        initial: "init",
+        initial: "openingDatabase",
         invoke: {
           /**
            * We need a top-level `invoke` because the `changeHandler` which is
@@ -120,22 +168,37 @@ export const databaseMachine = databaseModel.createMachine(
           src: "ubOpenDatabase",
         },
         states: {
-          init: {
+          openingDatabase: {
             on: {
-              DATABASE_OPENED: "databaseOpen",
-            },
-          },
-          databaseOpen: {
-            on: {
-              DATABASE_ITEMS_UPDATED: {
+              REPORT_DATABASE_OPENED: {
                 actions: [
-                  databaseModel.assign({
-                    userbaseItems: (_, event) => event.userbaseItems,
+                  /**
+                   * Creating a new database doesn't automatically push it to
+                   * the local list of available databases: we short-circuit the
+                   * 60s refresh and fetch them immediately (after which 60s
+                   * sevice will resume).
+                   */
+                  send({
+                    type: "GET_DATABASES",
                   }),
+
+                  /**
+                   * Send auth.machine an update event. This causes its local
+                   * context to be updated, and it to update Userbase with the
+                   * new profile.
+                   */
+                  sendParent<any, any, AuthMachineEvent>((context) => ({
+                    type: "UPDATE_USER_PROFILE",
+                    profile: {
+                      currentDatabase: context.currentDatabase,
+                    },
+                  })),
                 ],
+                target: "databaseOpen",
               },
             },
           },
+          databaseOpen: {},
         },
       },
     },
@@ -153,28 +216,31 @@ export const databaseMachine = databaseModel.createMachine(
               sendBack({ type: "GOT_DATABASES", databases });
             })
             .catch((error: UserbaseError) =>
-              sendBack({ type: "ERROR", error })
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              })
             );
         },
       ubOpenDatabase:
         (context: DatabaseMachineContext) =>
         (sendBack: (event: DatabaseMachineEvent) => void) => {
-          const databaseName = context.currentDatabase || "001";
           userbase
             .openDatabase({
-              databaseName,
+              databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
-                sendBack({ type: "DATABASE_ITEMS_UPDATED", userbaseItems });
+                sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
             .then(() => {
-              sendParent<any, any, AuthMachineEvent>({
-                type: "CURRENT_DATABASE_UPDATED",
-                databaseName,
-              });
-              sendBack({ type: "DATABASE_OPENED" });
+              sendBack({ type: "REPORT_DATABASE_OPENED" });
             })
             .catch((error: UserbaseError) => {
+              /**
+               * #TODO: errors need to be handled better here. You've already
+               *        set `currentDatabase`, so if this doesn't work we're
+               *        in a janky state.
+               */
               sendParent<any, any, AuthMachineEvent>({
                 type: "ERROR",
                 error,

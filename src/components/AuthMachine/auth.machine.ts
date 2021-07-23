@@ -1,7 +1,8 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
+import { assign, ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
-import userbase from "userbase-js";
+import userbase, { UserProfile } from "userbase-js";
+import merge from "deepmerge";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "../DatabaseMachine/database.machine";
@@ -63,18 +64,8 @@ const authModel = createModel(
 
       // -- From the signedIn state
       ATTEMPT_SIGNOUT: () => ({}),
-
-      // == Sent up from databaseMachine ==-==-==
-      /**
-       * If the user changes the current database, this event is sent here so
-       * we can update their profile.
-       *
-       * At this stage this doesn't affect any other signed in sessions: we send
-       * `currentDatabase` to `databaseMachine` when we invoke it, but never
-       * again during its life. Otherwise we're affecting state on one session
-       * from another and that's not what we want.
-       */
-      CURRENT_DATABASE_UPDATED: (databaseName: string) => ({ databaseName }),
+      UPDATE_USER_PROFILE: (profile: UserProfile) => ({ profile }),
+      USER_PROFILE_UPDATED: () => ({}),
 
       // == Catch-all error for the whole app ==-==-==
       /**
@@ -152,29 +143,6 @@ export const authMachine = authModel.createMachine(
         actions: [assignAndLogError],
         target: "#authMachine.error",
       },
-      /*
-      // TODO: block here
-      // "CURRENT DATABASE UPDATED": {
-      //   actions: [
-      //     immerAssign((context, event) => {
-      //       if (context.user && !context.user.profile) {
-      //         /**
-      //          * A signed-in user who has never had a database updated doesn't
-      //          * have a user.profile object yet. (The first 'update' happens
-      //          * after the automatic creation of their first database.)
-      //          
-      //         context.user.profile = {};
-      //       }
-      //       if (context.user && context.user.profile) {
-      //         /**
-      //          * Which it must as we just created it.
-      //          
-      //         context.user.profile.currentDatabase = event.value;
-      //       }
-      //     }),
-      //   ],
-      // },
-      */
     },
     states: {
       init: {
@@ -210,7 +178,7 @@ export const authMachine = authModel.createMachine(
                 message: "Signed-in user detected.",
               }),
             ],
-            target: "#authMachine.signedIn",
+            target: "#authMachine.signedIn.databaseOpener",
           },
           NO_USER_IS_SIGNED_IN: {
             actions: [
@@ -251,7 +219,7 @@ export const authMachine = authModel.createMachine(
             on: {
               SIGNED_IN: {
                 actions: [assignUser, clearError],
-                target: "#authMachine.signedIn",
+                target: "#authMachine.signedIn.databaseOpener",
               },
               ERROR: {
                 /**
@@ -385,7 +353,7 @@ export const authMachine = authModel.createMachine(
             },
             on: {
               SIGNUP_WAS_SUCCESSFUL: {
-                target: "#authMachine.signedIn.idle",
+                target: "#authMachine.signedIn.databaseOpener",
                 actions: [
                   assignUser,
                   send({
@@ -413,43 +381,85 @@ export const authMachine = authModel.createMachine(
         },
       },
       signedIn: {
-        type: "compound",
-        initial: "idle",
+        type: "parallel",
         states: {
-          idle: {
-            entry: [
-              send({
-                type: "LOG",
-                message: "Sign in successful.",
-              }),
-            ],
-            invoke: {
-              id: "databaseMachine",
-              src: databaseMachine,
-              data: {
-                /**
-                 * We tell TS that this property must exist because we create
-                 * it when a new user is created, and only ever update (vs.
-                 * delete) it.
-                 */
-                currentDatabase: (context: AuthMachineContext) =>
-                  context.user!.profile!.currentDatabase,
+          databaseOpener: {
+            type: "compound",
+            initial: "idle",
+            states: {
+              idle: {
+                entry: [
+                  send({
+                    type: "LOG",
+                    message: "Sign in successful.",
+                  }),
+                ],
+                invoke: {
+                  id: "databaseMachine",
+                  src: databaseMachine,
+                  data: {
+                    /**
+                     * We tell TS that this property must exist because we create
+                     * it when a new user is created, and only ever update (vs.
+                     * delete) it.
+                     */
+                    currentDatabase: (context: AuthMachineContext) =>
+                      context.user!.profile!.currentDatabase,
+                  },
+                },
+                on: {
+                  ATTEMPT_SIGNOUT: {
+                    target: "#authMachine.signedOut.tryingSignOut",
+                  },
+                },
               },
             },
-            on: {
-              ATTEMPT_SIGNOUT: {
-                target: "#authMachine.signedOut.tryingSignOut",
+          },
+          profileUpdater: {
+            type: "compound",
+            initial: "idle",
+            states: {
+              idle: {
+                on: {
+                  UPDATE_USER_PROFILE: {
+                    target: "updatingUserProfile",
+                  },
+                },
               },
-              // TODO: block here
-              //   "UPDATE USER PROFILE": {
-              //     actions: [
-              //       immerAssign((context, event) => {
-              //         if (context.user) {
-              //           context.user.profile = event.profile;
-              //         }
-              //       }),
-              //     ],
-              // },
+              updatingUserProfile: {
+                entry: [
+                  /**
+                   * Take event.profile, deepmerge it with context.user.profile,
+                   * and update context.user.profile.
+                   */
+                  assign({
+                    user: (context, event) => {
+                      if (event.type !== "UPDATE_USER_PROFILE") {
+                        return context.user;
+                      }
+                      const newUserProfile = merge(
+                        context.user!.profile!,
+                        event.profile
+                      );
+                      const newUser = {
+                        ...(context.user as UserResult),
+                        profile: {
+                          ...newUserProfile,
+                        } as UserProfile,
+                      };
+                      return newUser;
+                    },
+                  }),
+                ],
+                invoke: {
+                  src: "userbaseUpdateUserProfile",
+                },
+                on: {
+                  USER_PROFILE_UPDATED: {
+                    target: "idle",
+                  },
+                },
+              },
             },
           },
         },
@@ -535,7 +545,8 @@ export const authMachine = authModel.createMachine(
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignIn:
-        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        (_, event: AuthMachineEvent) =>
+        (sendBack: (event: AuthMachineEvent) => void) => {
           if (event.type !== "ATTEMPT_SIGNIN") {
             /**
              * Twist TypeScript's arm.
@@ -586,7 +597,8 @@ export const authMachine = authModel.createMachine(
 
       // == userbaseSignUp   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignUp:
-        (_, event) => (sendBack: (event: AuthMachineEvent) => void) => {
+        (_, event: AuthMachineEvent) =>
+        (sendBack: (event: AuthMachineEvent) => void) => {
           if (event.type !== "ATTEMPT_SIGNUP") {
             /**
              * Twist TypeScript's arm.
@@ -641,6 +653,41 @@ export const authMachine = authModel.createMachine(
             });
           });
       },
+
+      // == userbaseUpdateUserProfile ==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseUpdateUserProfile:
+        (context: AuthMachineContext, event: AuthMachineEvent) =>
+        (sendBack: (event: AuthMachineEvent) => void) => {
+          if (event.type !== "UPDATE_USER_PROFILE") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendBack({
+              type: "ERROR",
+              error: {
+                name: "UserbaseUpdateUserProfileError",
+                message: `userbaseUpdateUserProfile() was invoked from a state
+                  that wasn't reached by sending UPDATE_USER_PROFILE. While
+                  this probably won't cause any problems, it shouldn't
+                  have happened.`,
+                status: 903, // Customise me later
+              },
+            });
+            return;
+          }
+          userbase
+            .updateUser({
+              profile: context.user!.profile,
+            })
+            .then(() => {
+              sendBack({
+                type: "USER_PROFILE_UPDATED",
+              });
+            })
+            .catch((error) => {
+              sendBack({ type: "ERROR", error });
+            });
+        },
     },
   }
 );
