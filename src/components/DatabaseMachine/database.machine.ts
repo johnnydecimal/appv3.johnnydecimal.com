@@ -73,7 +73,15 @@ const databaseModel = createModel(
        */
       REPORT_DATABASE_OPENED: () => ({}),
 
+      /**
+       * Sent by the helper function whenever we want to add a new item to the
+       * current database.
+       */
       INSERT_ITEM: (item: UserbaseItem) => ({ item }),
+
+      /**
+       * Send by ubInsertItem when it was successful.
+       */
       ITEM_INSERTED: () => ({}),
     },
   }
@@ -86,6 +94,14 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
+  databases: (_, event) => event.databases,
+});
+
+const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
+  currentDatabase: (_context, event) => event.newDatabase,
+});
+
 const assignUserbaseItems = databaseModel.assign({
   userbaseItems: (context, event) => {
     /**
@@ -109,8 +125,14 @@ const assignUserbaseItems = databaseModel.assign({
   },
 });
 
-const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
-  currentDatabase: (_context, event) => event.newDatabase,
+const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
+  /**
+   * As soon as we open a new database, the existing userbaseItems
+   * become invalid. Rather than wait the fraction of a second for the
+   * changeHandler() to update them, we clear them here. This will make
+   * the UI more snappy. The cH() will fire immediately and re-populate.
+   */
+  userbaseItems: () => [],
 });
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -132,18 +154,7 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [
-          assignNewDatabase,
-          databaseModel.assign({
-            /**
-             * As soon as we open a new database, the existing userbaseItems
-             * become invalid. Rather than wait the fraction of a second for the
-             * changeHandler() to update them, we clear them here. This will make
-             * the UI more snappy. The cH() will fire immediately and re-populate.
-             */
-            userbaseItems: () => [],
-          }),
-        ],
+        actions: [assignNewDatabase, clearUserbaseItems],
         target: "#databaseMachine.databaseOpener",
       },
     },
@@ -164,11 +175,7 @@ export const databaseMachine = databaseModel.createMachine(
             },
             on: {
               GOT_DATABASES: {
-                actions: [
-                  databaseModel.assign({
-                    databases: (_, event) => event.databases,
-                  }),
-                ],
+                actions: [assignDatabases],
                 target: "idle",
               },
             },
