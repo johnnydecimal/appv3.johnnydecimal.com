@@ -102,7 +102,11 @@ const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentDatabase: (_context, event) => event.newDatabase,
 });
 
-const assignUserbaseItems = databaseModel.assign({
+const assignNewUserbaseItem = databaseModel.assign({
+  /**
+   * This is fired whenever we add a new item to the database. We add it to the
+   * local context immediately so that our UI is nice and responsive.
+   */
   userbaseItems: (context, event) => {
     /**
      * This action is fired by a state which was reached indirectly, so we can't
@@ -123,6 +127,14 @@ const assignUserbaseItems = databaseModel.assign({
     }
     return newUserbaseItems;
   },
+});
+
+const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+  /**
+   * This is fired by the changeHandler() and contains the entire array of
+   * userbaseItems.
+   */
+  userbaseItems: (context, event) => event.userbaseItems,
 });
 
 const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
@@ -253,7 +265,7 @@ export const databaseMachine = databaseModel.createMachine(
                * Add the new item to the local context. This ensures an instant
                * response in the UI.
                */
-              assignUserbaseItems,
+              assignNewUserbaseItem,
             ],
             invoke: {
               /**
@@ -272,17 +284,19 @@ export const databaseMachine = databaseModel.createMachine(
         },
       },
       itemReceiver: {
+        /**
+         * The changeHandler() that we set up when we open a database fires
+         * the event which we listen for here. It fires when the database is
+         * initially opened, and whenever any remote changes are detected.
+         * When that happens we assign the array of userbaseItems to context.
+         */
         type: "compound",
         initial: "listening",
         states: {
           listening: {
             on: {
               USERBASE_ITEMS_UPDATED: {
-                actions: [
-                  databaseModel.assign({
-                    userbaseItems: (context, event) => event.userbaseItems,
-                  }),
-                ],
+                actions: [assignUserbaseItems],
               },
             },
           },
