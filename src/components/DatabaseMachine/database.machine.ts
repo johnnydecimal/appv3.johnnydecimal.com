@@ -1,11 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  assign,
-  ContextFrom,
-  EventFrom,
-  send as xstateSend,
-  sendParent,
-} from "xstate";
+import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
@@ -78,6 +72,17 @@ const databaseModel = createModel(
        * Sent by ubOpenDatabase when it successfully opens a database.
        */
       REPORT_DATABASE_OPENED: () => ({}),
+
+      /**
+       * Sent by the helper function whenever we want to add a new item to the
+       * current database.
+       */
+      INSERT_ITEM: (item: UserbaseItem) => ({ item }),
+
+      /**
+       * Send by ubInsertItem when it was successful.
+       */
+      ITEM_INSERTED: () => ({}),
     },
   }
 );
@@ -89,11 +94,57 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
-//   userbaseItems: (_context, event) => event.userbaseItems,
-// });
+const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
+  databases: (_, event) => event.databases,
+});
+
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentDatabase: (_context, event) => event.newDatabase,
+});
+
+const assignNewUserbaseItem = databaseModel.assign({
+  /**
+   * This is fired whenever we add a new item to the database. We add it to the
+   * local context immediately so that our UI is nice and responsive.
+   */
+  userbaseItems: (context, event) => {
+    /**
+     * This action is fired by a state which was reached indirectly, so we can't
+     * use the <"TYPE"> syntax to narrow the event. Do it the old way.
+     */
+    if (event.type !== "INSERT_ITEM") {
+      return context.userbaseItems;
+    }
+    const newUserbaseItems = [];
+    if (typeof context.userbaseItems === "undefined") {
+      /**
+       * This is weird given that context.userbaseItems has been initialised
+       * as an empty array, but whatever.
+       */
+      newUserbaseItems.push(event.item);
+    } else {
+      newUserbaseItems.push(...context.userbaseItems, event.item);
+    }
+    return newUserbaseItems;
+  },
+});
+
+const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+  /**
+   * This is fired by the changeHandler() and contains the entire array of
+   * userbaseItems.
+   */
+  userbaseItems: (context, event) => event.userbaseItems,
+});
+
+const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
+  /**
+   * As soon as we open a new database, the existing userbaseItems
+   * become invalid. Rather than wait the fraction of a second for the
+   * changeHandler() to update them, we clear them here. This will make
+   * the UI more snappy. The cH() will fire immediately and re-populate.
+   */
+  userbaseItems: () => [],
 });
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -115,7 +166,7 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [assignNewDatabase],
+        actions: [assignNewDatabase, clearUserbaseItems],
         target: "#databaseMachine.databaseOpener",
       },
     },
@@ -136,11 +187,7 @@ export const databaseMachine = databaseModel.createMachine(
             },
             on: {
               GOT_DATABASES: {
-                actions: [
-                  assign({
-                    databases: (_, event) => event.databases,
-                  }),
-                ],
+                actions: [assignDatabases],
                 target: "idle",
               },
             },
@@ -198,7 +245,61 @@ export const databaseMachine = databaseModel.createMachine(
               },
             },
           },
-          databaseOpen: {},
+          databaseOpen: {
+            on: {
+              INSERT_ITEM: {
+                target: "#databaseMachine.itemInserter.insertingItem",
+              },
+            },
+          },
+        },
+      },
+      itemInserter: {
+        type: "compound",
+        initial: "idle",
+        states: {
+          idle: {},
+          insertingItem: {
+            entry: [
+              /**
+               * Add the new item to the local context. This ensures an instant
+               * response in the UI.
+               */
+              assignNewUserbaseItem,
+            ],
+            invoke: {
+              /**
+               * Invoke a service to push the new item to Userbase. The
+               * changeHandler will then fire, overwriting our local context
+               * with the same item, so nothing should change.
+               */
+              src: "ubInsertItem",
+            },
+            on: {
+              ITEM_INSERTED: {
+                target: "idle",
+              },
+            },
+          },
+        },
+      },
+      itemReceiver: {
+        /**
+         * The changeHandler() that we set up when we open a database fires
+         * the event which we listen for here. It fires when the database is
+         * initially opened, and whenever any remote changes are detected.
+         * When that happens we assign the array of userbaseItems to context.
+         */
+        type: "compound",
+        initial: "listening",
+        states: {
+          listening: {
+            on: {
+              USERBASE_ITEMS_UPDATED: {
+                actions: [assignUserbaseItems],
+              },
+            },
+          },
         },
       },
     },
@@ -229,6 +330,12 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
+                /**
+                 * So when this is set up, this fires. That's how we get the
+                 * initial load of items. So we need to make sure that the
+                 * machine is in a state which will accept this event and do
+                 * something with its payload.
+                 */
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
@@ -241,6 +348,45 @@ export const databaseMachine = databaseModel.createMachine(
                *        set `currentDatabase`, so if this doesn't work we're
                *        in a janky state.
                */
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
+      ubInsertItem:
+        (context, event) =>
+        (sendBack: (event: DatabaseMachineEvent) => void) => {
+          if (event.type !== "INSERT_ITEM") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendParent<any, any, AuthMachineEvent>({
+              type: "ERROR",
+              error: {
+                name: "UserbaseInsertItemCallError",
+                message: `userbaseInsertItem() was invoked from a state that
+                  wasn't reached by sending INSERT_ITEM. As a result,
+                  'event.item' won't exist, so this function will now return.`,
+                status: 905, // Customise me later
+              },
+            });
+            return;
+          }
+          userbase
+            .insertItem({
+              databaseName: context.currentDatabase,
+              // item: event.item,
+              item: {
+                test: true,
+                item: "yeah",
+                insertDate: new Date(),
+              },
+            })
+            .then(() => {
+              sendBack({ type: "ITEM_INSERTED" });
+            })
+            .catch((error) => {
               sendParent<any, any, AuthMachineEvent>({
                 type: "ERROR",
                 error,
