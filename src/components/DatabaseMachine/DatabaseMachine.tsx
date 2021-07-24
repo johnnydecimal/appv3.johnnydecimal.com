@@ -101,6 +101,7 @@ export const DatabaseMachine = () => {
    */
   const DatabaseReactContextValue = {
     changeDatabase,
+    insertItem,
   };
 
   const handleSubmit = (e: any) => {

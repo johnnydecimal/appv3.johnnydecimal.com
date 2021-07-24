@@ -8,7 +8,6 @@ import {
 } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
-import merge from "deepmerge";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { UserbaseError, UserbaseItem } from "../../@types";
@@ -93,13 +92,29 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 // === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-const assignUserbaseItems = databaseModel.assign<"INSERT_ITEM">({
+const assignUserbaseItems = databaseModel.assign({
   userbaseItems: (context, event) => {
-    const newUserbaseItems = [...context.userbaseItems];
-    newUserbaseItems.push(event.item);
+    /**
+     * This action is fired by a state which was reached indirectly, so we can't
+     * use the <"TYPE"> syntax to narrow the event. Do it the old way.
+     */
+    if (event.type !== "INSERT_ITEM") {
+      return context.userbaseItems;
+    }
+    const newUserbaseItems = [];
+    if (typeof context.userbaseItems === "undefined") {
+      /**
+       * This is weird given that context.userbaseItems has been initialised
+       * as an empty array, but whatever.
+       */
+      newUserbaseItems.push(event.item);
+    } else {
+      newUserbaseItems.push(...context.userbaseItems, event.item);
+    }
     return newUserbaseItems;
   },
 });
+
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentDatabase: (_context, event) => event.newDatabase,
 });
@@ -145,7 +160,7 @@ export const databaseMachine = databaseModel.createMachine(
             on: {
               GOT_DATABASES: {
                 actions: [
-                  assign({
+                  databaseModel.assign({
                     databases: (_, event) => event.databases,
                   }),
                 ],
@@ -228,21 +243,36 @@ export const databaseMachine = databaseModel.createMachine(
                *
                * Okay, console.log shows that the event does get sent down here.
                */
-              (_, event) => {
-                console.log("insertingItem: event", event);
-              },
               assignUserbaseItems,
             ],
-            invoke: [
+            invoke: {
               /**
                * Invoke a service to push the new item to Userbase. The
                * changeHandler will then fire, overwriting our local context
                * with the same item, so nothing should change.
                */
-            ],
+              src: "ubInsertItem",
+            },
             on: {
               ITEM_INSERTED: {
                 target: "idle",
+              },
+            },
+          },
+        },
+      },
+      itemReceiver: {
+        type: "compound",
+        initial: "listening",
+        states: {
+          listening: {
+            on: {
+              USERBASE_ITEMS_UPDATED: {
+                actions: [
+                  databaseModel.assign({
+                    userbaseItems: (context, event) => event.userbaseItems,
+                  }),
+                ],
               },
             },
           },
@@ -276,6 +306,16 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
+                console.log(
+                  "🇹🇩 changeHandler() fired, userbaseItems:",
+                  userbaseItems
+                );
+                /**
+                 * So when this is set up, this fires. That's how we get the
+                 * initial load of items. So we need to make sure that the
+                 * machine is in a state which will accept this event and do
+                 * something with its payload.
+                 */
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
@@ -288,6 +328,46 @@ export const databaseMachine = databaseModel.createMachine(
                *        set `currentDatabase`, so if this doesn't work we're
                *        in a janky state.
                */
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
+      ubInsertItem:
+        (context, event) =>
+        (sendBack: (event: DatabaseMachineEvent) => void) => {
+          if (event.type !== "INSERT_ITEM") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendParent<any, any, AuthMachineEvent>({
+              type: "ERROR",
+              error: {
+                name: "UserbaseInsertItemCallError",
+                message: `userbaseInsertItem() was invoked from a state that
+                  wasn't reached by sending INSERT_ITEM. As a result,
+                  'event.item' won't exist, so this function will now return.`,
+                status: 905, // Customise me later
+              },
+            });
+            return;
+          }
+          console.log("ubInsertItem", context, event);
+          userbase
+            .insertItem({
+              databaseName: context.currentDatabase,
+              // item: event.item,
+              item: {
+                test: true,
+                item: "yeah",
+                insertDate: new Date(),
+              },
+            })
+            .then(() => {
+              sendBack({ type: "ITEM_INSERTED" });
+            })
+            .catch((error) => {
               sendParent<any, any, AuthMachineEvent>({
                 type: "ERROR",
                 error,
