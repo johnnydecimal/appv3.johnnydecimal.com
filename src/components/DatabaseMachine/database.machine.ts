@@ -1,11 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  assign,
-  ContextFrom,
-  EventFrom,
-  send as xstateSend,
-  sendParent,
-} from "xstate";
+import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
@@ -138,7 +132,18 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [assignNewDatabase],
+        actions: [
+          assignNewDatabase,
+          databaseModel.assign({
+            /**
+             * As soon as we open a new database, the existing userbaseItems
+             * become invalid. Rather than wait the fraction of a second for the
+             * changeHandler() to update them, we clear them here. This will make
+             * the UI more snappy. The cH() will fire immediately and re-populate.
+             */
+            userbaseItems: () => [],
+          }),
+        ],
         target: "#databaseMachine.databaseOpener",
       },
     },
@@ -240,8 +245,6 @@ export const databaseMachine = databaseModel.createMachine(
               /**
                * Add the new item to the local context. This ensures an instant
                * response in the UI.
-               *
-               * Okay, console.log shows that the event does get sent down here.
                */
               assignUserbaseItems,
             ],
@@ -306,10 +309,6 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
-                console.log(
-                  "🇹🇩 changeHandler() fired, userbaseItems:",
-                  userbaseItems
-                );
                 /**
                  * So when this is set up, this fires. That's how we get the
                  * initial load of items. So we need to make sure that the
@@ -353,7 +352,6 @@ export const databaseMachine = databaseModel.createMachine(
             });
             return;
           }
-          console.log("ubInsertItem", context, event);
           userbase
             .insertItem({
               databaseName: context.currentDatabase,
