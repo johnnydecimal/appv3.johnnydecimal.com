@@ -1,35 +1,6 @@
-/* eslint-disable no-unused-vars */
-// @ts-ignore
-const JDProject = ({ children, number }) => (
-  <div className="p-4 border border-black">
-    <div>Project number: {number}</div>
-    {children}
-  </div>
-);
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-// @ts-ignore
-const JDArea = ({ children, number }) => (
-  <div className="p-4 border border-black">
-    <div>Area number: {number}</div>
-    {children}
-  </div>
-);
-
-// @ts-ignore
-const JDCategory = ({ children, number }) => (
-  <div className="p-4 border border-black">
-    <div>Category number: {number}</div>
-    {children}
-  </div>
-);
-
-// @ts-ignore
-const JDID = ({ children, number }) => (
-  <div className="p-4 border border-black">
-    <div>ID number: {number}</div>
-    {children}
-  </div>
-);
+import React from "react";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface IJDID {
@@ -63,6 +34,62 @@ interface IJDSysytem {
 
   [key: string]: IJDProject;
 }
+
+// @ts-ignore
+const JDProject = ({ children, number }) => (
+  <div className="p-4 border border-black">
+    <div>Project number: {number}</div>
+    {children}
+  </div>
+);
+
+const JDArea = ({
+  children,
+  currentArea,
+  currentProject,
+  currentSystem,
+}: {
+  children: React.ReactNode;
+  currentArea: string | undefined;
+  currentProject: string;
+  currentSystem: IJDSysytem;
+}) => {
+  /**
+   * If `props.currentArea`, we show that area and then the categories
+   * will show below.
+   *
+   * If not, show the *list of areas* that the user can select.
+   */
+  if (currentArea) {
+    return (
+      <div className="p-4 border border-black">
+        <div>Area number: {currentArea}</div>
+        {children}
+      </div>
+    );
+  } else {
+    // Generate the list of areas to show
+    const areas = Object.keys(currentSystem[currentProject].areas!);
+    console.log("areas:", areas);
+    return <div>check the console</div>;
+  }
+};
+
+// @ts-ignore
+const JDCategory = ({ children, category }) => (
+  <div className="p-4 border border-black">
+    <div>Category number: {category}</div>
+    {children}
+  </div>
+);
+
+// @ts-ignore
+const JDID = ({ children, id }) => (
+  <div className="p-4 border border-black">
+    <div>ID number: {id}</div>
+    {children}
+  </div>
+);
 
 export const currentSystem: IJDSysytem = {
   "001": {
@@ -123,8 +150,8 @@ export const currentSystem: IJDSysytem = {
 };
 
 const currentProject = "001";
-const currentArea = "00-09";
-// const currentArea = undefined;
+// const currentArea = "00-09";
+const currentArea = undefined;
 const currentCategory = "00";
 
 export const Scratch = () => {
@@ -133,12 +160,19 @@ export const Scratch = () => {
       {/* There's always a project open. */}
       <JDProject number={currentProject}>
         {/* Is there a current area? This doesn't mean that there aren't any
-            areas in the system, just that you don't have one actively open. */}
-        {currentArea ? /* yes */ : /* no */ }
-        <JDArea number="00-09">
-          <JDCategory number="00">
-            <JDID number="00.00">Children</JDID>
-          </JDCategory>
+            areas in the system, just that you don't have one actively open.
+            
+            If there is, we show it and then this same logic applies to
+            the categories underneath it.
+            
+            If there isn't, we show the *list of areas*, and it's up to the
+            user to select one of them. This then becomes the current area.*/}
+        <JDArea
+          currentArea={currentArea}
+          currentProject={currentProject}
+          currentSystem={currentSystem}
+        >
+          area children
         </JDArea>
       </JDProject>
     </div>
