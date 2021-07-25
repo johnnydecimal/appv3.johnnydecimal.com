@@ -14,19 +14,19 @@ interface InternalJDId {
 type InternalJDCategory = {
   title: string;
   meta?: { [key: string]: any };
-  ids?: { [K in JDIdNumbers]: InternalJDId };
+  ids?: { [K in JDIdNumbers]?: InternalJDId };
 };
 
 type InternalJDArea = {
   title: string;
   meta?: { [key: string]: any };
-  categories?: { [K in JDCategoryNumbers]: InternalJDCategory };
+  categories?: { [K in JDCategoryNumbers]?: InternalJDCategory };
 };
 
 type InternalJDProject = {
   title: string;
   meta?: { [key: string]: any };
-  areas?: { [K in JDAreaNumbers]: InternalJDArea };
+  areas?: { [K in JDAreaNumbers]?: InternalJDArea };
 };
 
 /**
@@ -34,7 +34,7 @@ type InternalJDProject = {
  * https://stackoverflow.com/questions/51659420/consider-using-a-mapped-object-type-instead-whats-a-mapped-object-type-and#51659490
  */
 export type InternalJDSystem = {
-  [K in JDProjectNumbers]: InternalJDProject;
+  [K in JDProjectNumbers]?: InternalJDProject;
 };
 
 export const test: InternalJDSystem = {
