@@ -4,6 +4,8 @@ import { inspect } from "@xstate/inspect";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { AuthMachine } from "./components/AuthMachine/AuthMachine";
 
+import { Scratch } from "./scratch";
+
 /**
  * The XState inspector popup.
  */
@@ -14,6 +16,7 @@ inspect({
 });
 
 export const App = () => {
+  return <Scratch />;
   return (
     /* Bring everything in from the sides */
     <div className="mx-2 sm:mx-12">

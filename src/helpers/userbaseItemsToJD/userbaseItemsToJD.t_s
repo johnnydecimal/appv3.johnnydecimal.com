@@ -1,0 +1,26 @@
+/**
+ * # userbaseItemsToJD
+ *
+ * ## Goal
+ * We'll take the current array of `UserbaseItems[]` and parse them in to
+ * something that can be usefully rendered to screen.
+ *
+ * What will that final-state object look like? What will our JD-rendering
+ * components need?
+ *
+ * You're thinking that there'll be nested levels of these things, like:
+ *
+ * <JDProject number="001">
+ *   <JDArea number="00-09">
+ *     <JDCategory number="00">
+ * 		 </JDCategory>
+ *   </JDArea number="00-09">
+ * </JDProject>
+ *
+ * <JDProject
+ *   number="001"
+ *   category={<JDCategory }
+ * />
+ *
+ * Hmm let's just mess about with some real code.
+ */
