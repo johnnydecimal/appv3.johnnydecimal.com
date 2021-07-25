@@ -70,18 +70,58 @@ const JDArea = ({
   } else {
     // Generate the list of areas to show
     const areas = Object.keys(currentSystem[currentProject].areas!);
-    console.log("areas:", areas);
-    return <div>check the console</div>;
+    return (
+      <div>
+        <p>Select an area:</p>
+        {areas.map((area, i) => (
+          <div key={i}>{area}</div>
+        ))}
+      </div>
+    );
   }
 };
 
-// @ts-ignore
-const JDCategory = ({ children, category }) => (
-  <div className="p-4 border border-black">
-    <div>Category number: {category}</div>
-    {children}
-  </div>
-);
+const JDCategory = ({
+  children,
+  currentSystem,
+  currentProject,
+  currentArea,
+  currentCategory,
+}: {
+  children: React.ReactNode;
+  currentSystem: IJDSysytem;
+  currentProject: string;
+  currentArea: string | undefined;
+  currentCategory: string | undefined;
+}) => {
+  /**
+   * If `props.currentCategory`, we show that area and then the categories
+   * will show below.
+   *
+   * If not, show the *list of areas* that the user can select.
+   */
+  if (currentCategory) {
+    return (
+      <div className="p-4 border border-black">
+        <div>Category number: {currentCategory}</div>
+        {children}
+      </div>
+    );
+  } else {
+    // Generate the list of categories to show
+    const categories = Object.keys(
+      currentSystem[currentProject].areas![currentArea!].categories!
+    );
+    return (
+      <div>
+        <p>Select a category:</p>
+        {categories.map((category, i) => (
+          <div key={i}>{category}</div>
+        ))}
+      </div>
+    );
+  }
+};
 
 // @ts-ignore
 const JDID = ({ children, id }) => (
@@ -150,9 +190,10 @@ export const currentSystem: IJDSysytem = {
 };
 
 const currentProject = "001";
-// const currentArea = "00-09";
-const currentArea = undefined;
+const currentArea = "00-09";
+// const currentArea = undefined;
 const currentCategory = "00";
+// const currentCategory = undefined;
 
 export const Scratch = () => {
   return (
@@ -168,11 +209,18 @@ export const Scratch = () => {
             If there isn't, we show the *list of areas*, and it's up to the
             user to select one of them. This then becomes the current area.*/}
         <JDArea
-          currentArea={currentArea}
-          currentProject={currentProject}
           currentSystem={currentSystem}
+          currentProject={currentProject}
+          currentArea={currentArea}
         >
-          area children
+          <JDCategory
+            currentSystem={currentSystem}
+            currentProject={currentProject}
+            currentArea={currentArea}
+            currentCategory={currentCategory}
+          >
+            category children
+          </JDCategory>
         </JDArea>
       </JDProject>
     </div>
