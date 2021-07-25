@@ -36,3 +36,9 @@ type InternalJDProject = {
 export type InternalJDSystem = {
   [K in JDProjectNumbers]: InternalJDProject;
 };
+
+export const test: InternalJDSystem = {
+  "001": {
+    title: "project",
+  },
+};
