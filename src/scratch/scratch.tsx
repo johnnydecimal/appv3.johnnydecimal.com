@@ -3,11 +3,7 @@ import { UserbaseItem } from "@types";
 import React from "react";
 import { nanoid } from "nanoid";
 
-import {
-  JDArea as JDAreaNumbers,
-  JDCategory as JDCategoryNumbers,
-  JDID as JDIDNumbers,
-} from "@types";
+import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
 
 import { allAreas, allCategories, allIds } from "./allTheNumbers";
 

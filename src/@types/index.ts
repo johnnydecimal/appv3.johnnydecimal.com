@@ -1,6 +1,7 @@
-import { JDArea } from "./JDArea";
-import { JDCategory } from "./JDCategory";
-import { JDID } from "./JDID";
+import { JDProjectNumbers } from "./JDProjectNumbers";
+import { JDAreaNumbers } from "./JDAreaNumbers";
+import { JDCategoryNumbers } from "./JDCategoryNumbers";
+import { JDIdNumbers } from "./JDIdNumbers";
 import { JDItem } from "./JDItem";
 import {
   JDUserProfile,
@@ -10,9 +11,10 @@ import {
 } from "./Userbase";
 
 export type {
-  JDArea,
-  JDCategory,
-  JDID,
+  JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+  JDIdNumbers,
   JDItem,
   JDUserProfile,
   UserbaseData,

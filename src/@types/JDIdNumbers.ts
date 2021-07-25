@@ -1,7 +1,7 @@
 /**
- * JDID is the type which is all possible IDs.
+ * JDIdNumbers is the type which is all possible ID numbers.
  */
-export type JDID =
+export type JDIdNumbers =
   | "00.00"
   | "00.01"
   | "00.02"

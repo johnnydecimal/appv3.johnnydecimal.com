@@ -1,4 +1,4 @@
-import type { JDArea, JDCategory, JDID } from ".";
+import type { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from ".";
 
 /**
  * Each distinct JD Item -- a Project, Area, Category, etc. -- follows the same
@@ -11,9 +11,29 @@ import type { JDArea, JDCategory, JDID } from ".";
  *   (this has yet to be defined).
  *
  */
-export interface JDItem {
-  jdType: "area" | "category" | "id";
-  jdNumber: JDArea | JDCategory | JDID;
-  jdTitle: string;
-  meta?: any; // This is an object with user-defined properties.
-}
+// export interface JDItem {
+//   jdType: "area" | "category" | "id";
+//   jdNumber: JDAreaNumbers | JDCategoryNumbers | JDIdNumbers;
+//   jdTitle: string;
+//   meta?: any; // This is an object with user-defined properties.
+// }
+
+export type JDItem =
+  | {
+      jdType: "area";
+      jdNumber: JDAreaNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
+  | {
+      jdType: "category";
+      jdNumber: JDCategoryNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
+  | {
+      jdType: "id";
+      jdNumber: JDIdNumbers;
+      jdTitle: string;
+      meta?: Object;
+    };
