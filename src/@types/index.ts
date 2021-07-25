@@ -1,4 +1,4 @@
-import { InternalJDProject } from "./InternalJDProject";
+import { InternalJDSystem } from "./InternalJDSystem";
 import { JDProjectNumbers } from "./JDProjectNumbers";
 import { JDAreaNumbers } from "./JDAreaNumbers";
 import { JDCategoryNumbers } from "./JDCategoryNumbers";
@@ -12,7 +12,7 @@ import {
 } from "./Userbase";
 
 export type {
-  InternalJDProject,
+  InternalJDSystem,
   JDProjectNumbers,
   JDAreaNumbers,
   JDCategoryNumbers,

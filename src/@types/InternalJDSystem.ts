@@ -3,6 +3,7 @@
  * created by `helpers/userbaseItemsToInternalJdProject`.
  */
 
+import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
 import { JDProjectNumbers } from "./JDProjectNumbers";
 
 interface InternalJDId {
@@ -10,28 +11,28 @@ interface InternalJDId {
   meta?: { [key: string]: any };
 }
 
-interface InternalJDCategory {
+type InternalJDCategory = {
   title: string;
   meta?: { [key: string]: any };
-  ids?: { [key: string]: InternalJDId };
-}
+  ids?: { [K in JDIdNumbers]: InternalJDId };
+};
 
-interface InternalJDArea {
+type InternalJDArea = {
   title: string;
   meta?: { [key: string]: any };
-  categories?: { [key: string]: InternalJDCategory };
-}
+  categories?: { [K in JDCategoryNumbers]: InternalJDCategory };
+};
 
-interface InternalJDProject {
+type InternalJDProject = {
   title: string;
   meta?: { [key: string]: any };
-  areas?: { [key: string]: InternalJDArea };
-}
+  areas?: { [K in JDAreaNumbers]: InternalJDArea };
+};
 
 /**
  * This one must be a type, an interface generates an error.
  * https://stackoverflow.com/questions/51659420/consider-using-a-mapped-object-type-instead-whats-a-mapped-object-type-and#51659490
  */
-export type InternalJDProject = {
+export type InternalJDSystem = {
   [K in JDProjectNumbers]: InternalJDProject;
 };
