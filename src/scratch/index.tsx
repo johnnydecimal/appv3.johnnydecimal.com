@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
+import { UserbaseItem } from "@types";
 import React from "react";
+import { nanoid } from "nanoid";
+
+import {
+  JDArea as JDAreaNumbers,
+  JDCategory as JDCategoryNumbers,
+  JDID as JDIDNumbers,
+} from "@types";
+
+import { allAreas, allCategories, allIds } from "./allTheNumbers";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface IJDID {
@@ -189,6 +198,187 @@ export const currentSystem: IJDSysytem = {
   },
 };
 
+function shuffle(array: any) {
+  // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  var currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
+
+const userbaseItemsFullSystemGenerator = () => {
+  console.log("Starting to create the über-JDSystem.");
+  // Set up the return array
+  const userbaseItems: UserbaseItem[] = [];
+
+  const startTime = window.performance.now();
+
+  // Push all areas to it
+  allAreas.forEach((area) => {
+    userbaseItems.push({
+      itemId: nanoid(),
+      createdBy: {
+        timestamp: new Date(),
+        username: "john",
+      },
+      item: {
+        jdType: "area",
+        jdNumber: area,
+        jdTitle: `Area ${area}`,
+      },
+    });
+  });
+  // Push all categories to it
+  allCategories.forEach((category) => {
+    userbaseItems.push({
+      itemId: nanoid(),
+      createdBy: {
+        timestamp: new Date(),
+        username: "john",
+      },
+      item: {
+        jdType: "category",
+        jdNumber: category,
+        jdTitle: `Category ${category}`,
+      },
+    });
+  });
+  // Push all IDs to it
+  allIds.forEach((id) => {
+    userbaseItems.push({
+      itemId: nanoid(),
+      createdBy: {
+        timestamp: new Date(),
+        username: "john",
+      },
+      item: {
+        jdType: "id",
+        jdNumber: id,
+        jdTitle: `ID ${id}`,
+      },
+    });
+  });
+  // Shuffle it
+  const shuffledUserbaseItems: UserbaseItem[] = shuffle(userbaseItems);
+
+  const endTime = window.performance.now();
+  console.log(
+    `Creating all possibilities and shuffling them took ${
+      endTime - startTime
+    }ms.`
+  );
+
+  return userbaseItems;
+};
+
+const userbaseItemsToInternalJdObjectGenerator = (
+  userbaseItems: UserbaseItem[]
+) => {
+  const startTime = window.performance.now();
+  const returnProject = {
+    "001": {
+      areas: {},
+    },
+  };
+
+  // -- Get all of the areas from the array --=--=--=--=--=--=--=--=--=--=--=--
+  var i = 0,
+    len = userbaseItems.length;
+  while (i < len) {
+    if (userbaseItems[i].item.jdType === "area") {
+      // @ts-ignore
+      const areaNumber: JDAreaNumbers = userbaseItems[i].item.jdNumber;
+      const areaTitle = userbaseItems[i].item.jdTitle;
+      // @ts-ignore
+      returnProject["001"].areas[areaNumber] = {
+        title: areaTitle,
+        categories: {},
+      };
+    }
+    i++;
+  }
+
+  // -- Get all of the categories from the array  --=--=--=--=--=--=--=--=--=--
+  // .. Helper function ..
+  const categoryToArea = (category: JDCategoryNumbers): JDAreaNumbers => {
+    const categoryFirstNumberToAreaDictionary = {
+      "0": "00-09",
+      "1": "10-19",
+      "2": "20-29",
+      "3": "30-39",
+      "4": "40-49",
+      "5": "50-59",
+      "6": "60-69",
+      "7": "70-79",
+      "8": "80-89",
+      "9": "90-99",
+    };
+    const firstNumber = category.charAt(0);
+    // @ts-ignore
+    return categoryFirstNumberToAreaDictionary[firstNumber];
+  };
+  // .. Do the work ..
+  i = 0;
+  while (i < len) {
+    if (userbaseItems[i].item.jdType === "category") {
+      // @ts-ignore
+      const categoryNumber: JDCategoryNumbers = userbaseItems[i].item.jdNumber;
+      const categoryTitle: string = userbaseItems[i].item.jdTitle;
+      const areaNumber: JDAreaNumbers = categoryToArea(categoryNumber);
+      // @ts-ignore
+      returnProject["001"].areas[areaNumber].categories[categoryNumber] = {
+        title: categoryTitle,
+        ids: {},
+      };
+    }
+    i++;
+  }
+
+  // -- Get all of the IDs from the array   --=--=--=--=--=--=--=--=--=--=--=--
+  i = 0;
+  while (i < len) {
+    if (userbaseItems[i].item.jdType === "id") {
+      const item = userbaseItems[i].item;
+      const idNumber = item.jdNumber;
+      const idTitle = item.jdTitle;
+      const categoryNumber: JDCategoryNumbers = item.jdNumber.substr(
+        0,
+        2
+      ) as JDCategoryNumbers;
+      const areaNumber = categoryToArea(categoryNumber);
+      // @ts-ignore
+      returnProject["001"].areas[areaNumber].categories[categoryNumber].ids[
+        idNumber
+      ] = {
+        title: idTitle,
+      };
+    }
+    i++;
+  }
+
+  // -- Finish up   --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
+  const endTime = window.performance.now();
+  console.log(
+    `Creating the sorted object from the random array took ${
+      endTime - startTime
+    }ms.`
+  );
+  console.log("returnProject:", returnProject);
+};
+
 const currentProject = "001";
 const currentArea = "00-09";
 // const currentArea = undefined;
@@ -196,6 +386,9 @@ const currentCategory = "00";
 // const currentCategory = undefined;
 
 export const Scratch = () => {
+  const uberJdProject = userbaseItemsFullSystemGenerator();
+  const internalJdObject =
+    userbaseItemsToInternalJdObjectGenerator(uberJdProject);
   return (
     <div className="m-12">
       {/* There's always a project open. */}
