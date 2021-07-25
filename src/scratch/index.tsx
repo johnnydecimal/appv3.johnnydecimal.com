@@ -96,6 +96,9 @@ export const currentSystem: IJDSysytem = {
               "00.00": {
                 title: "ID 00.00",
                 meta: {
+                  blankLinesAbove: 4,
+                  commentAbove: "This is a comment above the item.",
+                  commentBelow: "This is a comment below the item.",
                   isTheLastId: false,
                 },
               },
@@ -119,11 +122,19 @@ export const currentSystem: IJDSysytem = {
   },
 };
 
+const currentProject = "001";
+const currentArea = "00-09";
+// const currentArea = undefined;
+const currentCategory = "00";
+
 export const Scratch = () => {
   return (
     <div className="m-12">
       {/* There's always a project open. */}
-      <JDProject number="001">
+      <JDProject number={currentProject}>
+        {/* Is there a current area? This doesn't mean that there aren't any
+            areas in the system, just that you don't have one actively open. */}
+        {currentArea ? /* yes */ : /* no */ }
         <JDArea number="00-09">
           <JDCategory number="00">
             <JDID number="00.00">Children</JDID>
