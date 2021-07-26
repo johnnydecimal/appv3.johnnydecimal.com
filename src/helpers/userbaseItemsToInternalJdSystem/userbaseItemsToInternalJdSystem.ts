@@ -38,6 +38,11 @@ export const userbaseItemsToInternalJdSystem = (
   userbaseItems: UserbaseItem[]
 ): InternalJDSystem => {
   /**
+   * Do some timings in dev. #TODO: remove later.
+   */
+  const startTime = window.performance.now();
+
+  /**
    * Set up the base object. We'll return this even if there are no AC.IDs.
    */
   const internalJDSystem: InternalJDSystem = {
@@ -131,6 +136,15 @@ export const userbaseItemsToInternalJdSystem = (
         };
     }
     i++;
+  }
+
+  const endTime = window.performance.now();
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      `Creating internalJDSystem from userbaseItem[] took ${
+        endTime - startTime
+      }ms.`
+    );
   }
 
   return internalJDSystem;
