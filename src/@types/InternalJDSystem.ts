@@ -13,20 +13,20 @@ interface InternalJDId {
 
 type InternalJDCategory = {
   title: string;
+  ids: { [K in JDIdNumbers]?: InternalJDId };
   meta?: { [key: string]: any };
-  ids?: { [K in JDIdNumbers]?: InternalJDId };
 };
 
 type InternalJDArea = {
   title: string;
+  categories: { [K in JDCategoryNumbers]?: InternalJDCategory };
   meta?: { [key: string]: any };
-  categories?: { [K in JDCategoryNumbers]?: InternalJDCategory };
 };
 
 type InternalJDProject = {
   title: string;
+  areas: { [K in JDAreaNumbers]?: InternalJDArea };
   meta?: { [key: string]: any };
-  areas?: { [K in JDAreaNumbers]?: InternalJDArea };
 };
 
 /**
@@ -40,5 +40,11 @@ export type InternalJDSystem = {
 export const test: InternalJDSystem = {
   "001": {
     title: "project",
+    areas: {
+      "00-09": {
+        title: "yeah",
+        categories: {},
+      },
+    },
   },
 };
