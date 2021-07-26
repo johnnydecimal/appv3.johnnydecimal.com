@@ -473,75 +473,73 @@ export const authMachine = authModel.createMachine(
   {
     services: {
       // == userbaseInit  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-      userbaseInit:
-        (context: AuthMachineContext) =>
-        (sendBack: (event: AuthMachineEvent) => void) => {
-          userbase
-            .init({
-              appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
-              updateUserHandler: ({ user: updatedUser }) => {
-                /**
-                 * This is the update user handler, so when we're executing this
-                 * function we know that we must have a signedIn user.
-                 *
-                 * Assign the updated user to context.
-                 */
-                authModel.assign({ user: updatedUser });
-
-                /**
-                 * We are *not* going to look for changes to `currentDatabase`
-                 * and send them down to the databaseMachine.
-                 *
-                 * You thought about it but what if the user on this session is
-                 * half-way through an edit? Yeah, theoretically it was them
-                 * that changed the database on another machine, but this could
-                 * still result in data loss. And why *not* be able to have two
-                 * databases open on two separate machines? You're doing one
-                 * thing at work and another at home.
-                 */
-              },
-            })
-            .then((session) => {
+      userbaseInit: () => (sendBack: (event: AuthMachineEvent) => void) => {
+        userbase
+          .init({
+            appId: "37c7462e-f79c-4ef3-bdb0-55968a34d572",
+            updateUserHandler: ({ user: updatedUser }) => {
               /**
-               * This only tells us that the SDK initialised successfully, *not*
-               * that there is an active user. For that we need `session.user`
-               * to contain a user object.
+               * This is the update user handler, so when we're executing this
+               * function we know that we must have a signedIn user.
+               *
+               * Assign the updated user to context.
                */
-              if (session.user) {
-                /**
-                 * We have a user, so a user is signed in.
-                 */
-                sendBack({
-                  type: "A_USER_IS_SIGNED_IN",
-                  user: session.user,
-                });
-              } else {
-                /**
-                 * There's no user, but this isn't an error. We just don't have
-                 * a signed-in user.
-                 */
-                sendBack({
-                  type: "NO_USER_IS_SIGNED_IN",
-                });
-              }
-            })
-            .catch((error: UserbaseError) => {
+              authModel.assign({ user: updatedUser });
+
               /**
-               * Now *this* is an error. Something janky happened with the
-               * `init` call. We shit the bed at this stage.
+               * We are *not* going to look for changes to `currentDatabase`
+               * and send them down to the databaseMachine.
                *
-               * Update: change from CATASTROPHIC_ERROR to a regular error. Hmm
-               * no. What we need to do is examine the error, and depending on
-               * which one it is, act accordingly. They're all documented.
-               *
-               * // TODO: sort this out.
+               * You thought about it but what if the user on this session is
+               * half-way through an edit? Yeah, theoretically it was them
+               * that changed the database on another machine, but this could
+               * still result in data loss. And why *not* be able to have two
+               * databases open on two separate machines? You're doing one
+               * thing at work and another at home.
+               */
+            },
+          })
+          .then((session) => {
+            /**
+             * This only tells us that the SDK initialised successfully, *not*
+             * that there is an active user. For that we need `session.user`
+             * to contain a user object.
+             */
+            if (session.user) {
+              /**
+               * We have a user, so a user is signed in.
                */
               sendBack({
-                type: "ERROR",
-                error,
+                type: "A_USER_IS_SIGNED_IN",
+                user: session.user,
               });
+            } else {
+              /**
+               * There's no user, but this isn't an error. We just don't have
+               * a signed-in user.
+               */
+              sendBack({
+                type: "NO_USER_IS_SIGNED_IN",
+              });
+            }
+          })
+          .catch((error: UserbaseError) => {
+            /**
+             * Now *this* is an error. Something janky happened with the
+             * `init` call. We shit the bed at this stage.
+             *
+             * Update: change from CATASTROPHIC_ERROR to a regular error. Hmm
+             * no. What we need to do is examine the error, and depending on
+             * which one it is, act accordingly. They're all documented.
+             *
+             * // TODO: sort this out.
+             */
+            sendBack({
+              type: "ERROR",
+              error,
             });
-        },
+          });
+      },
 
       // == userbaseSignIn   ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
       userbaseSignIn:
