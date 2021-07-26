@@ -25,20 +25,18 @@ import { InternalJDSystem, JDProjectNumbers, UserbaseItem } from "@types";
  *
  */
 export const userbaseItemsToInternalJdSystem = (
-  // currentProject: JDProjectNumbers,
+  currentProjectNumber: JDProjectNumbers,
+  currentProjectTitle: string,
   userbaseItems: UserbaseItem[]
 ): InternalJDSystem => {
-  // Okay, crib all this from scratch.tsx
-  const currentProject: JDProjectNumbers = "001";
+  /**
+   * Set up the base object. We'll return this even if there are no AC.IDs.
+   */
   const internalJDSystem: InternalJDSystem = {
-    "000": {
-      title: "string",
+    [currentProjectNumber]: {
+      title: currentProjectTitle,
       areas: {},
     },
-    // [currentProject]: {
-    //   typesWorkHere: false,
-    //   bad: true,
-    // },
   };
 
   return internalJDSystem;
