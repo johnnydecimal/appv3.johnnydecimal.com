@@ -8,15 +8,15 @@ import { Scratch } from "./scratch/scratch";
 
 /**
  * The XState inspector popup.
- inspect({
-   // options
-   // url: 'https://statecharts.io/inspect', // (default)
-   iframe: false, // open in new window
-  });
-  */
+ */
+inspect({
+  // options
+  // url: 'https://statecharts.io/inspect', // (default)
+  iframe: false, // open in new window
+});
 
 export const App = () => {
-  return <Scratch />;
+  // return <Scratch />;
   return (
     /* Bring everything in from the sides */
     <div className="mx-2 sm:mx-12">

@@ -6,7 +6,7 @@
 //   JDIdNumbers,
 // } from "@types";
 
-import { categoryNumberToAreaNumber } from "helpers/categoryNumberToAreaNumber/categoryNumberToAreaNumber";
+import { categoryNumberToAreaNumber } from "utilities/categoryNumberToAreaNumber/categoryNumberToAreaNumber";
 
 import {
   InternalJDSystem,
