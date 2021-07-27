@@ -80,16 +80,9 @@ export const DatabaseMachine = () => {
     send({
       type: "INSERT_ITEM",
       item: {
-        itemId: "blah",
-        item: {
-          jdType: "area",
-          jdNumber: "00-09",
-          jdTitle: "Hard-coded test",
-        },
-        createdBy: {
-          timestamp: new Date(),
-          // this is enough, the changeHandler will provide real values
-        },
+        jdType: "area",
+        jdNumber: "00-09",
+        jdTitle: "Hard-coded test",
       },
     });
   };

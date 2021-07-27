@@ -6,12 +6,14 @@ import userbase, { Database } from "userbase-js";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   InternalJDSystem,
+  JDItem,
   JDProjectNumbers,
   UserbaseError,
   UserbaseItem,
 } from "../../@types";
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
 import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
+import { nanoid } from "nanoid";
 
 const databaseModel = createModel(
   {
@@ -86,9 +88,10 @@ const databaseModel = createModel(
 
       /**
        * Sent by the helper function whenever we want to add a new item to the
-       * current database.
+       * current database. Note that we don't insert a UserbaseItem, there's a
+       * bunch of stuff on there (itemId) that Userbase generates for us.
        */
-      INSERT_ITEM: (item: UserbaseItem) => ({ item }),
+      INSERT_ITEM: (item: JDItem) => ({ item }),
 
       /**
        * Send by ubInsertItem when it was successful.
@@ -126,15 +129,30 @@ const assignNewUserbaseItem = databaseModel.assign({
     if (event.type !== "INSERT_ITEM") {
       return context.userbaseItems;
     }
+    /**
+     * Incoming event.item is of type JDItem. It doesn't contain the stuff that
+     * Userbase adds, so we fudge it here as it'll be immediately overwritten
+     * by the changeHandler.
+     */
+    const newItem: UserbaseItem = {
+      itemId: nanoid(),
+      item: {
+        ...event.item,
+      },
+      createdBy: {
+        username: "fudge", // TODO: pull from auth.context
+        timestamp: new Date(),
+      },
+    };
     const newUserbaseItems = [];
     if (typeof context.userbaseItems === "undefined") {
       /**
        * This is weird given that context.userbaseItems has been initialised
        * as an empty array, but whatever.
        */
-      newUserbaseItems.push(event.item);
+      newUserbaseItems.push(newItem);
     } else {
-      newUserbaseItems.push(...context.userbaseItems, event.item);
+      newUserbaseItems.push(...context.userbaseItems, newItem);
     }
     return newUserbaseItems;
   },
