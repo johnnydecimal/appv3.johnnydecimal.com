@@ -4,8 +4,14 @@ import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { UserbaseError, UserbaseItem } from "../../@types";
+import {
+  InternalJDSystem,
+  JDProjectNumbers,
+  UserbaseError,
+  UserbaseItem,
+} from "../../@types";
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
+import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
 
 const databaseModel = createModel(
   {
@@ -37,6 +43,11 @@ const databaseModel = createModel(
      * which makes up that database.
      */
     userbaseItems: [] as UserbaseItem[],
+
+    /**
+     * The parsed representation of our system.
+     */
+    internalJDSystem: {} as InternalJDSystem,
   },
   {
     events: {
@@ -336,6 +347,18 @@ export const databaseMachine = databaseModel.createMachine(
                  * machine is in a state which will accept this event and do
                  * something with its payload.
                  */
+
+                // databaseModel.assign({
+                //   internalJDSystem: (context: DatabaseMachineContext) => {
+                const internalJDSystem = userbaseItemsToInternalJdSystem(
+                  context.currentDatabase as JDProjectNumbers,
+                  "JUST A TEST #TODO",
+                  userbaseItems
+                );
+                console.log("internalJDSystem:", internalJDSystem);
+                // return internalJDSystem;
+                // },
+                // });
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
