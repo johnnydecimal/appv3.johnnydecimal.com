@@ -20,6 +20,8 @@ const WaitOne = () => <div>Wait one. Doing networks.</div>;
 export const AuthMachine = () => {
   /**
    * Start the machine.
+   * #TODO: switch to `useInterpret` to save re-renders.
+   * https://xstate.js.org/docs/recipes/react.html#global-state-react-context
    */
   const [state, send] = useMachine(authMachine, {
     devTools: true,

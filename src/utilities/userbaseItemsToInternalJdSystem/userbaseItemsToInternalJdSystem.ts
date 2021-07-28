@@ -1,11 +1,3 @@
-// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// import {
-//   JDProjectNumbers,
-//   JDAreaNumbers,
-//   JDCategoryNumbers,
-//   JDIdNumbers,
-// } from "@types";
-
 import { categoryNumberToAreaNumber } from "utilities/categoryNumberToAreaNumber/categoryNumberToAreaNumber";
 
 import {
@@ -15,6 +7,7 @@ import {
   UserbaseItem,
   JDCategoryNumbers,
 } from "@types";
+import { current } from "immer";
 
 /**
  * # userbaseItemsToInternalJdSystem
@@ -37,6 +30,12 @@ export const userbaseItemsToInternalJdSystem = (
   currentProjectTitle: string,
   userbaseItems: UserbaseItem[]
 ): InternalJDSystem => {
+  console.log(
+    "userbaseItemsToInternalJdSystem called with:",
+    currentProjectNumber,
+    currentProjectTitle,
+    userbaseItems
+  );
   /**
    * Do some timings in dev. #TODO: remove later.
    */

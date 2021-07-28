@@ -359,6 +359,7 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
+                console.log("changeHandler:userbaseItems:", userbaseItems);
                 /**
                  * So when this is set up, this fires. That's how we get the
                  * initial load of items. So we need to make sure that the
@@ -377,6 +378,7 @@ export const databaseMachine = databaseModel.createMachine(
                 // return internalJDSystem;
                 // },
                 // });
+
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
@@ -417,12 +419,7 @@ export const databaseMachine = databaseModel.createMachine(
           userbase
             .insertItem({
               databaseName: context.currentDatabase,
-              // item: event.item,
-              item: {
-                test: true,
-                item: "yeah",
-                insertDate: new Date(),
-              },
+              item: event.item,
             })
             .then(() => {
               sendBack({ type: "ITEM_INSERTED" });

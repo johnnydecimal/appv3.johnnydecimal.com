@@ -12,6 +12,7 @@ import { DatabaseMachineReactContext } from "./context";
 // import { Database } from "userbase-js";
 import { ActorRefFrom } from "xstate";
 import { databaseMachine } from "./database.machine";
+import { JDItem } from "@types";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -76,14 +77,10 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const insertItem = () => {
+  const insertItem = (item: JDItem) => {
     send({
       type: "INSERT_ITEM",
-      item: {
-        jdType: "area",
-        jdNumber: "00-09",
-        jdTitle: "Hard-coded test",
-      },
+      item,
     });
   };
 
@@ -101,8 +98,21 @@ export const DatabaseMachine = () => {
     e.preventDefault();
     changeDatabase(formRef!.current!.value);
   };
+  const handleSubmitNewItem = (e: any) => {
+    e.preventDefault();
+    insertItem({
+      // @ts-ignore
+      jdType: jdTypeRef!.current!.value,
+      // @ts-ignore
+      jdNumber: jdNumberRef!.current!.value,
+      jdTitle: jdTitleRef!.current!.value,
+    });
+  };
 
   const formRef = React.createRef<HTMLInputElement>();
+  const jdTypeRef = React.createRef<HTMLInputElement>();
+  const jdNumberRef = React.createRef<HTMLInputElement>();
+  const jdTitleRef = React.createRef<HTMLInputElement>();
 
   return (
     <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
@@ -118,7 +128,31 @@ export const DatabaseMachine = () => {
         </label>
       </form>
       <hr className="my-2" />
-      <button onClick={() => insertItem()}>insert test item</button>
+      <h2>Create item</h2>
+      <form onSubmit={handleSubmitNewItem}>
+        <label>
+          New item:
+          <input
+            name="jdType"
+            placeholder="jdType"
+            type="text"
+            ref={jdTypeRef}
+          />
+          <input
+            name="jdNumber"
+            placeholder="jdNumber"
+            type="text"
+            ref={jdNumberRef}
+          />
+          <input
+            name="jdTitle"
+            placeholder="jdTitle"
+            type="text"
+            ref={jdTitleRef}
+          />
+          <input type="submit" value="submit" />
+        </label>
+      </form>
       <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} />
