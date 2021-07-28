@@ -30,12 +30,12 @@ export const userbaseItemsToInternalJdSystem = (
   currentProjectTitle: string,
   userbaseItems: UserbaseItem[]
 ): InternalJDSystem => {
-  console.log(
-    "userbaseItemsToInternalJdSystem called with:",
-    currentProjectNumber,
-    currentProjectTitle,
-    userbaseItems
-  );
+  // console.log(
+  //   "userbaseItemsToInternalJdSystem called with:",
+  //   currentProjectNumber,
+  //   currentProjectTitle,
+  //   userbaseItems
+  // );
   /**
    * Do some timings in dev. #TODO: remove later.
    */
