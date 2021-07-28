@@ -359,7 +359,6 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
-                console.log("changeHandler:userbaseItems:", userbaseItems);
                 /**
                  * So when this is set up, this fires. That's how we get the
                  * initial load of items. So we need to make sure that the
@@ -369,16 +368,37 @@ export const databaseMachine = databaseModel.createMachine(
 
                 // databaseModel.assign({
                 //   internalJDSystem: (context: DatabaseMachineContext) => {
-                const internalJDSystem = userbaseItemsToInternalJdSystem(
-                  context.currentDatabase as JDProjectNumbers,
-                  "JUST A TEST #TODO",
-                  userbaseItems
-                );
-                console.log("internalJDSystem:", internalJDSystem);
+                // const internalJDSystem = userbaseItemsToInternalJdSystem(
+                // context.currentDatabase as JDProjectNumbers,
+                // "JUST A TEST #TODO",
+                // userbaseItems
+                // );
+                // console.log("internalJDSystem:", internalJDSystem);
                 // return internalJDSystem;
                 // },
                 // });
 
+                /**
+                 * If `userbaseItems` is empty, we're on a first-run. Put the
+                 * database object on there.
+                 */
+                // userbase
+                //   .insertItem({
+                //     databaseName: "001",
+                //     item: {
+                //       jdType: "jdProject",
+                //       jdNumber: "001",
+                //       jdTitle: "First project",
+                //     },
+                //   })
+                //   .then(() => {
+                //     /* derp */
+                //   })
+                //   .catch((error) => {
+                //     /* derp */
+                //   });
+
+                console.log("userbaseItems:", userbaseItems);
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
