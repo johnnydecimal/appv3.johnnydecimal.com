@@ -82,6 +82,11 @@ const databaseModel = createModel(
       }),
 
       /**
+       * Send by changeHandler() if userbaseItems.length === 0.
+       */
+      REPORT_USERBASEITEMS_EMPTY: () => ({}),
+
+      /**
        * Sent by ubOpenDatabase when it successfully opens a database.
        */
       REPORT_DATABASE_OPENED: () => ({}),
@@ -197,6 +202,18 @@ export const databaseMachine = databaseModel.createMachine(
       OPEN_DATABASE: {
         actions: [assignNewDatabase, clearUserbaseItems],
         target: "#databaseMachine.databaseOpener",
+      },
+      REPORT_USERBASEITEMS_EMPTY: {
+        actions: [
+          send({
+            type: "INSERT_ITEM",
+            item: {
+              jdType: "project",
+              jdNumber: "001",
+              jdTitle: "First project",
+            },
+          }),
+        ],
       },
     },
     states: {
@@ -366,39 +383,15 @@ export const databaseMachine = databaseModel.createMachine(
                  * something with its payload.
                  */
 
-                // databaseModel.assign({
-                //   internalJDSystem: (context: DatabaseMachineContext) => {
-                // const internalJDSystem = userbaseItemsToInternalJdSystem(
-                // context.currentDatabase as JDProjectNumbers,
-                // "JUST A TEST #TODO",
-                // userbaseItems
-                // );
-                // console.log("internalJDSystem:", internalJDSystem);
-                // return internalJDSystem;
-                // },
-                // });
+                console.log("userbaseItems:", userbaseItems);
 
                 /**
-                 * If `userbaseItems` is empty, we're on a first-run. Put the
-                 * database object on there.
+                 * If the array is empty, create the project object.
                  */
-                // userbase
-                //   .insertItem({
-                //     databaseName: "001",
-                //     item: {
-                //       jdType: "jdProject",
-                //       jdNumber: "001",
-                //       jdTitle: "First project",
-                //     },
-                //   })
-                //   .then(() => {
-                //     /* derp */
-                //   })
-                //   .catch((error) => {
-                //     /* derp */
-                //   });
+                if (userbaseItems.length === 0) {
+                  sendBack({ type: "REPORT_USERBASEITEMS_EMPTY" });
+                }
 
-                console.log("userbaseItems:", userbaseItems);
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
