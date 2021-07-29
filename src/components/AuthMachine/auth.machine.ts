@@ -405,6 +405,8 @@ export const authMachine = authModel.createMachine(
                      */
                     currentDatabase: (context: AuthMachineContext) =>
                       context.user!.profile!.currentDatabase,
+                    currentUserName: (context: AuthMachineContext) =>
+                      context.user!.username,
                   },
                 },
                 on: {

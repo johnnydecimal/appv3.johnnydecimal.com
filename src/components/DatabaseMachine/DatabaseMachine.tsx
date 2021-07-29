@@ -12,7 +12,7 @@ import { DatabaseMachineReactContext } from "./context";
 // import { Database } from "userbase-js";
 import { ActorRefFrom } from "xstate";
 import { databaseMachine } from "./database.machine";
-import { JDItem } from "@types";
+import { JDItem, JDProjectNumbers } from "@types";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -70,7 +70,7 @@ export const DatabaseMachine = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree.
    */
-  const changeDatabase = (newDatabase: string) => {
+  const changeDatabase = (newDatabase: JDProjectNumbers) => {
     send({
       type: "OPEN_DATABASE",
       newDatabase,
@@ -96,7 +96,9 @@ export const DatabaseMachine = () => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    changeDatabase(formRef!.current!.value);
+    // TODO: obvs in real life we have to make sure that the user can only
+    //       create a DB with the right format; but this is a fudge anyway
+    changeDatabase(formRef!.current!.value as JDProjectNumbers);
   };
   const handleSubmitNewItem = (e: any) => {
     e.preventDefault();
@@ -119,6 +121,8 @@ export const DatabaseMachine = () => {
       <div>JD App</div>
       <hr className="my-2" />
       <button onClick={handleSignOut}>Sign out</button>
+      <hr className="my-2" />
+      <div>User: {state.context.currentUserName}</div>
       <hr className="my-2" />
       <form onSubmit={handleSubmit}>
         <label>

@@ -12,7 +12,7 @@ import {
   UserbaseItem,
 } from "../../@types";
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
-import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
+// import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
 import { nanoid } from "nanoid";
 
 const databaseModel = createModel(
@@ -20,11 +20,16 @@ const databaseModel = createModel(
     /**
      * currentDatabase is the 3-digit project which we have open. Corresponds to
      * the databaseName in Userbase. We send this value down when we invoke
-     * the machine, and the master
-     *
-     *
+     * the machine.
      */
-    currentDatabase: "",
+    currentDatabase: "" as JDProjectNumbers,
+
+    /**
+     * currentUserName is the username of the currently-signed-in user. We send
+     * this down when we invoke the machine. Note that this isn't the full
+     * User object.
+     */
+    currentUserName: "",
 
     /**
      * The array of the user's available database objects, returned by Userbase.
@@ -70,7 +75,7 @@ const databaseModel = createModel(
        * one to open, it might not actually be new. Not that the API call to
        * Userbase cares either way.
        */
-      OPEN_DATABASE: (newDatabase: string) => ({
+      OPEN_DATABASE: (newDatabase: JDProjectNumbers) => ({
         newDatabase,
       }),
 
@@ -80,11 +85,6 @@ const databaseModel = createModel(
       USERBASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
         userbaseItems,
       }),
-
-      /**
-       * Send by changeHandler() if userbaseItems.length === 0.
-       */
-      REPORT_USERBASEITEMS_EMPTY: () => ({}),
 
       /**
        * Sent by ubOpenDatabase when it successfully opens a database.
@@ -145,7 +145,7 @@ const assignNewUserbaseItem = databaseModel.assign({
         ...event.item,
       },
       createdBy: {
-        username: "fudge", // TODO: pull from auth.context
+        username: context.currentUserName,
         timestamp: new Date(),
       },
     };
@@ -195,6 +195,13 @@ export const databaseMachine = databaseModel.createMachine(
     id: "databaseMachine",
     type: "parallel",
     context: databaseModel.initialContext,
+    invoke: {
+      /**
+       * We need a top-level `invoke` because the `changeHandler` which is
+       * set up in this service needs to stay alive.
+       */
+      src: "ubOpenDatabase",
+    },
     on: {
       GET_DATABASES: {
         target: "#databaseMachine.databaseGetter",
@@ -202,18 +209,6 @@ export const databaseMachine = databaseModel.createMachine(
       OPEN_DATABASE: {
         actions: [assignNewDatabase, clearUserbaseItems],
         target: "#databaseMachine.databaseOpener",
-      },
-      REPORT_USERBASEITEMS_EMPTY: {
-        actions: [
-          send({
-            type: "INSERT_ITEM",
-            item: {
-              jdType: "project",
-              jdNumber: "001",
-              jdTitle: "First project",
-            },
-          }),
-        ],
       },
     },
     states: {
@@ -225,8 +220,13 @@ export const databaseMachine = databaseModel.createMachine(
          * to switch databases.
          */
         type: "compound",
-        initial: "gettingDatabases",
+        initial: "waitingForDatabaseToBeOpen",
         states: {
+          waitingForDatabaseToBeOpen: {
+            on: {
+              REPORT_DATABASE_OPENED: "gettingDatabases",
+            },
+          },
           gettingDatabases: {
             invoke: {
               src: "ubGetDatabases",
@@ -253,13 +253,6 @@ export const databaseMachine = databaseModel.createMachine(
          */
         type: "compound",
         initial: "openingDatabase",
-        invoke: {
-          /**
-           * We need a top-level `invoke` because the `changeHandler` which is
-           * set up in this service needs to stay alive.
-           */
-          src: "ubOpenDatabase",
-        },
         states: {
           openingDatabase: {
             on: {
@@ -382,16 +375,7 @@ export const databaseMachine = databaseModel.createMachine(
                  * machine is in a state which will accept this event and do
                  * something with its payload.
                  */
-
-                console.log("userbaseItems:", userbaseItems);
-
-                /**
-                 * If the array is empty, create the project object.
-                 */
-                if (userbaseItems.length === 0) {
-                  sendBack({ type: "REPORT_USERBASEITEMS_EMPTY" });
-                }
-
+                console.log("changeHandler got:", userbaseItems);
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
