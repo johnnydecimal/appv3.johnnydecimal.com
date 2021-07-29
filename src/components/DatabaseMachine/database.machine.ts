@@ -14,6 +14,7 @@ import {
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
 // import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
 import { nanoid } from "nanoid";
+import { pure } from "xstate/lib/actions";
 
 const databaseModel = createModel(
   {
@@ -286,6 +287,20 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           databaseOpen: {
+            entry: [
+              pure((context) => {
+                if (context.userbaseItems.length === 0) {
+                  return send({
+                    type: "INSERT_ITEM",
+                    item: {
+                      jdType: "project",
+                      jdNumber: context.currentDatabase,
+                      jdTitle: `Project ${context.currentDatabase}`,
+                    },
+                  });
+                }
+              }),
+            ],
             on: {
               INSERT_ITEM: {
                 target: "#databaseMachine.itemInserter.insertingItem",
