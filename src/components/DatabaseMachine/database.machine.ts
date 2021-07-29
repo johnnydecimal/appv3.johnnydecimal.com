@@ -288,6 +288,10 @@ export const databaseMachine = databaseModel.createMachine(
           },
           databaseOpen: {
             entry: [
+              /**
+               * If the item which represents the project doesn't exist,
+               * create it.
+               */
               pure((context) => {
                 if (context.userbaseItems.length === 0) {
                   return send({
