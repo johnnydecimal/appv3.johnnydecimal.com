@@ -184,7 +184,7 @@ const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * There's only one way a database can be opened (or created): by changing
- * context.currentDatabase and transitioning to #databaseMachine.databaseOpener.
+ * context.currentDatabase and transitioning back to the root of this machine.
  * The root-level OPEN_DATABASE does this for us.
  *
  * This way we guarantee that context.currentDatabase is actually the database
@@ -208,7 +208,7 @@ export const databaseMachine = databaseModel.createMachine(
       },
       OPEN_DATABASE: {
         actions: [assignNewDatabase, clearUserbaseItems],
-        target: "#databaseMachine.databaseOpener",
+        target: "#databaseMachine",
       },
     },
     states: {
@@ -247,9 +247,10 @@ export const databaseMachine = databaseModel.createMachine(
           },
         },
       },
-      databaseOpener: {
+      databaseState: {
         /**
-         * This is where we actually open our database.
+         * We moved the opening of the database to the root, but this state
+         * still does a bunch of admin for us.
          */
         type: "compound",
         initial: "openingDatabase",
