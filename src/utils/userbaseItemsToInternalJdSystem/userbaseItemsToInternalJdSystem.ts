@@ -54,8 +54,8 @@ export const userbaseItemsToInternalJdSystem = (
       };
       break; // There can only be one project in userbaseItems[].
     }
+    i++;
   }
-  console.log("Found project at i =", i);
 
   /**
    * First pass: get all of the items which are an area.
