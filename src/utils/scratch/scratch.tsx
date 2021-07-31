@@ -5,7 +5,11 @@ import { nanoid } from "nanoid";
 
 import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
 
-import { allAreas, allCategories, allIds } from "./allTheNumbers";
+import {
+  allAreas,
+  allCategories,
+  allIds,
+} from "../allTheNumbers/allTheNumbers";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface IJDID {

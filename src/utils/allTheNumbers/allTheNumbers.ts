@@ -1,6 +1,6 @@
-import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "../@types";
+import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
 
-export const allAreas: JDAreaNumbers[] = [
+const allAreas: JDAreaNumbers[] = [
   "00-09",
   "10-19",
   "20-29",
@@ -13,7 +13,7 @@ export const allAreas: JDAreaNumbers[] = [
   "90-99",
 ];
 
-export const allCategories: JDCategoryNumbers[] = [
+const allCategories: JDCategoryNumbers[] = [
   "00",
   "01",
   "02",
@@ -116,7 +116,7 @@ export const allCategories: JDCategoryNumbers[] = [
   "99",
 ];
 
-export const allIds: JDIdNumbers[] = [
+const allIds: JDIdNumbers[] = [
   "00.00",
   "00.01",
   "00.02",
@@ -10118,3 +10118,5 @@ export const allIds: JDIdNumbers[] = [
   "99.98",
   "99.99",
 ];
+
+export { allAreas, allCategories, allIds };

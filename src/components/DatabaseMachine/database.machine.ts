@@ -12,7 +12,7 @@ import {
   UserbaseItem,
 } from "../../@types";
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
-// import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
+import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
 import { nanoid } from "nanoid";
 import { pure } from "xstate/lib/actions";
 
@@ -389,13 +389,14 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
+                console.log(userbaseItems);
                 /**
                  * So when this is set up, this fires. That's how we get the
                  * initial load of items. So we need to make sure that the
                  * machine is in a state which will accept this event and do
                  * something with its payload.
                  */
-                console.log("changeHandler got:", userbaseItems);
+
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })

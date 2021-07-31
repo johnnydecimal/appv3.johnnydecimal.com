@@ -4,7 +4,7 @@ import { inspect } from "@xstate/inspect";
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { AuthMachine } from "./components/AuthMachine/AuthMachine";
 
-import { Scratch } from "./scratch/scratch";
+import { Scratch } from "utils";
 
 /**
  * The XState inspector popup.

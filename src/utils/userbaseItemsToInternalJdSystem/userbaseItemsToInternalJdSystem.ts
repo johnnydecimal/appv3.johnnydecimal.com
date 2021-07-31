@@ -1,5 +1,7 @@
-import { categoryNumberToAreaNumber } from "utilities/categoryNumberToAreaNumber/categoryNumberToAreaNumber";
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { categoryNumberToAreaNumber } from "utils";
 
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   InternalJDSystem,
   JDProjectNumbers,
@@ -7,55 +9,53 @@ import {
   UserbaseItem,
   JDCategoryNumbers,
 } from "@types";
-import { current } from "immer";
 
+// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * # userbaseItemsToInternalJdSystem
  *
  * Takes an array of `UserbaseItem[]`s and turns it in to the
  * `InternalJDSystem` that we use in this app.
  *
- * ## Assumptions
- *
- * 1. We only ever have a single JD project open in this 'system' at any one
- *    time. That is, the object looks like `{ "001": ... }`, with one single
- *    key at the root which is the `currentProject`.
- *    ... although at this stage we just renamed it to `...System`, and all of
- *        the type shapes do allow multiple projects, so this may no longer be
- *        valid.
- *
+ * #TODO: should return errors, doesn't currently.
+ * Returns an error if the array isn't a valid system.
  */
 export const userbaseItemsToInternalJdSystem = (
-  currentProjectNumber: JDProjectNumbers,
-  currentProjectTitle: string,
   userbaseItems: UserbaseItem[]
 ): InternalJDSystem => {
-  // console.log(
-  //   "userbaseItemsToInternalJdSystem called with:",
-  //   currentProjectNumber,
-  //   currentProjectTitle,
-  //   userbaseItems
-  // );
   /**
    * Do some timings in dev. #TODO: remove later.
    */
   const startTime = window.performance.now();
 
   /**
-   * Set up the base object. We'll return this even if there are no AC.IDs.
+   * Set up the base object.
    */
-  const internalJDSystem: InternalJDSystem = {
-    [currentProjectNumber]: {
-      title: currentProjectTitle,
-      areas: {},
-    },
-  };
+  const internalJDSystem: InternalJDSystem = {};
 
   /**
    * Set up variables that we'll use to loop over `userbaseItems[]`.
    */
   var i = 0,
     len = userbaseItems.length;
+
+  /**
+   * New! Zeroth pass: get the project itself and create the base object.
+   */
+  let projectNumber: JDProjectNumbers = "000";
+  while (i < len) {
+    const item = userbaseItems[i].item;
+    if (item.jdType === "project") {
+      projectNumber = item.jdNumber as JDProjectNumbers;
+      const projectTitle = item.jdTitle;
+      internalJDSystem[projectNumber] = {
+        title: projectTitle,
+        areas: {},
+      };
+      break; // There can only be one project in userbaseItems[].
+    }
+  }
+  console.log("Found project at i =", i);
 
   /**
    * First pass: get all of the items which are an area.
@@ -68,15 +68,15 @@ export const userbaseItemsToInternalJdSystem = (
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "area") {
-      const areaNumber = userbaseItems[i].item.jdNumber as JDAreaNumbers;
-      const areaTitle = userbaseItems[i].item.jdTitle;
+      const areaNumber = item.jdNumber as JDAreaNumbers;
+      const areaTitle = item.jdTitle;
       /**
        * The forcing-TS-to-believe! here assumes that we haven't screwed up
        * elsewhere and somehow added an area to a project that doesn't exist.
        * Is that even possible with the current model? I don't think so.
        */
       // prettier-ignore
-      internalJDSystem[currentProjectNumber]!
+      internalJDSystem[projectNumber]!
         .areas[areaNumber] = {
           title: areaTitle,
           categories: {},
@@ -93,7 +93,7 @@ export const userbaseItemsToInternalJdSystem = (
     const item = userbaseItems[i].item;
     if (item.jdType === "category") {
       const categoryNumber = item.jdNumber as JDCategoryNumbers;
-      const categoryTitle = userbaseItems[i].item.jdTitle;
+      const categoryTitle = item.jdTitle;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       /**
        * The forcing-TS-to-believe! here assumes that we haven't screwed up
@@ -102,7 +102,7 @@ export const userbaseItemsToInternalJdSystem = (
        * need to be 100%.
        */
       // prettier-ignore
-      internalJDSystem[currentProjectNumber]!
+      internalJDSystem[projectNumber]!
         .areas[areaNumber]!
         .categories[categoryNumber] = {
           title: categoryTitle,
@@ -127,7 +127,7 @@ export const userbaseItemsToInternalJdSystem = (
       ) as JDCategoryNumbers;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       // prettier-ignore
-      internalJDSystem[currentProjectNumber]!
+      internalJDSystem[projectNumber]!
         .areas[areaNumber]!
         .categories[categoryNumber]!
         .ids[idNumber] = {
