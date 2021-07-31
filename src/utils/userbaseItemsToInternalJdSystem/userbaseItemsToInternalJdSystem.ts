@@ -65,6 +65,7 @@ export const userbaseItemsToInternalJdSystem = (
    * bother trying to optimise by exiting early when we have all of the areas,
    * for example.
    */
+  i = 0;
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "area") {
