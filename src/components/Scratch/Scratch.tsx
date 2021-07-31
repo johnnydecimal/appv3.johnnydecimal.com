@@ -9,7 +9,7 @@ import {
   allAreas,
   allCategories,
   allIds,
-} from "../allTheNumbers/allTheNumbers";
+} from "utils/allTheNumbers/allTheNumbers";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 interface IJDID {
