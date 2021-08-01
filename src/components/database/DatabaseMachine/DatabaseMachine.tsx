@@ -23,6 +23,7 @@ import { DatabaseMachineReactContext } from "./context";
 // === BUILDING - FIX WHEN DONE
 import { Project } from "../Project/Project";
 import { Area } from "../Area/Area";
+import { Category } from "../Category/Category";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -45,6 +46,17 @@ export const DatabaseMachine = () => {
     authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
   );
 
+  const {
+    internalJdSystem,
+    currentDatabase: currentProject,
+    currentArea,
+    currentCategory,
+    // currentId,
+  } = state.context;
+
+  console.log("dbMachine.context:", state.context);
+
+  //#region helper functions
   /**
    * Declare the functions which are the things we're going to pass down to our
    * child components. These are the functions which send events, so we don't
@@ -84,6 +96,7 @@ export const DatabaseMachine = () => {
       item,
     });
   };
+  //#endregion
 
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,
@@ -98,6 +111,7 @@ export const DatabaseMachine = () => {
     openId,
   };
 
+  //#region temporary shit while we build it
   const handleSubmit = (e: any) => {
     e.preventDefault();
     // TODO: obvs in real life we have to make sure that the user can only
@@ -120,6 +134,7 @@ export const DatabaseMachine = () => {
   const jdNumberRef = React.createRef<HTMLInputElement>();
   const jdTitleRef = React.createRef<HTMLInputElement>();
   */
+  //#endregion
 
   return (
     <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
@@ -137,17 +152,33 @@ export const DatabaseMachine = () => {
         </label>
       </form>
       <hr className="my-2" />
-      {state.context.internalJdSystem ? (
+      {/**
+       * What's passed as a prop vs. being pulled out of Context?
+       * Prop: variables.
+       * Context: static, i.e. helper functions.
+       */}
+      {internalJdSystem?.[currentProject] ? (
         <Project
-          currentProject={state.context.currentDatabase}
-          internalJdSystem={state.context.internalJdSystem}
+          internalJdSystem={internalJdSystem}
+          currentProject={currentProject}
         >
           <Area
-            currentArea={state.context.currentArea}
-            currentProject={state.context.currentDatabase}
-            internalJdSystem={state.context.internalJdSystem}
+            internalJdSystem={internalJdSystem}
+            currentProject={currentProject}
+            currentArea={currentArea}
           >
-            area children
+            {currentArea ? (
+              <Category
+                internalJdSystem={internalJdSystem}
+                currentProject={currentProject}
+                currentArea={currentArea}
+                currentCategory={currentCategory}
+              >
+                category children
+              </Category>
+            ) : (
+              <div>EEP</div>
+            )}
           </Area>
         </Project>
       ) : (

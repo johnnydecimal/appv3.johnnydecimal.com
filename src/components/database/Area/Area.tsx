@@ -1,17 +1,17 @@
 import { useContext } from "react";
-import { InternalJdSystem, JDAreaNumbers } from "@types";
+import { InternalJdSystem, JDProjectNumbers, JDAreaNumbers } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Area = ({
-  children,
-  currentArea,
-  currentProject,
   internalJdSystem,
+  currentProject,
+  currentArea,
+  children,
 }: {
-  children: React.ReactNode;
-  currentArea: JDAreaNumbers | null;
-  currentProject: string;
   internalJdSystem: InternalJdSystem;
+  currentProject: JDProjectNumbers;
+  currentArea: JDAreaNumbers | null;
+  children: React.ReactNode;
 }) => {
   const { openArea } = useContext(DatabaseMachineReactContext);
   /**
@@ -28,14 +28,16 @@ export const Area = ({
       </div>
     );
   } else {
-    // Generate the list of areas to show
-    // @ts-ignore
-    const areas = Object.keys(internalJdSystem[currentProject].areas);
+    const areas = Object.keys(internalJdSystem[currentProject]!.areas);
     return (
       <div>
         {areas.map((area, i) => (
-          <div key={i} onClick={() => openArea(area)}>
-            {area}
+          <div
+            className="cursor-pointer"
+            key={i}
+            onClick={() => openArea(area)}
+          >
+            &nbsp;{area}
           </div>
         ))}
       </div>

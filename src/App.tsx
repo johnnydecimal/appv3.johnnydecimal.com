@@ -7,12 +7,12 @@ import { AuthMachine } from "components/authentication";
 
 /**
  * The XState inspector popup.
- */
-inspect({
-  // options
-  // url: 'https://statecharts.io/inspect', // (default)
-  iframe: false, // open in new window
-});
+ inspect({
+   // options
+   // url: 'https://statecharts.io/inspect', // (default)
+   iframe: false, // open in new window
+  });
+  */
 
 export const App = () => {
   // return <Scratch />;

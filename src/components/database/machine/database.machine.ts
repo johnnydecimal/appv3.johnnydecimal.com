@@ -58,9 +58,9 @@ const databaseModel = createModel(
     /**
      * The currently-open area, category, and ID.
      */
-    currentArea: "" as JDAreaNumbers,
-    currentCategory: "" as JDCategoryNumbers,
-    currentId: "" as JDIdNumbers,
+    currentArea: null as JDAreaNumbers | null,
+    currentCategory: null as JDCategoryNumbers | null,
+    currentId: null as JDIdNumbers | null,
   },
   {
     events: {
@@ -215,6 +215,12 @@ const assignCurrentId = databaseModel.assign<"OPEN_ID">({
   currentId: (context, event) => event.id,
 });
 
+const clearCurrentACID = databaseModel.assign<"OPEN_DATABASE">({
+  currentArea: () => null,
+  currentCategory: () => null,
+  currentId: () => null,
+});
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * There's only one way a database can be opened (or created): by changing
@@ -241,7 +247,7 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [assignNewDatabase, clearUserbaseItems],
+        actions: [assignNewDatabase, clearUserbaseItems, clearCurrentACID],
         target: "#databaseMachine",
       },
       OPEN_AREA: {

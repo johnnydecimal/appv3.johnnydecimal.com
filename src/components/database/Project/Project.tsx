@@ -14,24 +14,16 @@ import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
  */
 export const Project = (props: any) => {
   const {
-    children,
     internalJdSystem,
     currentProject,
+    children,
   }: {
-    children: any;
     internalJdSystem: InternalJdSystem;
     currentProject: JDProjectNumbers;
+    children: React.ReactNode;
   } = props;
 
   const { openArea } = useContext(DatabaseMachineReactContext);
-
-  /**
-   * Check whether we're undergoing some sort of system rebuild, and display
-   * a wait one if so.
-   */
-  if (!internalJdSystem[currentProject]) {
-    return <div>Project: wait one</div>;
-  }
 
   /**
    * At the very least, we're always passed `internalJdSystem` which contains
@@ -50,7 +42,7 @@ export const Project = (props: any) => {
           {internalJdSystem[currentProject]!.title}
         </h2>
         <div className="flex flex-initial">
-          <h3 className="border-r border-black" onClick={() => openArea(null)}>
+          <h3 className="cursor-pointer" onClick={() => openArea(null)}>
             {currentProject}
           </h3>
           <div>{children}</div>
