@@ -2,11 +2,11 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { authMachine } from "./auth.machine";
+import { authMachine } from "../machine/auth.machine";
 import { AuthMachineReactContext } from "./context";
 import { DatabaseMachine } from "../DatabaseMachine/DatabaseMachine";
-import { SignInForm } from "../authentication/SignInForm/SignInForm";
-import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
+import { SignInForm } from "components/authentication";
+import { SignUpForm } from "components/authentication";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ISignInFormData } from "../authentication/SignInForm/SignInForm";

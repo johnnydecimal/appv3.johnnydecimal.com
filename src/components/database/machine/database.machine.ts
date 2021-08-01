@@ -10,7 +10,7 @@ import {
   JDProjectNumbers,
   UserbaseError,
   UserbaseItem,
-} from "../../@types";
+} from "@types";
 import { AuthMachineEvent } from "../AuthMachine/auth.machine";
 import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
 import { nanoid } from "nanoid";
