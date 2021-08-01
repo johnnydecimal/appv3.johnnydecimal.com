@@ -14,13 +14,17 @@ import { JDItem, JDProjectNumbers } from "@types";
 import { databaseMachine } from "../machine/database.machine";
 import { DatabaseMachineReactContext } from "./context";
 
+// === BUILDING - FIX WHEN DONE
+import { Project } from "../Project/Project";
+import { Area } from "../Area/Area";
+
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
-const Log = ({ value = {}, replacer = null, space = 2 }) => (
-  <pre>
-    <code>{JSON.stringify(value, replacer, space)}</code>
-  </pre>
-);
+// const Log = ({ value = {}, replacer = null, space = 2 }) => (
+//   <pre>
+//     <code>{JSON.stringify(value, replacer, space)}</code>
+//   </pre>
+// );
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
@@ -70,6 +74,8 @@ export const DatabaseMachine = () => {
     //       create a DB with the right format; but this is a fudge anyway
     changeDatabase(formRef!.current!.value as JDProjectNumbers);
   };
+  const formRef = React.createRef<HTMLInputElement>();
+  /*
   const handleSubmitNewItem = (e: any) => {
     e.preventDefault();
     insertItem({
@@ -80,11 +86,10 @@ export const DatabaseMachine = () => {
       jdTitle: jdTitleRef!.current!.value,
     });
   };
-
-  const formRef = React.createRef<HTMLInputElement>();
   const jdTypeRef = React.createRef<HTMLInputElement>();
   const jdNumberRef = React.createRef<HTMLInputElement>();
   const jdTitleRef = React.createRef<HTMLInputElement>();
+  */
 
   return (
     <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
@@ -102,6 +107,24 @@ export const DatabaseMachine = () => {
         </label>
       </form>
       <hr className="my-2" />
+      {state.context.internalJdSystem ? (
+        <Project
+          currentProject={state.context.currentDatabase}
+          internalJdSystem={state.context.internalJdSystem}
+        >
+          <Area
+            // currentArea={"00-09"}
+            currentArea={null}
+            currentProject={state.context.currentDatabase}
+            internalJdSystem={state.context.internalJdSystem}
+          >
+            area children
+          </Area>
+        </Project>
+      ) : (
+        <div>A flash as we generate the system</div>
+      )}
+      {/*
       <h2>Create item</h2>
       <form onSubmit={handleSubmitNewItem}>
         <label>
@@ -129,7 +152,7 @@ export const DatabaseMachine = () => {
       </form>
       <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
-      <Log value={state.context} />
+      <Log value={state.context} /> */}
     </DatabaseMachineReactContext.Provider>
   );
 };
