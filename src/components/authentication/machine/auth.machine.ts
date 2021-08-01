@@ -1,16 +1,15 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { assign, ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
-import userbase, { UserProfile } from "userbase-js";
+import userbase, { UserProfile, UserResult } from "userbase-js";
 import merge from "deepmerge";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { databaseMachine } from "../DatabaseMachine/database.machine";
+import { databaseMachine } from "components/database";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { UserResult } from "userbase-js";
-import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
-import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
+import { ISignInFormData } from "../SignInForm/SignInForm";
+import { ISignUpFormData } from "../SignUpForm/SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch

@@ -2,9 +2,9 @@
 import { useContext } from "react";
 import { useForm } from "react-hook-form";
 
-// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext } from "components/AuthMachine/context";
-import { LogViewer } from "../LogViewer";
+// === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { AuthMachineReactContext } from "../AuthMachine/context";
+import { LogViewer } from "../LogViewer/LogViewer";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export interface ISignUpFormData {

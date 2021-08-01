@@ -1,4 +1,8 @@
-export { authMachine } from "./machine/auth.machine";
-
-export { SignInForm, ISignInFormData } from "./SignInForm/SignInForm";
-export { SignUpForm, ISignUpFormData } from "./SignUpForm/SignUpForm";
+/**
+ * # Authentication
+ *
+ * Remember, only export stuff that's needed outside of this component.
+ *
+ */
+export { AuthMachine } from "./AuthMachine/AuthMachine";
+export { AuthMachineReactContext } from "./AuthMachine/context";

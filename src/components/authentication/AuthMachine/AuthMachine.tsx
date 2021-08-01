@@ -2,17 +2,15 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineReactContext } from "./context";
-import {
-  authMachine // no, only EXTERNAL exports go in index.js
-  SignInForm,
-  SignUpForm,
-  ISignInFormData,
-  ISignUpFormData,
-} from "components/authentication";
 import { DatabaseMachine } from "components/database";
 
-// == Temp stuff while you build this out ==
+// === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { authMachine } from "../machine/auth.machine";
+import { AuthMachineReactContext } from "./context";
+import { SignInForm, ISignInFormData } from "../SignInForm/SignInForm";
+import { SignUpForm, ISignUpFormData } from "../SignUpForm/SignUpForm";
+
+// === Temp ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const FourOhFour = () => <div>404</div>;
 const WaitOne = () => <div>Wait one. Doing networks.</div>;
 

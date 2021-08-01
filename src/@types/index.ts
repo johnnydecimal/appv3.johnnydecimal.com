@@ -1,25 +1,12 @@
-export { InternalJDSystem } from "./InternalJDSystem";
-export { JDProjectNumbers } from "./JDProjectNumbers";
-export { JDAreaNumbers } from "./JDAreaNumbers";
-export { JDCategoryNumbers } from "./JDCategoryNumbers";
-export { JDIdNumbers } from "./JDIdNumbers";
-export { JDItem } from "./JDItem";
-export {
+export type { InternalJDSystem } from "./InternalJDSystem";
+export type { JDProjectNumbers } from "./JDProjectNumbers";
+export type { JDAreaNumbers } from "./JDAreaNumbers";
+export type { JDCategoryNumbers } from "./JDCategoryNumbers";
+export type { JDIdNumbers } from "./JDIdNumbers";
+export type { JDItem } from "./JDItem";
+export type {
   JDUserProfile,
   UserbaseData,
   UserbaseError,
   UserbaseItem,
 } from "./Userbase";
-
-// export type {
-//   InternalJDSystem,
-//   JDProjectNumbers,
-//   JDAreaNumbers,
-//   JDCategoryNumbers,
-//   JDIdNumbers,
-//   JDItem,
-//   JDUserProfile,
-//   UserbaseData,
-//   UserbaseError,
-//   UserbaseItem,
-// };
