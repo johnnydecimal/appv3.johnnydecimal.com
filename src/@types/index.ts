@@ -1,4 +1,4 @@
-export type { InternalJDSystem } from "./InternalJDSystem";
+export type { InternalJdSystem } from "./InternalJdSystem";
 export type { JDProjectNumbers } from "./JDProjectNumbers";
 export type { JDAreaNumbers } from "./JDAreaNumbers";
 export type { JDCategoryNumbers } from "./JDCategoryNumbers";

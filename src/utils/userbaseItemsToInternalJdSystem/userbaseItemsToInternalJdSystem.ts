@@ -3,7 +3,7 @@ import { categoryNumberToAreaNumber } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
-  InternalJDSystem,
+  InternalJdSystem,
   JDProjectNumbers,
   JDAreaNumbers,
   UserbaseItem,
@@ -15,14 +15,14 @@ import {
  * # userbaseItemsToInternalJdSystem
  *
  * Takes an array of `UserbaseItem[]`s and turns it in to the
- * `InternalJDSystem` that we use in this app.
+ * `InternalJdSystem` that we use in this app.
  *
  * #TODO: should return errors, doesn't currently.
  * Returns an error if the array isn't a valid system.
  */
 export const userbaseItemsToInternalJdSystem = (
   userbaseItems: UserbaseItem[]
-): InternalJDSystem => {
+): InternalJdSystem => {
   /**
    * Do some timings in dev. #TODO: remove later.
    */
@@ -31,7 +31,7 @@ export const userbaseItemsToInternalJdSystem = (
   /**
    * Set up the base object.
    */
-  const internalJDSystem: InternalJDSystem = {};
+  const internalJdSystem: InternalJdSystem = {};
 
   /**
    * Set up variables that we'll use to loop over `userbaseItems[]`.
@@ -48,7 +48,7 @@ export const userbaseItemsToInternalJdSystem = (
     if (item.jdType === "project") {
       projectNumber = item.jdNumber as JDProjectNumbers;
       const projectTitle = item.jdTitle;
-      internalJDSystem[projectNumber] = {
+      internalJdSystem[projectNumber] = {
         title: projectTitle,
         areas: {},
       };
@@ -77,7 +77,7 @@ export const userbaseItemsToInternalJdSystem = (
        * Is that even possible with the current model? I don't think so.
        */
       // prettier-ignore
-      internalJDSystem[projectNumber]!
+      internalJdSystem[projectNumber]!
         .areas[areaNumber] = {
           title: areaTitle,
           categories: {},
@@ -103,7 +103,7 @@ export const userbaseItemsToInternalJdSystem = (
        * need to be 100%.
        */
       // prettier-ignore
-      internalJDSystem[projectNumber]!
+      internalJdSystem[projectNumber]!
         .areas[areaNumber]!
         .categories[categoryNumber] = {
           title: categoryTitle,
@@ -128,7 +128,7 @@ export const userbaseItemsToInternalJdSystem = (
       ) as JDCategoryNumbers;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       // prettier-ignore
-      internalJDSystem[projectNumber]!
+      internalJdSystem[projectNumber]!
         .areas[areaNumber]!
         .categories[categoryNumber]!
         .ids[idNumber] = {
@@ -141,11 +141,11 @@ export const userbaseItemsToInternalJdSystem = (
   const endTime = window.performance.now();
   if (process.env.NODE_ENV === "development") {
     console.log(
-      `Creating internalJDSystem from userbaseItem[] took ${
+      `Creating internalJdSystem from userbaseItem[] took ${
         endTime - startTime
       }ms.`
     );
   }
 
-  return internalJDSystem;
+  return internalJdSystem;
 };

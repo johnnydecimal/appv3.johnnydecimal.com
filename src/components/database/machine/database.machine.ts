@@ -5,17 +5,18 @@ import { pure } from "xstate/lib/actions";
 import userbase, { Database } from "userbase-js";
 import { nanoid } from "nanoid";
 
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { userbaseItemsToInternalJdSystem } from "utils";
+
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   AuthMachineEvent,
-  InternalJDSystem,
+  InternalJdSystem,
   JDItem,
   JDProjectNumbers,
   UserbaseError,
   UserbaseItem,
 } from "@types";
-
-import { userbaseItemsToInternalJdSystem } from "utils";
 
 const databaseModel = createModel(
   {
@@ -56,7 +57,7 @@ const databaseModel = createModel(
     /**
      * The parsed representation of our system.
      */
-    internalJDSystem: {} as InternalJDSystem,
+    internalJdSystem: {} as InternalJdSystem,
   },
   {
     events: {
@@ -171,6 +172,15 @@ const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
    * userbaseItems.
    */
   userbaseItems: (context, event) => event.userbaseItems,
+});
+
+const assignInternalJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+  internalJdSystem: (context, event) => {
+    const internalJdSystem = userbaseItemsToInternalJdSystem(
+      event.userbaseItems
+    );
+    return internalJdSystem;
+  },
 });
 
 const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
@@ -356,7 +366,7 @@ export const databaseMachine = databaseModel.createMachine(
           listening: {
             on: {
               USERBASE_ITEMS_UPDATED: {
-                actions: [assignUserbaseItems],
+                actions: [assignUserbaseItems, assignInternalJdSystem],
               },
             },
           },
@@ -390,7 +400,6 @@ export const databaseMachine = databaseModel.createMachine(
             .openDatabase({
               databaseName: context.currentDatabase,
               changeHandler: (userbaseItems) => {
-                console.log(userbaseItems);
                 /**
                  * So when this is set up, this fires. That's how we get the
                  * initial load of items. So we need to make sure that the
