@@ -13,34 +13,37 @@ export const Area = ({
   currentArea: JDAreaNumbers | null;
   children: React.ReactNode;
 }) => {
-  const { openArea } = useContext(DatabaseMachineReactContext);
+  const { openArea, openCategory } = useContext(DatabaseMachineReactContext);
   /**
    * If `props.currentArea`, we show that area and then the categories
    * will show below.
-   *
-   * If not, show the *list of areas* that the user can select.
    */
   if (currentArea) {
     return (
       <div className="flex flex-initial">
-        <div>.{currentArea}</div>
-        <div>{children}</div>
-      </div>
-    );
-  } else {
-    const areas = Object.keys(internalJdSystem[currentProject]!.areas);
-    return (
-      <div>
-        {areas.map((area, i) => (
-          <div
-            className="cursor-pointer"
-            key={i}
-            onClick={() => openArea(area)}
-          >
-            &nbsp;{area}
-          </div>
-        ))}
+        <h3 className="cursor-pointer" onClick={() => openCategory(null)}>
+          .{currentArea}
+        </h3>
+        <div>{children}</div> {/* <Categories /> */}
       </div>
     );
   }
+
+  /**
+   * If not, generate and show the sorted list of areas to choose from.
+   */
+  const areas = Object.keys(internalJdSystem[currentProject]!.areas).sort(
+    (a, b) => {
+      return Number(a.charAt(0)) - Number(b.charAt(0));
+    }
+  );
+  return (
+    <div className="border-l border-black">
+      {areas.map((area, i) => (
+        <div className="cursor-pointer" key={i} onClick={() => openArea(area)}>
+          &nbsp;{area}
+        </div>
+      ))}
+    </div>
+  );
 };

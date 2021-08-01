@@ -119,7 +119,6 @@ export const DatabaseMachine = () => {
     changeDatabase(formRef!.current!.value as JDProjectNumbers);
   };
   const formRef = React.createRef<HTMLInputElement>();
-  /*
   const handleSubmitNewItem = (e: any) => {
     e.preventDefault();
     insertItem({
@@ -133,7 +132,6 @@ export const DatabaseMachine = () => {
   const jdTypeRef = React.createRef<HTMLInputElement>();
   const jdNumberRef = React.createRef<HTMLInputElement>();
   const jdTitleRef = React.createRef<HTMLInputElement>();
-  */
   //#endregion
 
   return (
@@ -152,10 +150,41 @@ export const DatabaseMachine = () => {
         </label>
       </form>
       <hr className="my-2" />
+      <h2>Create item</h2>
+      <form onSubmit={handleSubmitNewItem}>
+        <label>
+          New item:
+          <input
+            name="jdType"
+            placeholder="jdType"
+            type="text"
+            ref={jdTypeRef}
+          />
+          <input
+            name="jdNumber"
+            placeholder="jdNumber"
+            type="text"
+            ref={jdNumberRef}
+          />
+          <input
+            name="jdTitle"
+            placeholder="jdTitle"
+            type="text"
+            ref={jdTitleRef}
+          />
+          <input type="submit" value="submit" />
+        </label>
+      </form>
+      <hr className="my-2" />
       {/**
        * What's passed as a prop vs. being pulled out of Context?
        * Prop: variables.
        * Context: static, i.e. helper functions.
+       *
+       * Remember, it's perfectly valid for these components to be passed their
+       * 'primary' thing -- `currentArea` for `<Area />` -- as `null`. This
+       * indicates that they should render the *list* of things in order that
+       * the user can select one.
        */}
       {internalJdSystem?.[currentProject] ? (
         <Project
@@ -185,32 +214,6 @@ export const DatabaseMachine = () => {
         <div>A flash as we generate the system</div>
       )}
       {/*
-      <h2>Create item</h2>
-      <form onSubmit={handleSubmitNewItem}>
-        <label>
-          New item:
-          <input
-            name="jdType"
-            placeholder="jdType"
-            type="text"
-            ref={jdTypeRef}
-          />
-          <input
-            name="jdNumber"
-            placeholder="jdNumber"
-            type="text"
-            ref={jdNumberRef}
-          />
-          <input
-            name="jdTitle"
-            placeholder="jdTitle"
-            type="text"
-            ref={jdTitleRef}
-          />
-          <input type="submit" value="submit" />
-        </label>
-      </form>
-      <hr className="my-2" />
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} /> */}
     </DatabaseMachineReactContext.Provider>

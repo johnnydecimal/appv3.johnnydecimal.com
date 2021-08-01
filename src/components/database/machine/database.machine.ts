@@ -215,9 +215,19 @@ const assignCurrentId = databaseModel.assign<"OPEN_ID">({
   currentId: (context, event) => event.id,
 });
 
-const clearCurrentACID = databaseModel.assign<"OPEN_DATABASE">({
+const clearCurrentArea = databaseModel.assign<"OPEN_DATABASE">({
   currentArea: () => null,
+});
+
+const clearCurrentCategory = databaseModel.assign<
+  "OPEN_DATABASE" | "OPEN_AREA"
+>({
   currentCategory: () => null,
+});
+
+const clearCurrentId = databaseModel.assign<
+  "OPEN_DATABASE" | "OPEN_AREA" | "OPEN_CATEGORY"
+>({
   currentId: () => null,
 });
 
@@ -247,14 +257,20 @@ export const databaseMachine = databaseModel.createMachine(
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [assignNewDatabase, clearUserbaseItems, clearCurrentACID],
+        actions: [
+          assignNewDatabase,
+          clearUserbaseItems,
+          clearCurrentArea,
+          clearCurrentCategory,
+          clearCurrentId,
+        ],
         target: "#databaseMachine",
       },
       OPEN_AREA: {
-        actions: [assignCurrentArea],
+        actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
       },
       OPEN_CATEGORY: {
-        actions: [assignCurrentCategory],
+        actions: [assignCurrentCategory, clearCurrentId],
       },
       OPEN_ID: {
         actions: [assignCurrentId],
