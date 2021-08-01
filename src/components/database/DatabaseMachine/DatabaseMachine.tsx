@@ -8,7 +8,13 @@ import { AuthMachineReactContext } from "components/authentication";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ActorRefFrom } from "xstate";
-import { JDItem, JDProjectNumbers } from "@types";
+import {
+  JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+  JDIdNumbers,
+  JDItem,
+} from "@types";
 
 // === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "../machine/database.machine";
@@ -51,6 +57,27 @@ export const DatabaseMachine = () => {
     });
   };
 
+  const openArea = (area: JDAreaNumbers) => {
+    console.log("openArea() fired");
+    send({
+      type: "OPEN_AREA",
+      area,
+    });
+  };
+
+  const openCategory = (category: JDCategoryNumbers) => {
+    send({
+      type: "OPEN_CATEGORY",
+      category,
+    });
+  };
+  const openId = (id: JDIdNumbers) => {
+    send({
+      type: "OPEN_ID",
+      id,
+    });
+  };
+
   const insertItem = (item: JDItem) => {
     send({
       type: "INSERT_ITEM",
@@ -66,6 +93,9 @@ export const DatabaseMachine = () => {
   const DatabaseReactContextValue = {
     changeDatabase,
     insertItem,
+    openArea,
+    openCategory,
+    openId,
   };
 
   const handleSubmit = (e: any) => {
@@ -113,8 +143,7 @@ export const DatabaseMachine = () => {
           internalJdSystem={state.context.internalJdSystem}
         >
           <Area
-            // currentArea={"00-09"}
-            currentArea={null}
+            currentArea={state.context.currentArea}
             currentProject={state.context.currentDatabase}
             internalJdSystem={state.context.internalJdSystem}
           >

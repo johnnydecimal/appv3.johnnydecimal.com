@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import { InternalJdSystem, JDAreaNumbers } from "@types";
+import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Area = ({
   children,
@@ -11,6 +13,7 @@ export const Area = ({
   currentProject: string;
   internalJdSystem: InternalJdSystem;
 }) => {
+  const { openArea } = useContext(DatabaseMachineReactContext);
   /**
    * If `props.currentArea`, we show that area and then the categories
    * will show below.
@@ -31,7 +34,9 @@ export const Area = ({
     return (
       <div>
         {areas.map((area, i) => (
-          <div key={i}>{area}</div>
+          <div key={i} onClick={() => openArea(area)}>
+            {area}
+          </div>
         ))}
       </div>
     );

@@ -1,4 +1,6 @@
+import { useContext } from "react";
 import { InternalJdSystem, JDProjectNumbers } from "@types";
+import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 /**
  * What's this thing need to do?
@@ -20,6 +22,8 @@ export const Project = (props: any) => {
     internalJdSystem: InternalJdSystem;
     currentProject: JDProjectNumbers;
   } = props;
+
+  const { openArea } = useContext(DatabaseMachineReactContext);
 
   /**
    * Check whether we're undergoing some sort of system rebuild, and display
@@ -46,7 +50,9 @@ export const Project = (props: any) => {
           {internalJdSystem[currentProject]!.title}
         </h2>
         <div className="flex flex-initial">
-          <h3 className="border-r border-black">{currentProject}</h3>
+          <h3 className="border-r border-black" onClick={() => openArea(null)}>
+            {currentProject}
+          </h3>
           <div>{children}</div>
         </div>
       </>

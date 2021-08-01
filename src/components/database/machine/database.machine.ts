@@ -12,8 +12,11 @@ import { userbaseItemsToInternalJdSystem } from "utils";
 import {
   AuthMachineEvent,
   InternalJdSystem,
-  JDItem,
   JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+  JDIdNumbers,
+  JDItem,
   UserbaseError,
   UserbaseItem,
 } from "@types";
@@ -42,13 +45,6 @@ const databaseModel = createModel(
     databases: [] as Database[],
 
     /**
-     * The latest error.
-     * Update: we're moving all error reporting to the parent. Delete when
-     * confirmed.
-        error: {} as UserbaseError,
-     */
-
-    /**
      * When we open any given database, `userbaseItems` is the array of Items
      * which makes up that database.
      */
@@ -58,6 +54,13 @@ const databaseModel = createModel(
      * The parsed representation of our system.
      */
     internalJdSystem: {} as InternalJdSystem,
+
+    /**
+     * The currently-open area, category, and ID.
+     */
+    currentArea: "" as JDAreaNumbers,
+    currentCategory: "" as JDCategoryNumbers,
+    currentId: "" as JDIdNumbers,
   },
   {
     events: {
@@ -102,9 +105,16 @@ const databaseModel = createModel(
       INSERT_ITEM: (item: JDItem) => ({ item }),
 
       /**
-       * Send by ubInsertItem when it was successful.
+       * Sent by ubInsertItem when it was successful.
        */
       ITEM_INSERTED: () => ({}),
+
+      /**
+       * Sent by the helper functions when the user interacts with the app.
+       */
+      OPEN_AREA: (area: JDAreaNumbers) => ({ area }),
+      OPEN_CATEGORY: (category: JDCategoryNumbers) => ({ category }),
+      OPEN_ID: (id: JDIdNumbers) => ({ id }),
     },
   }
 );
@@ -193,6 +203,18 @@ const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
   userbaseItems: () => [],
 });
 
+const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
+  currentArea: (context, event) => event.area,
+});
+
+const assignCurrentCategory = databaseModel.assign<"OPEN_CATEGORY">({
+  currentCategory: (context, event) => event.category,
+});
+
+const assignCurrentId = databaseModel.assign<"OPEN_ID">({
+  currentId: (context, event) => event.id,
+});
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * There's only one way a database can be opened (or created): by changing
@@ -221,6 +243,15 @@ export const databaseMachine = databaseModel.createMachine(
       OPEN_DATABASE: {
         actions: [assignNewDatabase, clearUserbaseItems],
         target: "#databaseMachine",
+      },
+      OPEN_AREA: {
+        actions: [assignCurrentArea],
+      },
+      OPEN_CATEGORY: {
+        actions: [assignCurrentCategory],
+      },
+      OPEN_ID: {
+        actions: [assignCurrentId],
       },
     },
     states: {
