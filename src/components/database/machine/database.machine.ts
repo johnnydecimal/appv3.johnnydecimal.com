@@ -1,20 +1,21 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
+import { pure } from "xstate/lib/actions";
 import userbase, { Database } from "userbase-js";
+import { nanoid } from "nanoid";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
+  AuthMachineEvent,
   InternalJDSystem,
   JDItem,
   JDProjectNumbers,
   UserbaseError,
   UserbaseItem,
 } from "@types";
-import { AuthMachineEvent } from "../AuthMachine/auth.machine";
-import { userbaseItemsToInternalJdSystem } from "utilities/userbaseItemsToInternalJdSystem/userbaseItemsToInternalJdSystem";
-import { nanoid } from "nanoid";
-import { pure } from "xstate/lib/actions";
+
+import { userbaseItemsToInternalJdSystem } from "utils";
 
 const databaseModel = createModel(
   {

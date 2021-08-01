@@ -2,8 +2,7 @@
 import { inspect } from "@xstate/inspect";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachine } from "./components/AuthMachine/AuthMachine";
-
+import { AuthMachine } from "components/authentication";
 // import { Scratch } from "components/Scratch";
 
 /**
