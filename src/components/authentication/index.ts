@@ -1,4 +1,4 @@
 export { authMachine } from "./machine/auth.machine";
 
-export { SignInForm } from "./SignInForm/SignInForm";
-export { SignUpForm } from "./SignUpForm/SignUpForm";
+export { SignInForm, ISignInFormData } from "./SignInForm/SignInForm";
+export { SignUpForm, ISignUpFormData } from "./SignUpForm/SignUpForm";
