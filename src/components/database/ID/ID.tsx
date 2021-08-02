@@ -4,24 +4,27 @@ import {
   JDProjectNumbers,
   JDAreaNumbers,
   JDCategoryNumbers,
+  JDIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
-export const Category = ({
+export const ID = ({
   internalJdSystem,
   currentProject,
   currentArea,
   currentCategory,
-  children,
-}: {
+  currentId,
+}: // children,
+{
   internalJdSystem: InternalJdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JDAreaNumbers;
-  currentCategory: JDCategoryNumbers | null;
-  children: React.ReactNode;
+  currentCategory: JDCategoryNumbers;
+  currentId: JDIdNumbers | null;
+  // children: React.ReactNode;
 }) => {
   const { openCategory, openId } = useContext(DatabaseMachineReactContext);
-  if (currentCategory) {
+  if (currentId) {
     return (
       /**
        * A grid with 3ch at the start so we indent the list of IDs
@@ -31,7 +34,7 @@ export const Category = ({
        */
       <div className="grid" style={{ gridTemplateColumns: "3ch auto" }}>
         {/**
-         * Spanned across all columns, the category number + title.
+         * Spanned across all columns, the ID number + title.
          */}
         <div
           className="cursor-pointer col-span-full"
@@ -39,17 +42,13 @@ export const Category = ({
             openId(null);
           }}
         >
-          {currentCategory}{" "}
+          {currentId}{" "}
           {
             internalJdSystem[currentProject]!.areas[currentArea]!.categories[
               currentCategory
-            ]!.title
+            ]!.ids[currentId]!.title
           }
         </div>
-        {/**
-         * In the indented second column, children (which is `<ID />`).
-         */}
-        <div className="col-start-2">{children}</div>
       </div>
     );
   }
@@ -57,25 +56,27 @@ export const Category = ({
   /**
    * If not, generate and show the sorted list of categories to choose from.
    */
-  const categories = Object.keys(
-    internalJdSystem[currentProject]!.areas[currentArea]!.categories
+  const ids = Object.keys(
+    internalJdSystem[currentProject]!.areas[currentArea]!.categories[
+      currentCategory
+    ]!.ids
   ).sort((a, b) => {
     return Number(a) - Number(b);
-  }) as JDCategoryNumbers[];
+  }) as JDIdNumbers[];
 
   return (
     <div>
-      {categories.map((category, i) => (
+      {ids.map((id, i) => (
         <div
           className="cursor-pointer"
           key={i}
-          onClick={() => openCategory(category)}
+          onClick={() => openCategory(id)}
         >
-          {category}{" "}
+          {id}{" "}
           {
             internalJdSystem[currentProject]!.areas[currentArea]!.categories[
-              category
-            ]!.title
+              currentCategory
+            ]!.ids[id]!.title
           }
         </div>
       ))}

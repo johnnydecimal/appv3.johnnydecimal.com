@@ -24,6 +24,7 @@ import { DatabaseMachineReactContext } from "./context";
 import { Project } from "../Project/Project";
 import { Area } from "../Area/Area";
 import { Category } from "../Category/Category";
+import { ID } from "../ID/ID";
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -51,7 +52,7 @@ export const DatabaseMachine = () => {
     currentDatabase: currentProject,
     currentArea,
     currentCategory,
-    // currentId,
+    currentId,
   } = state.context;
 
   console.log("dbMachine.context:", state.context);
@@ -175,7 +176,7 @@ export const DatabaseMachine = () => {
           <input type="submit" value="submit" />
         </label>
       </form>
-      <hr className="my-2" />
+      <hr className="my-12" />
       {/**
        * What's passed as a prop vs. being pulled out of Context?
        * Prop: variables.
@@ -203,7 +204,17 @@ export const DatabaseMachine = () => {
                 currentArea={currentArea}
                 currentCategory={currentCategory}
               >
-                category children
+                {currentCategory ? (
+                  <ID
+                    internalJdSystem={internalJdSystem}
+                    currentProject={currentProject}
+                    currentArea={currentArea}
+                    currentCategory={currentCategory}
+                    currentId={currentId}
+                  />
+                ) : (
+                  <div>EEP</div>
+                )}
               </Category>
             ) : (
               <div>EEP</div>

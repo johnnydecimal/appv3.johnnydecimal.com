@@ -42,7 +42,7 @@ export const Project = (props: any) => {
         style={{ gridTemplateColumns: "4ch auto" }}
       >
         <div
-          className="cursor-pointer col-span-full"
+          className="font-semibold cursor-pointer col-span-full"
           onClick={() => {
             openArea(null);
           }}

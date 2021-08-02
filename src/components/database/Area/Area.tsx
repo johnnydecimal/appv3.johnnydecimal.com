@@ -14,10 +14,6 @@ export const Area = ({
   children: React.ReactNode;
 }) => {
   const { openArea, openCategory } = useContext(DatabaseMachineReactContext);
-  /**
-   * If `props.currentArea`, we show that area and then the categories
-   * will show below.
-   */
   if (currentArea) {
     return (
       /**
