@@ -33,11 +33,11 @@ type InternalJDProject = {
  * This one must be a type, an interface generates an error.
  * https://stackoverflow.com/questions/51659420/consider-using-a-mapped-object-type-instead-whats-a-mapped-object-type-and#51659490
  */
-export type InternalJdSystem = {
+export type JdSystem = {
   [K in JDProjectNumbers]?: InternalJDProject;
 };
 
-export const test: InternalJdSystem = {
+export const test: JdSystem = {
   "001": {
     title: "project",
     areas: {

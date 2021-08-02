@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import {
-  InternalJdSystem,
+  JdSystem,
   JDProjectNumbers,
   JDAreaNumbers,
   JDCategoryNumbers,
@@ -16,7 +16,7 @@ export const ID = ({
   currentId,
 }: // children,
 {
-  jdSystem: InternalJdSystem;
+  jdSystem: JdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JDAreaNumbers;
   currentCategory: JDCategoryNumbers;

@@ -3,7 +3,7 @@ import { categoryNumberToAreaNumber } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
-  InternalJdSystem,
+  JdSystem,
   JDProjectNumbers,
   JDAreaNumbers,
   UserbaseItem,
@@ -15,14 +15,14 @@ import {
  * # userbaseItemsToJdSystem
  *
  * Takes an array of `UserbaseItem[]`s and turns it in to the
- * `InternalJdSystem` that we use in this app.
+ * `JdSystem` that we use in this app.
  *
  * #TODO: should return errors, doesn't currently.
  * Returns an error if the array isn't a valid system.
  */
 export const userbaseItemsToJdSystem = (
   userbaseItems: UserbaseItem[]
-): InternalJdSystem => {
+): JdSystem => {
   /**
    * Do some timings in dev. #TODO: remove later.
    */
@@ -31,7 +31,7 @@ export const userbaseItemsToJdSystem = (
   /**
    * Set up the base object.
    */
-  const jdSystem: InternalJdSystem = {};
+  const jdSystem: JdSystem = {};
 
   /**
    * Set up variables that we'll use to loop over `userbaseItems[]`.

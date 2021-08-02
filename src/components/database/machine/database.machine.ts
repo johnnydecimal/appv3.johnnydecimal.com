@@ -11,7 +11,7 @@ import { userbaseItemsToJdSystem } from "utils";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   AuthMachineEvent,
-  InternalJdSystem,
+  JdSystem,
   JDProjectNumbers,
   JDAreaNumbers,
   JDCategoryNumbers,
@@ -60,7 +60,7 @@ const databaseModel = createModel(
     /**
      * The parsed representation of our system.
      */
-    jdSystem: {} as InternalJdSystem,
+    jdSystem: {} as JdSystem,
   },
   {
     events: {
@@ -184,7 +184,7 @@ const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
   userbaseItems: (context, event) => event.userbaseItems,
 });
 
-const assignInternalJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+const assignJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
   jdSystem: (context, event) => {
     const jdSystem = userbaseItemsToJdSystem(event.userbaseItems);
     return jdSystem;
@@ -418,7 +418,7 @@ export const databaseMachine = databaseModel.createMachine(
           listening: {
             on: {
               USERBASE_ITEMS_UPDATED: {
-                actions: [assignUserbaseItems, assignInternalJdSystem],
+                actions: [assignUserbaseItems, assignJdSystem],
               },
             },
           },

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { InternalJdSystem, JDProjectNumbers, JDAreaNumbers } from "@types";
+import { JdSystem, JDProjectNumbers, JDAreaNumbers } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Project = (props: any) => {
@@ -8,7 +8,7 @@ export const Project = (props: any) => {
     currentProject,
     children,
   }: {
-    jdSystem: InternalJdSystem;
+    jdSystem: JdSystem;
     currentProject: JDProjectNumbers;
     children: React.ReactNode;
   } = props;
