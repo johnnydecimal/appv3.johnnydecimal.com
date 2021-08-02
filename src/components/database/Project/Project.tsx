@@ -37,17 +37,20 @@ export const Project = (props: any) => {
 
   if (currentProject) {
     return (
-      <>
-        <h2 className="text-2xl font-bold">
-          {internalJdSystem[currentProject]!.title}
-        </h2>
-        <div className="flex flex-initial">
-          <h3 className="cursor-pointer" onClick={() => openArea(null)}>
-            {currentProject}
-          </h3>
-          <div>{children}</div>
+      <div
+        className="grid text-2xl"
+        style={{ gridTemplateColumns: "4ch auto" }}
+      >
+        <div
+          className="cursor-pointer col-span-full"
+          onClick={() => {
+            openArea(null);
+          }}
+        >
+          {currentProject} {internalJdSystem[currentProject]!.title}
         </div>
-      </>
+        <div className="col-start-2">{children}</div>
+      </div>
     );
   }
 
@@ -55,3 +58,13 @@ export const Project = (props: any) => {
   // when there is.
   return <div>yeah</div>;
 };
+
+// <h2 className="text-2xl font-bold">
+//   {currentProject}: {internalJdSystem[currentProject]!.title}
+// </h2>
+// <div className="flex flex-initial">
+//   <h3 className="cursor-pointer" onClick={() => openArea(null)}>
+//     {currentProject}
+//   </h3>
+//   <div>{children}</div>
+// </div>
