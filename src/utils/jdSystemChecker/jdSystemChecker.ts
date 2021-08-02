@@ -1,4 +1,12 @@
-import { JdSystem, JDAreaNumbers, JDProjectNumbers } from "@types";
+import {
+  JdSystem,
+  JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+  JDIdNumbers,
+} from "@types";
+import { categoryNumberToAreaNumber } from "utils";
+import { idNumberToCategoryNumber } from "utils/idNumberToCategoryNumber/idNumberToCategoryNumber";
 
 export {};
 /**
@@ -32,4 +40,41 @@ export const isAreaDuplicate = (
   if (jdSystem[currentProject]?.areas[areaToCheck]) {
     return true;
   }
+  return false;
+};
+
+export const isCategoryDuplicate = (
+  jdSystem: JdSystem,
+  currentProject: JDProjectNumbers,
+  categoryToCheck: JDCategoryNumbers
+) => {
+  const area = categoryNumberToAreaNumber(categoryToCheck);
+  if (
+    // prettier-ignore
+    jdSystem[currentProject]
+      ?.areas[area]
+      ?.categories[categoryToCheck]
+  ) {
+    return true;
+  }
+  return false;
+};
+
+export const isIdDuplicate = (
+  jdSystem: JdSystem,
+  currentProject: JDProjectNumbers,
+  idToCheck: JDIdNumbers
+) => {
+  const category = idNumberToCategoryNumber(idToCheck);
+  const area = categoryNumberToAreaNumber(category);
+  if (
+    // prettier-ignore
+    jdSystem[currentProject]
+      ?.areas[area]
+      ?.categories[category]
+      ?.ids[idToCheck]
+  ) {
+    return true;
+  }
+  return false;
 };
