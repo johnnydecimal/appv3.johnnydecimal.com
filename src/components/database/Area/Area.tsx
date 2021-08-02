@@ -8,12 +8,12 @@ import {
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Area = ({
-  internalJdSystem,
+  jdSystem,
   currentProject,
   currentArea,
   children,
 }: {
-  internalJdSystem: InternalJdSystem;
+  jdSystem: InternalJdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JDAreaNumbers | null;
   children: React.ReactNode;
@@ -45,8 +45,7 @@ export const Area = ({
             openCategory(null);
           }}
         >
-          {currentArea}{" "}
-          {internalJdSystem[currentProject]!.areas[currentArea]!.title}
+          {currentArea} {jdSystem[currentProject]!.areas[currentArea]!.title}
         </div>
         {/**
          * In the indented second column, children (which is `<Category />`).
@@ -62,17 +61,15 @@ export const Area = ({
    * We render a list of all areas, each of which is clickable. Doing so makes
    * that area the `currentArea`.
    */
-  const areas = Object.keys(internalJdSystem[currentProject]!.areas).sort(
-    (a, b) => {
-      return Number(a.charAt(0)) - Number(b.charAt(0));
-    }
-  ) as JDAreaNumbers[];
+  const areas = Object.keys(jdSystem[currentProject]!.areas).sort((a, b) => {
+    return Number(a.charAt(0)) - Number(b.charAt(0));
+  }) as JDAreaNumbers[];
 
   return (
     <div>
       {areas.map((area, i) => (
         <div className="cursor-pointer" key={i} onClick={() => openArea(area)}>
-          {area} {internalJdSystem[currentProject]!.areas[area]!.title}
+          {area} {jdSystem[currentProject]!.areas[area]!.title}
         </div>
       ))}
     </div>

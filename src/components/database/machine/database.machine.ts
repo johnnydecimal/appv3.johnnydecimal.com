@@ -6,7 +6,7 @@ import userbase, { Database } from "userbase-js";
 import { nanoid } from "nanoid";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { userbaseItemsToInternalJdSystem } from "utils";
+import { userbaseItemsToJdSystem } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
@@ -60,7 +60,7 @@ const databaseModel = createModel(
     /**
      * The parsed representation of our system.
      */
-    internalJdSystem: {} as InternalJdSystem,
+    jdSystem: {} as InternalJdSystem,
   },
   {
     events: {
@@ -185,11 +185,9 @@ const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
 });
 
 const assignInternalJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
-  internalJdSystem: (context, event) => {
-    const internalJdSystem = userbaseItemsToInternalJdSystem(
-      event.userbaseItems
-    );
-    return internalJdSystem;
+  jdSystem: (context, event) => {
+    const jdSystem = userbaseItemsToJdSystem(event.userbaseItems);
+    return jdSystem;
   },
 });
 
@@ -498,6 +496,11 @@ export const databaseMachine = databaseModel.createMachine(
             });
             return;
           }
+
+          /**
+           * Ensure that the system is valid after this insert.
+           */
+
           userbase
             .insertItem({
               databaseName: context.currentProject,

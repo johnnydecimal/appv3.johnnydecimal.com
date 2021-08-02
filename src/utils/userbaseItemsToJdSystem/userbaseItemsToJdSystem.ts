@@ -12,7 +12,7 @@ import {
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
- * # userbaseItemsToInternalJdSystem
+ * # userbaseItemsToJdSystem
  *
  * Takes an array of `UserbaseItem[]`s and turns it in to the
  * `InternalJdSystem` that we use in this app.
@@ -20,7 +20,7 @@ import {
  * #TODO: should return errors, doesn't currently.
  * Returns an error if the array isn't a valid system.
  */
-export const userbaseItemsToInternalJdSystem = (
+export const userbaseItemsToJdSystem = (
   userbaseItems: UserbaseItem[]
 ): InternalJdSystem => {
   /**
@@ -31,7 +31,7 @@ export const userbaseItemsToInternalJdSystem = (
   /**
    * Set up the base object.
    */
-  const internalJdSystem: InternalJdSystem = {};
+  const jdSystem: InternalJdSystem = {};
 
   /**
    * Set up variables that we'll use to loop over `userbaseItems[]`.
@@ -48,7 +48,7 @@ export const userbaseItemsToInternalJdSystem = (
     if (item.jdType === "project") {
       projectNumber = item.jdNumber as JDProjectNumbers;
       const projectTitle = item.jdTitle;
-      internalJdSystem[projectNumber] = {
+      jdSystem[projectNumber] = {
         title: projectTitle,
         areas: {},
       };
@@ -77,7 +77,7 @@ export const userbaseItemsToInternalJdSystem = (
        * Is that even possible with the current model? I don't think so.
        */
       // prettier-ignore
-      internalJdSystem[projectNumber]!
+      jdSystem[projectNumber]!
         .areas[areaNumber] = {
           title: areaTitle,
           categories: {},
@@ -103,7 +103,7 @@ export const userbaseItemsToInternalJdSystem = (
        * need to be 100%.
        */
       // prettier-ignore
-      internalJdSystem[projectNumber]!
+      jdSystem[projectNumber]!
         .areas[areaNumber]!
         .categories[categoryNumber] = {
           title: categoryTitle,
@@ -128,7 +128,7 @@ export const userbaseItemsToInternalJdSystem = (
       ) as JDCategoryNumbers;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       // prettier-ignore
-      internalJdSystem[projectNumber]!
+      jdSystem[projectNumber]!
         .areas[areaNumber]!
         .categories[categoryNumber]!
         .ids[idNumber] = {
@@ -141,11 +141,9 @@ export const userbaseItemsToInternalJdSystem = (
   const endTime = window.performance.now();
   if (process.env.NODE_ENV === "development") {
     console.log(
-      `Creating internalJdSystem from userbaseItem[] took ${
-        endTime - startTime
-      }ms.`
+      `Creating jdSystem from userbaseItem[] took ${endTime - startTime}ms.`
     );
   }
 
-  return internalJdSystem;
+  return jdSystem;
 };

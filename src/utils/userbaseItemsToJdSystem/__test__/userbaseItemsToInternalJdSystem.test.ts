@@ -3,7 +3,7 @@ import {
   allCategories,
   allIds,
   userbaseItemsGenerator,
-  userbaseItemsToInternalJdSystem,
+  userbaseItemsToJdSystem,
 } from "utils";
 
 it("should work with a project", () => {
@@ -33,8 +33,8 @@ it("should work with an ID", () => {
 
 it("should generate a one-project JD system", () => {
   const userbaseItems = userbaseItemsGenerator(["000"]);
-  const internalJdSystem = userbaseItemsToInternalJdSystem(userbaseItems);
-  expect(internalJdSystem).toEqual({
+  const jdSystem = userbaseItemsToJdSystem(userbaseItems);
+  expect(jdSystem).toEqual({
     "000": {
       title: "Project 000",
       areas: {},
@@ -44,8 +44,8 @@ it("should generate a one-project JD system", () => {
 
 it("should generate a one-area JD system", () => {
   const userbaseItems = userbaseItemsGenerator(["000"], ["00-09"]);
-  const internalJdSystem = userbaseItemsToInternalJdSystem(userbaseItems);
-  expect(internalJdSystem).toEqual({
+  const jdSystem = userbaseItemsToJdSystem(userbaseItems);
+  expect(jdSystem).toEqual({
     "000": {
       title: "Project 000",
       areas: {
@@ -60,8 +60,8 @@ it("should generate a one-area JD system", () => {
 
 it("should generate a one-category JD system", () => {
   const userbaseItems = userbaseItemsGenerator(["000"], ["00-09"], ["00"]);
-  const internalJdSystem = userbaseItemsToInternalJdSystem(userbaseItems);
-  expect(internalJdSystem).toEqual({
+  const jdSystem = userbaseItemsToJdSystem(userbaseItems);
+  expect(jdSystem).toEqual({
     "000": {
       title: "Project 000",
       areas: {
@@ -86,8 +86,8 @@ it("should generate a one-ID JD system", () => {
     ["00"],
     ["00.00"]
   );
-  const internalJdSystem = userbaseItemsToInternalJdSystem(userbaseItems);
-  expect(internalJdSystem).toEqual({
+  const jdSystem = userbaseItemsToJdSystem(userbaseItems);
+  expect(jdSystem).toEqual({
     "000": {
       title: "Project 000",
       areas: {

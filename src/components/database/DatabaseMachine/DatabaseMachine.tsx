@@ -47,13 +47,8 @@ export const DatabaseMachine = () => {
     authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
   );
 
-  const {
-    internalJdSystem,
-    currentProject,
-    currentArea,
-    currentCategory,
-    currentId,
-  } = state.context;
+  const { jdSystem, currentProject, currentArea, currentCategory, currentId } =
+    state.context;
 
   console.log("dbMachine.context:", state.context);
 
@@ -187,26 +182,23 @@ export const DatabaseMachine = () => {
        * indicates that they should render the *list* of things in order that
        * the user can select one.
        */}
-      {internalJdSystem?.[currentProject] ? (
-        <Project
-          internalJdSystem={internalJdSystem}
-          currentProject={currentProject}
-        >
+      {jdSystem?.[currentProject] ? (
+        <Project jdSystem={jdSystem} currentProject={currentProject}>
           <Area
-            internalJdSystem={internalJdSystem}
+            jdSystem={jdSystem}
             currentProject={currentProject}
             currentArea={currentArea}
           >
             {currentArea ? (
               <Category
-                internalJdSystem={internalJdSystem}
+                jdSystem={jdSystem}
                 currentProject={currentProject}
                 currentArea={currentArea}
                 currentCategory={currentCategory}
               >
                 {currentCategory ? (
                   <ID
-                    internalJdSystem={internalJdSystem}
+                    jdSystem={jdSystem}
                     currentProject={currentProject}
                     currentArea={currentArea}
                     currentCategory={currentCategory}

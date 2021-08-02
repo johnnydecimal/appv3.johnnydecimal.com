@@ -9,13 +9,13 @@ import {
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Category = ({
-  internalJdSystem,
+  jdSystem,
   currentProject,
   currentArea,
   currentCategory,
   children,
 }: {
-  internalJdSystem: InternalJdSystem;
+  jdSystem: InternalJdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JDAreaNumbers;
   currentCategory: JDCategoryNumbers | null;
@@ -50,7 +50,7 @@ export const Category = ({
         >
           {currentCategory}{" "}
           {
-            internalJdSystem[currentProject]!.areas[currentArea]!.categories[
+            jdSystem[currentProject]!.areas[currentArea]!.categories[
               currentCategory
             ]!.title
           }
@@ -70,7 +70,7 @@ export const Category = ({
    * makes that category the `currentCategory`.
    */
   const categories = Object.keys(
-    internalJdSystem[currentProject]!.areas[currentArea]!.categories
+    jdSystem[currentProject]!.areas[currentArea]!.categories
   ).sort((a, b) => {
     return Number(a) - Number(b);
   }) as JDCategoryNumbers[];
@@ -85,9 +85,8 @@ export const Category = ({
         >
           {category}{" "}
           {
-            internalJdSystem[currentProject]!.areas[currentArea]!.categories[
-              category
-            ]!.title
+            jdSystem[currentProject]!.areas[currentArea]!.categories[category]!
+              .title
           }
         </div>
       ))}

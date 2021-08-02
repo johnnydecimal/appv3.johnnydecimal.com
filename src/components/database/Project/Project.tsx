@@ -4,11 +4,11 @@ import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Project = (props: any) => {
   const {
-    internalJdSystem,
+    jdSystem,
     currentProject,
     children,
   }: {
-    internalJdSystem: InternalJdSystem;
+    jdSystem: InternalJdSystem;
     currentProject: JDProjectNumbers;
     children: React.ReactNode;
   } = props;
@@ -20,7 +20,7 @@ export const Project = (props: any) => {
   } = useContext(DatabaseMachineReactContext);
 
   /**
-   * At the very least, we're always passed `internalJdSystem` which contains
+   * At the very least, we're always passed `jdSystem` which contains
    * the first project that we set up for the user.
    *
    * If `currentProject`, show that project's ID and then render the <Areas />
@@ -41,7 +41,7 @@ export const Project = (props: any) => {
             openArea(null);
           }}
         >
-          {currentProject} {internalJdSystem[currentProject]!.title}
+          {currentProject} {jdSystem[currentProject]!.title}
         </div>
         <div className="col-start-2">{children}</div>
       </div>
@@ -54,7 +54,7 @@ export const Project = (props: any) => {
 };
 
 // <h2 className="text-2xl font-bold">
-//   {currentProject}: {internalJdSystem[currentProject]!.title}
+//   {currentProject}: {jdSystem[currentProject]!.title}
 // </h2>
 // <div className="flex flex-initial">
 //   <h3 className="cursor-pointer" onClick={() => openArea(null)}>

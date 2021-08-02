@@ -9,14 +9,14 @@ import {
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const ID = ({
-  internalJdSystem,
+  jdSystem,
   currentProject,
   currentArea,
   currentCategory,
   currentId,
 }: // children,
 {
-  internalJdSystem: InternalJdSystem;
+  jdSystem: InternalJdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JDAreaNumbers;
   currentCategory: JDCategoryNumbers;
@@ -45,7 +45,7 @@ export const ID = ({
         <div className="col-span-full">
           {currentId}{" "}
           {
-            internalJdSystem[currentProject]!.areas[currentArea]!.categories[
+            jdSystem[currentProject]!.areas[currentArea]!.categories[
               currentCategory
             ]!.ids[currentId]!.title
           }
@@ -64,9 +64,8 @@ export const ID = ({
    * that ID the `currentId`.
    */
   const ids = Object.keys(
-    internalJdSystem[currentProject]!.areas[currentArea]!.categories[
-      currentCategory
-    ]!.ids
+    jdSystem[currentProject]!.areas[currentArea]!.categories[currentCategory]!
+      .ids
   ).sort((a, b) => {
     return Number(a) - Number(b);
   }) as JDIdNumbers[];
@@ -77,7 +76,7 @@ export const ID = ({
         <div className="cursor-pointer" key={i} onClick={() => openId(id)}>
           {id}{" "}
           {
-            internalJdSystem[currentProject]!.areas[currentArea]!.categories[
+            jdSystem[currentProject]!.areas[currentArea]!.categories[
               currentCategory
             ]!.ids[id]!.title
           }
