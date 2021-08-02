@@ -125,7 +125,7 @@ export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
 const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
-// === Actions  ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+//#region  ===-===  Actions     ===-===-===-===-===-===-===-===-===-===-===-===
 const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
   databases: (_, event) => event.databases,
 });
@@ -230,8 +230,9 @@ const clearCurrentId = databaseModel.assign<
 >({
   currentId: () => null,
 });
+//#endregion
 
-// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+//#region  ===-===  Main        ===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * There's only one way a database can be opened (or created): by changing
  * context.currentProject and transitioning back to the root of this machine.
@@ -515,3 +516,4 @@ export const databaseMachine = databaseModel.createMachine(
     },
   }
 );
+//#endregion

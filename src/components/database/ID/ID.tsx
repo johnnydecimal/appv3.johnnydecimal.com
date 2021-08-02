@@ -26,7 +26,6 @@ export const ID = ({
   const {
     openId,
   }: {
-    openCategory: (category: JDCategoryNumbers) => void;
     openId: (id: JDIdNumbers) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentId) {

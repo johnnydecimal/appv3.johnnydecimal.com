@@ -4,6 +4,7 @@ import {
   JDProjectNumbers,
   JDAreaNumbers,
   JDCategoryNumbers,
+  JDIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -20,7 +21,13 @@ export const Category = ({
   currentCategory: JDCategoryNumbers | null;
   children: React.ReactNode;
 }) => {
-  const { openCategory, openId } = useContext(DatabaseMachineReactContext);
+  const {
+    openCategory,
+    openId,
+  }: {
+    openCategory: (category: JDCategoryNumbers) => void;
+    openId: (id: JDIdNumbers | null) => void;
+  } = useContext(DatabaseMachineReactContext);
   if (currentCategory) {
     /**
      * If there's a current category, the user has selected a category.

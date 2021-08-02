@@ -1,5 +1,10 @@
 import { useContext } from "react";
-import { InternalJdSystem, JDProjectNumbers, JDAreaNumbers } from "@types";
+import {
+  InternalJdSystem,
+  JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+} from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Area = ({
@@ -13,7 +18,13 @@ export const Area = ({
   currentArea: JDAreaNumbers | null;
   children: React.ReactNode;
 }) => {
-  const { openArea, openCategory } = useContext(DatabaseMachineReactContext);
+  const {
+    openArea,
+    openCategory,
+  }: {
+    openArea: (area: JDAreaNumbers) => void;
+    openCategory: (category: JDCategoryNumbers | null) => void;
+  } = useContext(DatabaseMachineReactContext);
   if (currentArea) {
     /**
      * If there's a current area, the user has selected an area.

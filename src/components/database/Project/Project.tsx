@@ -1,17 +1,7 @@
 import { useContext } from "react";
-import { InternalJdSystem, JDProjectNumbers } from "@types";
+import { InternalJdSystem, JDProjectNumbers, JDAreaNumbers } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
-/**
- * What's this thing need to do?
- *
- * And didn't we write something similar? Whatever, do it again.
- *
- * There are two options for this type of component (because Area, Category etc.
- * will all be the same):
- *
- * - If 'Project' is passed
- */
 export const Project = (props: any) => {
   const {
     internalJdSystem,
@@ -23,7 +13,11 @@ export const Project = (props: any) => {
     children: React.ReactNode;
   } = props;
 
-  const { openArea } = useContext(DatabaseMachineReactContext);
+  const {
+    openArea,
+  }: {
+    openArea: (area: JDAreaNumbers | null) => void;
+  } = useContext(DatabaseMachineReactContext);
 
   /**
    * At the very least, we're always passed `internalJdSystem` which contains
