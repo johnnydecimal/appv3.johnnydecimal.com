@@ -15,13 +15,15 @@ export const Area = ({
 }) => {
   const { openArea, openCategory } = useContext(DatabaseMachineReactContext);
   if (currentArea) {
+    /**
+     * If there's a current area, the user has selected an area.
+     *
+     * We show this area as a header, and render the children below.
+     *
+     * The header is clickable: doing so brings us back to the list of areas,
+     * which we do by clearing `currentCategory`.
+     */
     return (
-      /**
-       * A grid with 3ch at the start so we indent the list of categories
-       * by `00-`.
-       *
-       * Text size is inherited from `<Project />`.
-       */
       <div className="grid" style={{ gridTemplateColumns: "3ch auto" }}>
         {/**
          * Spanned across all columns, the area number + title.
@@ -44,9 +46,10 @@ export const Area = ({
   }
 
   /**
-   * If not, generate and show the sorted list of areas to choose from.
+   * If there isn't a current area, the user has not selected an area.
    *
-   * They just sit in the container.
+   * We render a list of all areas, each of which is clickable. Doing so makes
+   * that area the `currentArea`.
    */
   const areas = Object.keys(internalJdSystem[currentProject]!.areas).sort(
     (a, b) => {

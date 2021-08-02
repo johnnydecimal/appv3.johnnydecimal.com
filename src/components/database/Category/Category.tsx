@@ -22,13 +22,15 @@ export const Category = ({
 }) => {
   const { openCategory, openId } = useContext(DatabaseMachineReactContext);
   if (currentCategory) {
+    /**
+     * If there's a current category, the user has selected a category.
+     *
+     * We show this category as a header, and render the children below.
+     *
+     * The header is clickable: doing so brings us back to the list of
+     * categories, which we do by clearing `currentId`.
+     */
     return (
-      /**
-       * A grid with 3ch at the start so we indent the list of IDs
-       * by `00 `.
-       *
-       * Text size is inherited from `<Project />`.
-       */
       <div className="grid" style={{ gridTemplateColumns: "3ch auto" }}>
         {/**
          * Spanned across all columns, the category number + title.
@@ -55,7 +57,10 @@ export const Category = ({
   }
 
   /**
-   * If not, generate and show the sorted list of categories to choose from.
+   * If there isn't a current category, the user has not selected a category.
+   *
+   * We render a list of all categories, each of which is clickable. Doing so
+   * makes that category the `currentCategory`.
    */
   const categories = Object.keys(
     internalJdSystem[currentProject]!.areas[currentArea]!.categories
