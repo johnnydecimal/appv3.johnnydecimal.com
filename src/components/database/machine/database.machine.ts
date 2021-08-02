@@ -24,11 +24,18 @@ import {
 const databaseModel = createModel(
   {
     /**
-     * currentDatabase is the 3-digit project which we have open. Corresponds to
+     * currentProject is the 3-digit project which we have open. Corresponds to
      * the databaseName in Userbase. We send this value down when we invoke
      * the machine.
      */
-    currentDatabase: "" as JDProjectNumbers,
+    currentProject: "" as JDProjectNumbers,
+
+    /**
+     * The currently-open area, category, and ID.
+     */
+    currentArea: null as JDAreaNumbers | null,
+    currentCategory: null as JDCategoryNumbers | null,
+    currentId: null as JDIdNumbers | null,
 
     /**
      * currentUserName is the username of the currently-signed-in user. We send
@@ -54,13 +61,6 @@ const databaseModel = createModel(
      * The parsed representation of our system.
      */
     internalJdSystem: {} as InternalJdSystem,
-
-    /**
-     * The currently-open area, category, and ID.
-     */
-    currentArea: null as JDAreaNumbers | null,
-    currentCategory: null as JDCategoryNumbers | null,
-    currentId: null as JDIdNumbers | null,
   },
   {
     events: {
@@ -131,7 +131,7 @@ const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
 });
 
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
-  currentDatabase: (_context, event) => event.newDatabase,
+  currentProject: (_context, event) => event.newDatabase,
 });
 
 const assignNewUserbaseItem = databaseModel.assign({
@@ -234,10 +234,10 @@ const clearCurrentId = databaseModel.assign<
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * There's only one way a database can be opened (or created): by changing
- * context.currentDatabase and transitioning back to the root of this machine.
+ * context.currentProject and transitioning back to the root of this machine.
  * The root-level OPEN_DATABASE does this for us.
  *
- * This way we guarantee that context.currentDatabase is actually the database
+ * This way we guarantee that context.currentProject is actually the database
  * which is open.
  */
 export const databaseMachine = databaseModel.createMachine(
@@ -342,7 +342,7 @@ export const databaseMachine = databaseModel.createMachine(
                   sendParent<any, any, AuthMachineEvent>((context) => ({
                     type: "UPDATE_USER_PROFILE",
                     profile: {
-                      currentDatabase: context.currentDatabase,
+                      currentProject: context.currentProject,
                     },
                   })),
                 ],
@@ -362,8 +362,8 @@ export const databaseMachine = databaseModel.createMachine(
                     type: "INSERT_ITEM",
                     item: {
                       jdType: "project",
-                      jdNumber: context.currentDatabase,
-                      jdTitle: `Project ${context.currentDatabase}`,
+                      jdNumber: context.currentProject,
+                      jdTitle: `Project ${context.currentProject}`,
                     },
                   });
                 }
@@ -451,7 +451,7 @@ export const databaseMachine = databaseModel.createMachine(
         (sendBack: (event: DatabaseMachineEvent) => void) => {
           userbase
             .openDatabase({
-              databaseName: context.currentDatabase,
+              databaseName: context.currentProject,
               changeHandler: (userbaseItems) => {
                 /**
                  * So when this is set up, this fires. That's how we get the
@@ -469,7 +469,7 @@ export const databaseMachine = databaseModel.createMachine(
             .catch((error: UserbaseError) => {
               /**
                * #TODO: errors need to be handled better here. You've already
-               *        set `currentDatabase`, so if this doesn't work we're
+               *        set `currentProject`, so if this doesn't work we're
                *        in a janky state.
                */
               sendParent<any, any, AuthMachineEvent>({
@@ -499,7 +499,7 @@ export const databaseMachine = databaseModel.createMachine(
           }
           userbase
             .insertItem({
-              databaseName: context.currentDatabase,
+              databaseName: context.currentProject,
               item: event.item,
             })
             .then(() => {

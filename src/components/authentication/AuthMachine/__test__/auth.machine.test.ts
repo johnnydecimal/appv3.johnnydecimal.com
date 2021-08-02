@@ -12,7 +12,7 @@ const user: UserResult = {
   creationDate: new Date(),
   paymentsMode: "disabled",
   profile: {
-    currentDatabase: "001",
+    currentProject: "001",
   },
 };
 

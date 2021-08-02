@@ -402,8 +402,8 @@ export const authMachine = authModel.createMachine(
                      * it when a new user is created, and only ever update (vs.
                      * delete) it.
                      */
-                    currentDatabase: (context: AuthMachineContext) =>
-                      context.user!.profile!.currentDatabase,
+                    currentProject: (context: AuthMachineContext) =>
+                      context.user!.profile!.currentProject,
                     currentUserName: (context: AuthMachineContext) =>
                       context.user!.username,
                   },
@@ -488,7 +488,7 @@ export const authMachine = authModel.createMachine(
               authModel.assign({ user: updatedUser });
 
               /**
-               * We are *not* going to look for changes to `currentDatabase`
+               * We are *not* going to look for changes to `currentProject`
                * and send them down to the databaseMachine.
                *
                * You thought about it but what if the user on this session is
@@ -620,7 +620,7 @@ export const authMachine = authModel.createMachine(
               username: event.formData.username,
               password: event.formData.password,
               profile: {
-                currentDatabase: "001",
+                currentProject: "001",
               },
             })
             .then((user) => {

@@ -49,7 +49,7 @@ export const DatabaseMachine = () => {
 
   const {
     internalJdSystem,
-    currentDatabase: currentProject,
+    currentProject,
     currentArea,
     currentCategory,
     currentId,
@@ -236,8 +236,8 @@ export const DatabaseMachine = () => {
  * database, where does that happen? What needs to happen?
  *
  * 1. We need to actually open that database. Presumably it's enough to set
- *    context.currentDatabase here on db.machine and `init`.
- * 2. We need to set user.profile.currentDatabase so that the next time they
+ *    context.currentProject here on db.machine and `init`.
+ * 2. We need to set user.profile.currentProject so that the next time they
  *    log in they're using this database. But we specifically do NOT want that
  *    change to propagate to any active sessions.
  *

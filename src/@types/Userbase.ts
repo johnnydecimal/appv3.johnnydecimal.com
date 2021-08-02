@@ -10,7 +10,7 @@ import { JDItem } from ".";
  * `JDUserProfile` is the base profile interface with our custom stuff.
  */
 export interface JDUserProfile extends UserProfile {
-  currentDatabase: string;
+  currentProject: string;
 }
 
 // -=- Database  --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
