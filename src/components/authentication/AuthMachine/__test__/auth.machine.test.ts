@@ -1,6 +1,9 @@
-import { UserResult } from "userbase-js";
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { interpret } from "xstate";
-import { authMachine, AuthMachineEvent } from "../auth.machine";
+import { UserResult } from "userbase-js";
+
+// === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { authMachine, AuthMachineEvent } from "../../machine/auth.machine";
 
 const user: UserResult = {
   username: "john",

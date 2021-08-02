@@ -1,22 +1,41 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
+import { pure } from "xstate/lib/actions";
 import userbase, { Database } from "userbase-js";
+import { nanoid } from "nanoid";
+
+// === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { userbaseItemsToInternalJdSystem } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { UserbaseError, UserbaseItem } from "../../@types";
-import { AuthMachineEvent } from "../AuthMachine/auth.machine";
+import {
+  AuthMachineEvent,
+  InternalJdSystem,
+  JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+  JDIdNumbers,
+  JDItem,
+  UserbaseError,
+  UserbaseItem,
+} from "@types";
 
 const databaseModel = createModel(
   {
     /**
      * currentDatabase is the 3-digit project which we have open. Corresponds to
      * the databaseName in Userbase. We send this value down when we invoke
-     * the machine, and the master
-     *
-     *
+     * the machine.
      */
-    currentDatabase: "",
+    currentDatabase: "" as JDProjectNumbers,
+
+    /**
+     * currentUserName is the username of the currently-signed-in user. We send
+     * this down when we invoke the machine. Note that this isn't the full
+     * User object.
+     */
+    currentUserName: "",
 
     /**
      * The array of the user's available database objects, returned by Userbase.
@@ -26,17 +45,22 @@ const databaseModel = createModel(
     databases: [] as Database[],
 
     /**
-     * The latest error.
-     * Update: we're moving all error reporting to the parent. Delete when
-     * confirmed.
-        error: {} as UserbaseError,
-     */
-
-    /**
      * When we open any given database, `userbaseItems` is the array of Items
      * which makes up that database.
      */
     userbaseItems: [] as UserbaseItem[],
+
+    /**
+     * The parsed representation of our system.
+     */
+    internalJdSystem: {} as InternalJdSystem,
+
+    /**
+     * The currently-open area, category, and ID.
+     */
+    currentArea: null as JDAreaNumbers | null,
+    currentCategory: null as JDCategoryNumbers | null,
+    currentId: null as JDIdNumbers | null,
   },
   {
     events: {
@@ -57,7 +81,7 @@ const databaseModel = createModel(
        * one to open, it might not actually be new. Not that the API call to
        * Userbase cares either way.
        */
-      OPEN_DATABASE: (newDatabase: string) => ({
+      OPEN_DATABASE: (newDatabase: JDProjectNumbers) => ({
         newDatabase,
       }),
 
@@ -75,14 +99,22 @@ const databaseModel = createModel(
 
       /**
        * Sent by the helper function whenever we want to add a new item to the
-       * current database.
+       * current database. Note that we don't insert a UserbaseItem, there's a
+       * bunch of stuff on there (itemId) that Userbase generates for us.
        */
-      INSERT_ITEM: (item: UserbaseItem) => ({ item }),
+      INSERT_ITEM: (item: JDItem) => ({ item }),
 
       /**
-       * Send by ubInsertItem when it was successful.
+       * Sent by ubInsertItem when it was successful.
        */
       ITEM_INSERTED: () => ({}),
+
+      /**
+       * Sent by the helper functions when the user interacts with the app.
+       */
+      OPEN_AREA: (area: JDAreaNumbers) => ({ area }),
+      OPEN_CATEGORY: (category: JDCategoryNumbers) => ({ category }),
+      OPEN_ID: (id: JDIdNumbers) => ({ id }),
     },
   }
 );
@@ -115,15 +147,30 @@ const assignNewUserbaseItem = databaseModel.assign({
     if (event.type !== "INSERT_ITEM") {
       return context.userbaseItems;
     }
+    /**
+     * Incoming event.item is of type JDItem. It doesn't contain the stuff that
+     * Userbase adds, so we fudge it here as it'll be immediately overwritten
+     * by the changeHandler.
+     */
+    const newItem: UserbaseItem = {
+      itemId: nanoid(),
+      item: {
+        ...event.item,
+      },
+      createdBy: {
+        username: context.currentUserName,
+        timestamp: new Date(),
+      },
+    };
     const newUserbaseItems = [];
     if (typeof context.userbaseItems === "undefined") {
       /**
        * This is weird given that context.userbaseItems has been initialised
        * as an empty array, but whatever.
        */
-      newUserbaseItems.push(event.item);
+      newUserbaseItems.push(newItem);
     } else {
-      newUserbaseItems.push(...context.userbaseItems, event.item);
+      newUserbaseItems.push(...context.userbaseItems, newItem);
     }
     return newUserbaseItems;
   },
@@ -137,6 +184,15 @@ const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
   userbaseItems: (context, event) => event.userbaseItems,
 });
 
+const assignInternalJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+  internalJdSystem: (context, event) => {
+    const internalJdSystem = userbaseItemsToInternalJdSystem(
+      event.userbaseItems
+    );
+    return internalJdSystem;
+  },
+});
+
 const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
   /**
    * As soon as we open a new database, the existing userbaseItems
@@ -147,10 +203,38 @@ const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
   userbaseItems: () => [],
 });
 
+const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
+  currentArea: (context, event) => event.area,
+});
+
+const assignCurrentCategory = databaseModel.assign<"OPEN_CATEGORY">({
+  currentCategory: (context, event) => event.category,
+});
+
+const assignCurrentId = databaseModel.assign<"OPEN_ID">({
+  currentId: (context, event) => event.id,
+});
+
+const clearCurrentArea = databaseModel.assign<"OPEN_DATABASE">({
+  currentArea: () => null,
+});
+
+const clearCurrentCategory = databaseModel.assign<
+  "OPEN_DATABASE" | "OPEN_AREA"
+>({
+  currentCategory: () => null,
+});
+
+const clearCurrentId = databaseModel.assign<
+  "OPEN_DATABASE" | "OPEN_AREA" | "OPEN_CATEGORY"
+>({
+  currentId: () => null,
+});
+
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**
  * There's only one way a database can be opened (or created): by changing
- * context.currentDatabase and transitioning to #databaseMachine.databaseOpener.
+ * context.currentDatabase and transitioning back to the root of this machine.
  * The root-level OPEN_DATABASE does this for us.
  *
  * This way we guarantee that context.currentDatabase is actually the database
@@ -161,13 +245,35 @@ export const databaseMachine = databaseModel.createMachine(
     id: "databaseMachine",
     type: "parallel",
     context: databaseModel.initialContext,
+    invoke: {
+      /**
+       * We need a top-level `invoke` because the `changeHandler` which is
+       * set up in this service needs to stay alive.
+       */
+      src: "ubOpenDatabase",
+    },
     on: {
       GET_DATABASES: {
         target: "#databaseMachine.databaseGetter",
       },
       OPEN_DATABASE: {
-        actions: [assignNewDatabase, clearUserbaseItems],
-        target: "#databaseMachine.databaseOpener",
+        actions: [
+          assignNewDatabase,
+          clearUserbaseItems,
+          clearCurrentArea,
+          clearCurrentCategory,
+          clearCurrentId,
+        ],
+        target: "#databaseMachine",
+      },
+      OPEN_AREA: {
+        actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
+      },
+      OPEN_CATEGORY: {
+        actions: [assignCurrentCategory, clearCurrentId],
+      },
+      OPEN_ID: {
+        actions: [assignCurrentId],
       },
     },
     states: {
@@ -179,8 +285,13 @@ export const databaseMachine = databaseModel.createMachine(
          * to switch databases.
          */
         type: "compound",
-        initial: "gettingDatabases",
+        initial: "waitingForDatabaseToBeOpen",
         states: {
+          waitingForDatabaseToBeOpen: {
+            on: {
+              REPORT_DATABASE_OPENED: "gettingDatabases",
+            },
+          },
           gettingDatabases: {
             invoke: {
               src: "ubGetDatabases",
@@ -201,19 +312,13 @@ export const databaseMachine = databaseModel.createMachine(
           },
         },
       },
-      databaseOpener: {
+      databaseState: {
         /**
-         * This is where we actually open our database.
+         * We moved the opening of the database to the root, but this state
+         * still does a bunch of admin for us.
          */
         type: "compound",
         initial: "openingDatabase",
-        invoke: {
-          /**
-           * We need a top-level `invoke` because the `changeHandler` which is
-           * set up in this service needs to stay alive.
-           */
-          src: "ubOpenDatabase",
-        },
         states: {
           openingDatabase: {
             on: {
@@ -246,6 +351,24 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           databaseOpen: {
+            entry: [
+              /**
+               * If the item which represents the project doesn't exist,
+               * create it.
+               */
+              pure((context) => {
+                if (context.userbaseItems.length === 0) {
+                  return send({
+                    type: "INSERT_ITEM",
+                    item: {
+                      jdType: "project",
+                      jdNumber: context.currentDatabase,
+                      jdTitle: `Project ${context.currentDatabase}`,
+                    },
+                  });
+                }
+              }),
+            ],
             on: {
               INSERT_ITEM: {
                 target: "#databaseMachine.itemInserter.insertingItem",
@@ -296,7 +419,7 @@ export const databaseMachine = databaseModel.createMachine(
           listening: {
             on: {
               USERBASE_ITEMS_UPDATED: {
-                actions: [assignUserbaseItems],
+                actions: [assignUserbaseItems, assignInternalJdSystem],
               },
             },
           },
@@ -336,6 +459,7 @@ export const databaseMachine = databaseModel.createMachine(
                  * machine is in a state which will accept this event and do
                  * something with its payload.
                  */
+
                 sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
               },
             })
@@ -376,12 +500,7 @@ export const databaseMachine = databaseModel.createMachine(
           userbase
             .insertItem({
               databaseName: context.currentDatabase,
-              // item: event.item,
-              item: {
-                test: true,
-                item: "yeah",
-                insertDate: new Date(),
-              },
+              item: event.item,
             })
             .then(() => {
               sendBack({ type: "ITEM_INSERTED" });

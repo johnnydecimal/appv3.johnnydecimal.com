@@ -1,7 +1,7 @@
 /**
- * JDCategory is the type which is all possible categories.
+ * JDCategoryNumbers is the type which is all possible category numbers.
  */
-export type JDCategory =
+export type JDCategoryNumbers =
   | "00"
   | "01"
   | "02"

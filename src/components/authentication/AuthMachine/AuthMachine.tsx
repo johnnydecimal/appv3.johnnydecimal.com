@@ -2,17 +2,15 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { authMachine } from "./auth.machine";
+import { DatabaseMachine } from "components/database";
+
+// === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
+import { authMachine } from "../machine/auth.machine";
 import { AuthMachineReactContext } from "./context";
-import { DatabaseMachine } from "../DatabaseMachine/DatabaseMachine";
-import { SignInForm } from "../authentication/SignInForm/SignInForm";
-import { SignUpForm } from "../authentication/SignUpForm/SignUpForm";
+import { SignInForm, ISignInFormData } from "../SignInForm/SignInForm";
+import { SignUpForm, ISignUpFormData } from "../SignUpForm/SignUpForm";
 
-// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ISignInFormData } from "../authentication/SignInForm/SignInForm";
-import { ISignUpFormData } from "../authentication/SignUpForm/SignUpForm";
-
-// == Temp stuff while you build this out ==
+// === Temp ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const FourOhFour = () => <div>404</div>;
 const WaitOne = () => <div>Wait one. Doing networks.</div>;
 
@@ -20,6 +18,8 @@ const WaitOne = () => <div>Wait one. Doing networks.</div>;
 export const AuthMachine = () => {
   /**
    * Start the machine.
+   * #TODO: switch to `useInterpret` to save re-renders.
+   * https://xstate.js.org/docs/recipes/react.html#global-state-react-context
    */
   const [state, send] = useMachine(authMachine, {
     devTools: true,

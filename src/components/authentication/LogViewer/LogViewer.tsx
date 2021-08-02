@@ -1,3 +1,4 @@
+// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const LogViewer = ({ log }: { log: string[] }) => (
   <div>
     {log.map((entry: string, i: number) => (

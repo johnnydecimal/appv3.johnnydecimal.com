@@ -1,4 +1,9 @@
-import type { JDArea, JDCategory, JDID } from ".";
+import type {
+  JDProjectNumbers,
+  JDAreaNumbers,
+  JDCategoryNumbers,
+  JDIdNumbers,
+} from ".";
 
 /**
  * Each distinct JD Item -- a Project, Area, Category, etc. -- follows the same
@@ -7,13 +12,31 @@ import type { JDArea, JDCategory, JDID } from ".";
  * - `jdType` describes which of these it is.
  * - `jdNumber` contains its number.
  * - `jdTitle` contains its title.
- * - `meta` contains any user-defined metadata, which follows the item
- *   (this has yet to be defined).
- *
+ * - `meta` contains any user-defined metadata
  */
-export interface JDItem {
-  jdType: "area" | "category" | "id";
-  jdNumber: JDArea | JDCategory | JDID;
-  jdTitle: string;
-  meta?: any; // This is an object with user-defined properties.
-}
+
+export type JDItem =
+  | {
+      jdType: "project";
+      jdNumber: JDProjectNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
+  | {
+      jdType: "area";
+      jdNumber: JDAreaNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
+  | {
+      jdType: "category";
+      jdNumber: JDCategoryNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
+  | {
+      jdType: "id";
+      jdNumber: JDIdNumbers;
+      jdTitle: string;
+      meta?: Object;
+    };

@@ -1,19 +1,21 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { inspect } from "@xstate/inspect";
+// import { inspect } from "@xstate/inspect";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachine } from "./components/AuthMachine/AuthMachine";
+import { AuthMachine } from "components/authentication";
+// import { Scratch } from "components/Scratch";
 
 /**
  * The XState inspector popup.
- */
-inspect({
-  // options
-  // url: 'https://statecharts.io/inspect', // (default)
-  iframe: false, // open in new window
-});
+ inspect({
+   // options
+   // url: 'https://statecharts.io/inspect', // (default)
+   iframe: false, // open in new window
+  });
+  */
 
 export const App = () => {
+  // return <Scratch />;
   return (
     /* Bring everything in from the sides */
     <div className="mx-2 sm:mx-12">
