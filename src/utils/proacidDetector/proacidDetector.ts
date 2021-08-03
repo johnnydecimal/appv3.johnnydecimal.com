@@ -5,8 +5,17 @@ export const proacidDetector = (item: string): PROACIDDetectorReturn => {
     return "error";
   }
 
-  if (item.match(/^\d\d\d$/)) {
-    return "project";
+  /**
+   * Sorted by order-of-probably-most-likely-to-be-called to possibly save the
+   * odd millisecond here and there.
+   */
+
+  if (item.match(/^\d\d\.\d\d$/)) {
+    return "id";
+  }
+
+  if (item.match(/^\d\d$/)) {
+    return "category";
   }
 
   if (item.match(/^\d0-\d9$/)) {
@@ -15,14 +24,9 @@ export const proacidDetector = (item: string): PROACIDDetectorReturn => {
     }
   }
 
-  if (item.match(/^\d\d$/)) {
-    return "category";
+  if (item.match(/^\d\d\d$/)) {
+    return "project";
   }
 
-  if (item.match(/^\d\d\.\d\d$/)) {
-    return "id";
-  }
-
-  // The default. Delete when done and TS will tell you if you've fucked up.
   return "error";
 };
