@@ -1,27 +1,6 @@
 import { JDItem } from "@types";
 
-type PROACIDDetectorReturn =
-  | "project"
-  | "area"
-  | "category"
-  | "id"
-  | { error: string };
-
 // == MOVE ME EXTERNALLY WHEN DONE
-const proacidDetector = (item: any): PROACIDDetectorReturn => {
-  if (item.match(/^\d\d\d$/)) {
-    return "project";
-  }
-
-  if (item.match(/^\d\d-\d\d$/)) {
-    if (item.charAt(1) === item.charAt(3)) {
-      return "area";
-    }
-  }
-
-  // The default. Delete when done and TS will tell you if you've fucked up.
-  return { error: "Default" };
-};
 
 /**
  * # insert
@@ -33,5 +12,5 @@ const proacidDetector = (item: any): PROACIDDetectorReturn => {
  */
 export const insert = (item: JDItem) => {
   // So what is it?
-  const proacid = proacidDetector(item);
+  // const proacid = proacidDetector(item);
 };
