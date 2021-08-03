@@ -36,7 +36,7 @@ export const isAreaDuplicate = (
   jdSystem: JdSystem,
   currentProject: JDProjectNumbers,
   areaToCheck: JDAreaNumbers
-) => {
+): Boolean => {
   if (jdSystem[currentProject]?.areas[areaToCheck]) {
     return true;
   }
@@ -47,7 +47,7 @@ export const isCategoryDuplicate = (
   jdSystem: JdSystem,
   currentProject: JDProjectNumbers,
   categoryToCheck: JDCategoryNumbers
-) => {
+): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
   if (
     // prettier-ignore
@@ -64,7 +64,42 @@ export const isIdDuplicate = (
   jdSystem: JdSystem,
   currentProject: JDProjectNumbers,
   idToCheck: JDIdNumbers
-) => {
+): Boolean => {
+  const category = idNumberToCategoryNumber(idToCheck);
+  const area = categoryNumberToAreaNumber(category);
+  if (
+    // prettier-ignore
+    jdSystem[currentProject]
+    ?.areas[area]
+    ?.categories[category]
+    ?.ids[idToCheck]
+  ) {
+    return true;
+  }
+  return false;
+};
+
+export const parentAreaExists = (
+  jdSystem: JdSystem,
+  currentProject: JDProjectNumbers,
+  categoryToCheck: JDCategoryNumbers
+): Boolean => {
+  const area = categoryNumberToAreaNumber(categoryToCheck);
+  if (
+    // prettier-ignore
+    jdSystem[currentProject]
+    ?.areas[area]
+  ) {
+    return true;
+  }
+  return false;
+};
+
+export const parentCategoryExists = (
+  jdSystem: JdSystem,
+  currentProject: JDProjectNumbers,
+  idToCheck: JDIdNumbers
+): Boolean => {
   const category = idNumberToCategoryNumber(idToCheck);
   const area = categoryNumberToAreaNumber(category);
   if (
@@ -72,7 +107,6 @@ export const isIdDuplicate = (
     jdSystem[currentProject]
       ?.areas[area]
       ?.categories[category]
-      ?.ids[idToCheck]
   ) {
     return true;
   }
