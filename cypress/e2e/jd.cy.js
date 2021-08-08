@@ -4,13 +4,21 @@ import userbase from "userbase-js";
 describe("run it", () => {
   const userId = `cy_${nanoid(6)}`;
 
+  beforeEach(() => {
+    sessionStorage.clear();
+    cy.visit("/").clearLocalStorage();
+  });
+
   afterEach(() => {
-    userbase.deleteUser();
+    cy.window()
+      .its("__handleDeleteUser__")
+      .then((handleDeleteUser) => {
+        handleDeleteUser();
+      });
   });
 
   it("starts up", () => {
-    cy.visit("/")
-      .get("body")
+    cy.get("body")
       .contains("Sign up")
       .click()
       .get("body")
@@ -22,5 +30,9 @@ describe("run it", () => {
       .type("test123{enter}")
       .get("body")
       .contains("Sign out", { timeout: 10000 });
+  });
+
+  it("starts again from the beginning", () => {
+    cy.get("body");
   });
 });

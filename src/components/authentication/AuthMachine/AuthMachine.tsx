@@ -60,12 +60,24 @@ export const AuthMachine = () => {
     send({ type: "ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION" });
   };
 
+  const handleDeleteUser = () => {
+    send({ type: "ATTEMPT_DELETE_USER" });
+  };
+
+  // @ts-expect-error
+  if (window.Cypress) {
+    console.log("🌲 cypress.io!");
+    // @ts-expect-error
+    window.__handleDeleteUser__ = handleDeleteUser;
+  }
+
   /**
    * Wrap these functions and `state` in an object which we'll use as context
    * value, passing it down to child components.
    */
   const AuthReactContextValue = {
     handleAcknowledgeDireWarningAboutE2EEncryption,
+    handleDeleteUser,
     handleSignIn,
     handleSignOut,
     handleSignUp,
