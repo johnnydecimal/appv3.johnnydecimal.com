@@ -13,4 +13,5 @@ import { JDItem } from "@types";
 export const insert = (item: JDItem) => {
   // So what is it?
   // const proacid = proacidDetector(item);
+  return true;
 };

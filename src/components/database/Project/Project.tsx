@@ -33,6 +33,7 @@ export const Project = (props: any) => {
     return (
       <div
         className="grid text-2xl"
+        id="project"
         style={{ gridTemplateColumns: "4ch auto" }}
       >
         <div
