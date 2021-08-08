@@ -34,6 +34,26 @@ describe("new user first run", () => {
   });
 });
 
+describe.only("switching between signup screens", () => {
+  it("switches between the signin and signup pages", () => {
+    cy.visit("/")
+      .get("body")
+      .contains("h1", "Sign in")
+      .get("body")
+      .contains("Sign up")
+      .click()
+      .get("body")
+      .contains("h1", "Sign up")
+      .get("body")
+      .contains("Really important message")
+      .get("body")
+      .contains("Sign in")
+      .click()
+      .get("body")
+      .contains("h1", "Sign in");
+  });
+});
+
 describe("existing user", () => {
   const user = {
     username: "cypress_perm",
