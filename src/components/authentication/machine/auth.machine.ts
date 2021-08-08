@@ -44,6 +44,7 @@ const authModel = createModel(
       LOG: (message: string) => ({ message }),
 
       // -- From services.userbaseInit()
+      // TODO: add the 'REPORT_' syntax to these where appropriate
       A_USER_IS_SIGNED_IN: (user: UserResult) => ({ user }),
       NO_USER_IS_SIGNED_IN: () => ({}),
 
@@ -65,6 +66,8 @@ const authModel = createModel(
       ATTEMPT_SIGNOUT: () => ({}),
       UPDATE_USER_PROFILE: (profile: UserProfile) => ({ profile }),
       USER_PROFILE_UPDATED: () => ({}),
+      ATTEMPT_DELETE_USER: () => ({}),
+      REPORT_USER_DELETED: () => ({}),
 
       // == Catch-all error for the whole app ==-==-==
       /**
@@ -381,6 +384,14 @@ export const authMachine = authModel.createMachine(
       },
       signedIn: {
         type: "parallel",
+        on: {
+          ATTEMPT_SIGNOUT: {
+            target: "#authMachine.signedOut.tryingSignOut",
+          },
+          ATTEMPT_DELETE_USER: {
+            target: "deletingUser",
+          },
+        },
         states: {
           databaseOpener: {
             type: "compound",
@@ -411,11 +422,6 @@ export const authMachine = authModel.createMachine(
                     jdSystem: () => {
                       return {};
                     },
-                  },
-                },
-                on: {
-                  ATTEMPT_SIGNOUT: {
-                    target: "#authMachine.signedOut.tryingSignOut",
                   },
                 },
               },
@@ -467,6 +473,16 @@ export const authMachine = authModel.createMachine(
                 },
               },
             },
+          },
+        },
+      },
+      deletingUser: {
+        invoke: {
+          src: "userbaseDeleteUser",
+        },
+        on: {
+          REPORT_USER_DELETED: {
+            target: "#authMachine.init",
           },
         },
       },
@@ -691,6 +707,17 @@ export const authMachine = authModel.createMachine(
             .catch((error) => {
               sendBack({ type: "ERROR", error });
             });
+        },
+
+      // == userbaseDeleteUser  ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+      userbaseDeleteUser:
+        () => (sendBack: (event: AuthMachineEvent) => void) => {
+          userbase
+            .deleteUser()
+            .then(() => {
+              sendBack({ type: "REPORT_USER_DELETED" });
+            })
+            .catch((error) => {});
         },
     },
   }
