@@ -94,6 +94,7 @@ export const SignUpForm = () => {
             <input
               className={UI.inputClass}
               disabled={UI.disabled}
+              id="password"
               type="password"
               {...register("password", { required: true })}
             />
@@ -125,6 +126,7 @@ export const SignUpForm = () => {
       {state.matches("signUp.direWarningAboutE2EEncryptionNotAcknowledged") ? (
         <div
           className="p-4 mt-8 text-sm border cursor-pointer border-red"
+          id="dire-warning"
           onClick={() => handleAcknowledgeDireWarningAboutE2EEncryption()}
         >
           <h2 className="font-bold text-red">Really important message</h2>

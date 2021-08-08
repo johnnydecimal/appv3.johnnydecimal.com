@@ -73,6 +73,7 @@ export const SignInForm = () => {
               autoFocus
               className={UI.inputClass}
               disabled={UI.disabled}
+              id="username"
               type="text"
               {...register("username", { required: true })}
             />
@@ -82,6 +83,7 @@ export const SignInForm = () => {
             <input
               className={UI.inputClass}
               disabled={UI.disabled}
+              id="password"
               type="password"
               {...register("password", { required: true })}
             />
@@ -90,6 +92,7 @@ export const SignInForm = () => {
             <button
               className={UI.buttonClass}
               disabled={UI.disabled}
+              id="signIn"
               type="submit"
             >
               {state.value.signedOut === "tryingSignIn" ? "Wait..." : "Sign in"}
@@ -97,6 +100,7 @@ export const SignInForm = () => {
             <button
               className="px-4 py-2 font-bold border-black justify-self-stretch focus:outline-none"
               onClick={switchToSignUp}
+              id="signUp"
             >
               Sign up
             </button>
