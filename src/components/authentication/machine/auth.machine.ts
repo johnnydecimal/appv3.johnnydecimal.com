@@ -404,8 +404,13 @@ export const authMachine = authModel.createMachine(
                      */
                     currentProject: (context: AuthMachineContext) =>
                       context.user!.profile!.currentProject,
-                    currentUserName: (context: AuthMachineContext) =>
+                    currentUsername: (context: AuthMachineContext) =>
                       context.user!.username,
+                    databases: () => [],
+                    userbaseItems: () => [],
+                    jdSystem: () => {
+                      return {};
+                    },
                   },
                 },
                 on: {

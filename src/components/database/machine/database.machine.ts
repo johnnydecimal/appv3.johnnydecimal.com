@@ -38,11 +38,11 @@ const databaseModel = createModel(
     currentId: null as JDIdNumbers | null,
 
     /**
-     * currentUserName is the username of the currently-signed-in user. We send
+     * currentUsername is the username of the currently-signed-in user. We send
      * this down when we invoke the machine. Note that this isn't the full
      * User object.
      */
-    currentUserName: "",
+    currentUsername: "",
 
     /**
      * The array of the user's available database objects, returned by Userbase.
@@ -158,7 +158,7 @@ const assignNewUserbaseItem = databaseModel.assign({
         ...event.item,
       },
       createdBy: {
-        username: context.currentUserName,
+        username: context.currentUsername,
         timestamp: new Date(),
       },
     };

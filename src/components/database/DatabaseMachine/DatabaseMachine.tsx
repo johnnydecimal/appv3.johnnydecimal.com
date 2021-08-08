@@ -136,7 +136,7 @@ export const DatabaseMachine = () => {
       <hr className="my-2" />
       <button onClick={handleSignOut}>Sign out</button>
       <hr className="my-2" />
-      <div>User: {state.context.currentUserName}</div>
+      <div>User: {state.context.currentUsername}</div>
       <hr className="my-2" />
       <form onSubmit={handleSubmit}>
         <label>
