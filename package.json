@@ -36,6 +36,7 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
+    "ts": "npx tsc --noEmit --strict",
     "eject": "react-scripts eject",
     "xsc": "xstate-codegen \"src/**/**.machine.ts\"",
     "_disabled.dev": "xstate-codegen \"src/**/**.machine.ts\" --once",

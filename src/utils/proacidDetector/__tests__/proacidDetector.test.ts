@@ -58,7 +58,9 @@ it("should return an error in all sorts of situations", () => {
   expect(proacidDetector("a00-09")).toBe("error");
   expect(proacidDetector("a00")).toBe("error");
   expect(proacidDetector("a00.00")).toBe("error");
+  // @ts-expect-error
   expect(proacidDetector(undefined)).toBe("error");
+  // @ts-expect-error
   expect(proacidDetector(null)).toBe("error");
   // @ts-expect-error
   expect(proacidDetector({})).toBe("error");
