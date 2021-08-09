@@ -3,7 +3,7 @@ import {
   JdSystem,
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   JDIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
@@ -19,7 +19,7 @@ export const ID = ({
   jdSystem: JdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JdAreaNumbers;
-  currentCategory: JDCategoryNumbers;
+  currentCategory: JdCategoryNumbers;
   currentId: JDIdNumbers | null;
   // children: React.ReactNode;
 }) => {

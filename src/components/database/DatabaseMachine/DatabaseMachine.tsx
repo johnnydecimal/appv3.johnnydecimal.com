@@ -11,7 +11,7 @@ import { ActorRefFrom } from "xstate";
 import {
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   JDIdNumbers,
   JDItem,
 } from "@types";
@@ -87,7 +87,7 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const openCategory = (category: JDCategoryNumbers) => {
+  const openCategory = (category: JdCategoryNumbers) => {
     send({
       type: "OPEN_CATEGORY",
       category,

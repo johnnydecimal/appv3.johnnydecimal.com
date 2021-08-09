@@ -3,7 +3,7 @@ import { UserbaseItem } from "@types";
 import React from "react";
 import { nanoid } from "nanoid";
 
-import { JdAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
+import { JdAreaNumbers, JdCategoryNumbers, JDIdNumbers } from "@types";
 
 import {
   allAreas,
@@ -313,7 +313,7 @@ const userbaseItemsToInternalJdObjectGenerator = (
 
   // -- Get all of the categories from the array  --=--=--=--=--=--=--=--=--=--
   // .. Helper function ..
-  const categoryToArea = (category: JDCategoryNumbers): JdAreaNumbers => {
+  const categoryToArea = (category: JdCategoryNumbers): JdAreaNumbers => {
     const categoryFirstNumberToAreaDictionary = {
       "0": "00-09",
       "1": "10-19",
@@ -335,7 +335,7 @@ const userbaseItemsToInternalJdObjectGenerator = (
   while (i < len) {
     if (userbaseItems[i].item.jdType === "category") {
       // @ts-ignore
-      const categoryNumber: JDCategoryNumbers = userbaseItems[i].item.jdNumber;
+      const categoryNumber: JdCategoryNumbers = userbaseItems[i].item.jdNumber;
       const categoryTitle: string = userbaseItems[i].item.jdTitle;
       const areaNumber: JdAreaNumbers = categoryToArea(categoryNumber);
       // @ts-ignore
@@ -354,10 +354,10 @@ const userbaseItemsToInternalJdObjectGenerator = (
       const item = userbaseItems[i].item;
       const idNumber = item.jdNumber;
       const idTitle = item.jdTitle;
-      const categoryNumber: JDCategoryNumbers = item.jdNumber.substr(
+      const categoryNumber: JdCategoryNumbers = item.jdNumber.substr(
         0,
         2
-      ) as JDCategoryNumbers;
+      ) as JdCategoryNumbers;
       const areaNumber = categoryToArea(categoryNumber);
       // @ts-ignore
       returnProject["001"].areas[areaNumber].categories[categoryNumber].ids[

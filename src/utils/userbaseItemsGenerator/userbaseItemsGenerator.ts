@@ -7,7 +7,7 @@ import { shuffleArray } from "utils";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   JDIdNumbers,
   JDProjectNumbers,
   UserbaseItem,
@@ -25,7 +25,7 @@ import {
 export const userbaseItemsGenerator = (
   jdProjects?: JDProjectNumbers[],
   jdAreas?: JdAreaNumbers[],
-  jdCategories?: JDCategoryNumbers[],
+  jdCategories?: JdCategoryNumbers[],
   jdIds?: JDIdNumbers[]
 ) => {
   // console.log("Starting to create the über-JDSystem.");

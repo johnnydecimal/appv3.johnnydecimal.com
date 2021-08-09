@@ -2,7 +2,7 @@ import {
   JdSystem,
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   JDIdNumbers,
 } from "@types";
 import { categoryNumberToAreaNumber } from "utils";
@@ -46,7 +46,7 @@ export const isAreaDuplicate = (
 export const isCategoryDuplicate = (
   jdSystem: JdSystem,
   currentProject: JDProjectNumbers,
-  categoryToCheck: JDCategoryNumbers
+  categoryToCheck: JdCategoryNumbers
 ): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
   if (
@@ -82,7 +82,7 @@ export const isIdDuplicate = (
 export const parentAreaExists = (
   jdSystem: JdSystem,
   currentProject: JDProjectNumbers,
-  categoryToCheck: JDCategoryNumbers
+  categoryToCheck: JdCategoryNumbers
 ): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
   if (

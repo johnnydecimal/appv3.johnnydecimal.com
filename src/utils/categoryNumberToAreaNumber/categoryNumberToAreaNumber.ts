@@ -1,9 +1,9 @@
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JdAreaNumbers, JDCategoryNumbers } from "@types";
+import { JdAreaNumbers, JdCategoryNumbers } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const categoryNumberToAreaNumber = (
-  category: JDCategoryNumbers
+  category: JdCategoryNumbers
 ): JdAreaNumbers => {
   /**
    * We ts-ignore later, but testing shows that it isn't possible to write a

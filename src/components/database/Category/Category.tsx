@@ -3,7 +3,7 @@ import {
   JdSystem,
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   JDIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
@@ -18,14 +18,14 @@ export const Category = ({
   jdSystem: JdSystem;
   currentProject: JDProjectNumbers;
   currentArea: JdAreaNumbers;
-  currentCategory: JDCategoryNumbers | null;
+  currentCategory: JdCategoryNumbers | null;
   children: React.ReactNode;
 }) => {
   const {
     openCategory,
     openId,
   }: {
-    openCategory: (category: JDCategoryNumbers) => void;
+    openCategory: (category: JdCategoryNumbers) => void;
     openId: (id: JDIdNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentCategory) {
@@ -73,7 +73,7 @@ export const Category = ({
     jdSystem[currentProject]!.areas[currentArea]!.categories
   ).sort((a, b) => {
     return Number(a) - Number(b);
-  }) as JDCategoryNumbers[];
+  }) as JdCategoryNumbers[];
 
   return (
     <div>

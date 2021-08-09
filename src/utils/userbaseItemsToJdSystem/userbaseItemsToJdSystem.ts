@@ -6,7 +6,7 @@ import {
   JdSystem,
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   UserbaseItem,
 } from "@types";
 
@@ -101,7 +101,7 @@ export const userbaseItemsToJdSystem = (
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "category") {
-      const categoryNumber = item.jdNumber as JDCategoryNumbers;
+      const categoryNumber = item.jdNumber as JdCategoryNumbers;
       const categoryTitle = item.jdTitle;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       /**
@@ -130,10 +130,10 @@ export const userbaseItemsToJdSystem = (
     if (item.jdType === "id") {
       const idNumber = item.jdNumber;
       const idTitle = item.jdTitle;
-      const categoryNumber: JDCategoryNumbers = item.jdNumber.substr(
+      const categoryNumber: JdCategoryNumbers = item.jdNumber.substr(
         0,
         2
-      ) as JDCategoryNumbers;
+      ) as JdCategoryNumbers;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       // prettier-ignore
       jdSystem[projectNumber]!

@@ -18,7 +18,7 @@ describe("new user first run", () => {
       });
   });
 
-  it("signs up a new user and creates a bunch of items", () => {
+  it.only("signs up a new user and creates a bunch of items", () => {
     // Sign up
     cy.get("body")
       .contains("Sign up")

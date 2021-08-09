@@ -14,7 +14,7 @@ import {
   JdSystem,
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
   JDIdNumbers,
   JDItem,
   UserbaseError,
@@ -34,7 +34,7 @@ const databaseModel = createModel(
      * The currently-open area, category, and ID.
      */
     currentArea: null as JdAreaNumbers | null,
-    currentCategory: null as JDCategoryNumbers | null,
+    currentCategory: null as JdCategoryNumbers | null,
     currentId: null as JDIdNumbers | null,
 
     /**
@@ -113,7 +113,7 @@ const databaseModel = createModel(
        * Sent by the helper functions when the user interacts with the app.
        */
       OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
-      OPEN_CATEGORY: (category: JDCategoryNumbers) => ({ category }),
+      OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
       OPEN_ID: (id: JDIdNumbers) => ({ id }),
     },
   }

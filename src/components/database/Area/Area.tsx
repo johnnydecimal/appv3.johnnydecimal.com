@@ -3,7 +3,7 @@ import {
   JdSystem,
   JDProjectNumbers,
   JdAreaNumbers,
-  JDCategoryNumbers,
+  JdCategoryNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -23,7 +23,7 @@ export const Area = ({
     openCategory,
   }: {
     openArea: (area: JdAreaNumbers) => void;
-    openCategory: (category: JDCategoryNumbers | null) => void;
+    openCategory: (category: JdCategoryNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentArea) {
     /**
