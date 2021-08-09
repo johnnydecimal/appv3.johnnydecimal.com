@@ -1,5 +1,7 @@
 import { nanoid } from "nanoid";
 
+import { JDProjectNumbers } from "../../../src/@types";
+
 describe("new user first run", () => {
   const userId = `cy_${nanoid(6)}`;
 
@@ -16,7 +18,8 @@ describe("new user first run", () => {
       });
   });
 
-  it("signs up a new user and creates project 001", () => {
+  it("signs up a new user and creates a bunch of items", () => {
+    // Sign up
     cy.get("body")
       .contains("Sign up")
       .click()
@@ -29,8 +32,32 @@ describe("new user first run", () => {
       .type("test123{enter}")
       .get("body")
       .contains("Sign out", { timeout: 10000 })
+
+      // Default project 001 has been created
       .get("#project")
-      .contains("001");
+      .contains("Project 001")
+
+      // Create project 002
+      .get("#new-project")
+      .type("002{enter}")
+      .get("#project")
+      .contains("Project 002")
+
+      // Switch back to project 001
+      .get("#new-project")
+      .clear()
+      .type("001{enter}")
+      .get("#project")
+      .contains("Project 001")
+
+      // Using the function exposed on `window`, switch again
+      .window()
+      .its("DatabaseMachine.changeDatabase")
+      .then((changeDatabase: (newDatabase: JDProjectNumbers) => void) => {
+        changeDatabase("002");
+      })
+      .get("#project")
+      .contains("Project 002");
   });
 });
 

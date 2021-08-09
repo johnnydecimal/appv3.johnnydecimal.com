@@ -26,6 +26,13 @@ import { Area } from "../Area/Area";
 import { Category } from "../Category/Category";
 import { ID } from "../ID/ID";
 
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+declare global {
+  interface Window {
+    DatabaseMachine: any;
+  } // Cypress testing
+}
+
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
 // const Log = ({ value = {}, replacer = null, space = 2 }) => (
@@ -65,6 +72,13 @@ export const DatabaseMachine = () => {
     });
   };
 
+  const insertItem = (item: JDItem) => {
+    send({
+      type: "INSERT_ITEM",
+      item,
+    });
+  };
+
   const openArea = (area: JDAreaNumbers) => {
     console.log("openArea() fired");
     send({
@@ -85,14 +99,20 @@ export const DatabaseMachine = () => {
       id,
     });
   };
-
-  const insertItem = (item: JDItem) => {
-    send({
-      type: "INSERT_ITEM",
-      item,
-    });
-  };
   //#endregion
+
+  /**
+   * If we're testing, expose all of this on `window`.
+   */
+  if ("Cypress" in window) {
+    window.DatabaseMachine = {
+      changeDatabase,
+      insertItem,
+      openArea,
+      openCategory,
+      openId,
+    };
+  }
 
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,
@@ -141,7 +161,7 @@ export const DatabaseMachine = () => {
       <form onSubmit={handleSubmit}>
         <label>
           New project:
-          <input type="text" ref={formRef} />
+          <input id="new-project" ref={formRef} type="text" />
           <input type="submit" value="submit" />
         </label>
       </form>
