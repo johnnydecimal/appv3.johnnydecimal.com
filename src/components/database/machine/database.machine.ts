@@ -16,7 +16,7 @@ import {
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
-  JDItem,
+  JdItem,
   UserbaseError,
   UserbaseItem,
 } from "@types";
@@ -102,7 +102,7 @@ const databaseModel = createModel(
        * current database. Note that we don't insert a UserbaseItem, there's a
        * bunch of stuff on there (itemId) that Userbase generates for us.
        */
-      INSERT_ITEM: (item: JDItem) => ({ item }),
+      INSERT_ITEM: (item: JdItem) => ({ item }),
 
       /**
        * Sent by ubInsertItem when it was successful.
@@ -148,7 +148,7 @@ const assignNewUserbaseItem = databaseModel.assign({
       return context.userbaseItems;
     }
     /**
-     * Incoming event.item is of type JDItem. It doesn't contain the stuff that
+     * Incoming event.item is of type JdItem. It doesn't contain the stuff that
      * Userbase adds, so we fudge it here as it'll be immediately overwritten
      * by the changeHandler.
      */

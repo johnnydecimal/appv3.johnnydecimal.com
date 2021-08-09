@@ -2,7 +2,7 @@
 import { Item, UserProfile } from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JDItem } from ".";
+import { JdItem } from ".";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 // -=- Auth   --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
@@ -16,10 +16,10 @@ export interface JDUserProfile extends UserProfile {
 // -=- Database  --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
 /**
  * `Item` is the base Userbase item type. We extend it by specifying that the
- * `item` property must be a `JDItem`.
+ * `item` property must be a `JdItem`.
  */
 export interface UserbaseItem extends Item {
-  item: JDItem;
+  item: JdItem;
 }
 
 /**

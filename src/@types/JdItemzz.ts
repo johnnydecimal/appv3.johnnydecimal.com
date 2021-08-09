@@ -15,7 +15,7 @@ import type {
  * - `meta` contains any user-defined metadata
  */
 
-export type JDItem =
+export type JdItem =
   | {
       jdType: "project";
       jdNumber: JDProjectNumbers;

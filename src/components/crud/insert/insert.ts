@@ -1,4 +1,4 @@
-import { JDItem } from "@types";
+import { JdItem } from "@types";
 
 // == MOVE ME EXTERNALLY WHEN DONE
 
@@ -10,7 +10,7 @@ import { JDItem } from "@types";
  * handle the rejection in your own way.
  *
  */
-export const insert = (item: JDItem) => {
+export const insert = (item: JdItem) => {
   // So what is it?
   // const proacid = proacidDetector(item);
   return true;

@@ -13,7 +13,7 @@ import {
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
-  JDItem,
+  JdItem,
 } from "@types";
 
 // === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -72,7 +72,7 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const insertItem = (item: JDItem) => {
+  const insertItem = (item: JdItem) => {
     send({
       type: "INSERT_ITEM",
       item,
