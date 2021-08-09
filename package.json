@@ -37,6 +37,7 @@
     "build": "craco build",
     "test": "craco test",
     "ts": "npx tsc --noEmit --strict",
+    "cy": "yarn run cypress open",
     "eject": "react-scripts eject",
     "xsc": "xstate-codegen \"src/**/**.machine.ts\"",
     "_disabled.dev": "xstate-codegen \"src/**/**.machine.ts\" --once",
@@ -63,6 +64,8 @@
   "devDependencies": {
     "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "autoprefixer": "^9",
+    "cypress": "^8.2.0",
+    "eslint-plugin-cypress": "^2.11.3",
     "postcss": "^7",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat"
   }

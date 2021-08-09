@@ -1,5 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-// import { inspect } from "@xstate/inspect";
+import { inspect } from "@xstate/inspect";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { AuthMachine } from "components/authentication";
@@ -7,12 +7,13 @@ import { AuthMachine } from "components/authentication";
 
 /**
  * The XState inspector popup.
- inspect({
-   // options
-   // url: 'https://statecharts.io/inspect', // (default)
-   iframe: false, // open in new window
+ */
+if (!("Cypress" in window)) {
+  inspect({
+    // url: 'https://statecharts.io/inspect', // (default)
+    iframe: false, // open in new window
   });
-  */
+}
 
 export const App = () => {
   // return <Scratch />;
