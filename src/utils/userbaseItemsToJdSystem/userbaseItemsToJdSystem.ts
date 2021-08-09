@@ -6,8 +6,8 @@ import {
   JdSystem,
   JDProjectNumbers,
   JDAreaNumbers,
-  UserbaseItem,
   JDCategoryNumbers,
+  UserbaseItem,
 } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -17,12 +17,20 @@ import {
  * Takes an array of `UserbaseItem[]`s and turns it in to the
  * `JdSystem` that we use in this app.
  *
- * #TODO: should return errors, doesn't currently.
- * Returns an error if the array isn't a valid system.
+ * How does this feel for a return type:
+ * {
+ *   success: { // JdSystem in here },
+ *   error:   { // error here },
+ * }
  */
+
+type UserbaseItemsToJdSystemResult =
+  | { success: true; data: JdSystem }
+  | { success: false; error: string };
+
 export const userbaseItemsToJdSystem = (
   userbaseItems: UserbaseItem[]
-): JdSystem => {
+): UserbaseItemsToJdSystemResult => {
   /**
    * Do some timings in dev. #TODO: remove later.
    */
@@ -145,5 +153,11 @@ export const userbaseItemsToJdSystem = (
     );
   }
 
-  return jdSystem;
+  /**
+   * If we reach this point, it's worked.
+   */
+  return {
+    success: true,
+    data: jdSystem,
+  };
 };

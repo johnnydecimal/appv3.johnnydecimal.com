@@ -186,8 +186,12 @@ const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
 
 const assignJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
   jdSystem: (context, event) => {
-    const jdSystem = userbaseItemsToJdSystem(event.userbaseItems);
-    return jdSystem;
+    const result = userbaseItemsToJdSystem(event.userbaseItems);
+    if (result.success) {
+      return result.data;
+    }
+    // TODO: improve handling of errors
+    return context.jdSystem;
   },
 });
 
