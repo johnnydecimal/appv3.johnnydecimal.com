@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 
-import { JdProjectNumbers } from "../../../src/@types";
+import { JdItem, JdProjectNumbers } from "../../../src/@types";
 
 describe("new user first run", () => {
   const userId = `cy_${nanoid(6)}`;
@@ -57,7 +57,20 @@ describe("new user first run", () => {
         changeDatabase("002");
       })
       .get("#project")
-      .contains("Project 002");
+      .contains("Project 002")
+
+      // Create a new area
+      .window()
+      .its("DatabaseMachine.insertItem")
+      .then((insertItem: (newItem: JdItem) => void) => {
+        insertItem({
+          jdType: "area",
+          jdNumber: "00-09",
+          jdTitle: "area zero niner",
+        });
+      })
+      .get("body")
+      .contains("area zero niner");
   });
 });
 
