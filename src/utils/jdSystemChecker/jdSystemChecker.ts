@@ -1,9 +1,9 @@
 import {
   JdSystem,
-  JDProjectNumbers,
-  JDAreaNumbers,
-  JDCategoryNumbers,
-  JDIdNumbers,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdIdNumbers,
 } from "@types";
 import { categoryNumberToAreaNumber } from "utils";
 import { idNumberToCategoryNumber } from "utils/idNumberToCategoryNumber/idNumberToCategoryNumber";
@@ -34,8 +34,8 @@ export {};
 
 export const isAreaDuplicate = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
-  areaToCheck: JDAreaNumbers
+  currentProject: JdProjectNumbers,
+  areaToCheck: JdAreaNumbers
 ): Boolean => {
   if (jdSystem[currentProject]?.areas[areaToCheck]) {
     return true;
@@ -45,8 +45,8 @@ export const isAreaDuplicate = (
 
 export const isCategoryDuplicate = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
-  categoryToCheck: JDCategoryNumbers
+  currentProject: JdProjectNumbers,
+  categoryToCheck: JdCategoryNumbers
 ): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
   if (
@@ -62,8 +62,8 @@ export const isCategoryDuplicate = (
 
 export const isIdDuplicate = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
-  idToCheck: JDIdNumbers
+  currentProject: JdProjectNumbers,
+  idToCheck: JdIdNumbers
 ): Boolean => {
   const category = idNumberToCategoryNumber(idToCheck);
   const area = categoryNumberToAreaNumber(category);
@@ -81,8 +81,8 @@ export const isIdDuplicate = (
 
 export const parentAreaExists = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
-  categoryToCheck: JDCategoryNumbers
+  currentProject: JdProjectNumbers,
+  categoryToCheck: JdCategoryNumbers
 ): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
   if (
@@ -97,8 +97,8 @@ export const parentAreaExists = (
 
 export const parentCategoryExists = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
-  idToCheck: JDIdNumbers
+  currentProject: JdProjectNumbers,
+  idToCheck: JdIdNumbers
 ): Boolean => {
   const category = idNumberToCategoryNumber(idToCheck);
   const area = categoryNumberToAreaNumber(category);

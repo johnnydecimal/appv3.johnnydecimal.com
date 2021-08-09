@@ -4,10 +4,10 @@ import { categoryNumberToAreaNumber } from "utils";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   JdSystem,
-  JDProjectNumbers,
-  JDAreaNumbers,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
   UserbaseItem,
-  JDCategoryNumbers,
 } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -17,12 +17,20 @@ import {
  * Takes an array of `UserbaseItem[]`s and turns it in to the
  * `JdSystem` that we use in this app.
  *
- * #TODO: should return errors, doesn't currently.
- * Returns an error if the array isn't a valid system.
+ * How does this feel for a return type:
+ * {
+ *   success: { // JdSystem in here },
+ *   error:   { // error here },
+ * }
  */
+
+type UserbaseItemsToJdSystemResult =
+  | { success: true; data: JdSystem }
+  | { success: false; error: string };
+
 export const userbaseItemsToJdSystem = (
   userbaseItems: UserbaseItem[]
-): JdSystem => {
+): UserbaseItemsToJdSystemResult => {
   /**
    * Do some timings in dev. #TODO: remove later.
    */
@@ -42,11 +50,11 @@ export const userbaseItemsToJdSystem = (
   /**
    * New! Zeroth pass: get the project itself and create the base object.
    */
-  let projectNumber: JDProjectNumbers = "000";
+  let projectNumber: JdProjectNumbers = "000";
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "project") {
-      projectNumber = item.jdNumber as JDProjectNumbers;
+      projectNumber = item.jdNumber as JdProjectNumbers;
       const projectTitle = item.jdTitle;
       jdSystem[projectNumber] = {
         title: projectTitle,
@@ -69,7 +77,7 @@ export const userbaseItemsToJdSystem = (
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "area") {
-      const areaNumber = item.jdNumber as JDAreaNumbers;
+      const areaNumber = item.jdNumber as JdAreaNumbers;
       const areaTitle = item.jdTitle;
       /**
        * The forcing-TS-to-believe! here assumes that we haven't screwed up
@@ -93,7 +101,7 @@ export const userbaseItemsToJdSystem = (
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "category") {
-      const categoryNumber = item.jdNumber as JDCategoryNumbers;
+      const categoryNumber = item.jdNumber as JdCategoryNumbers;
       const categoryTitle = item.jdTitle;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       /**
@@ -122,10 +130,10 @@ export const userbaseItemsToJdSystem = (
     if (item.jdType === "id") {
       const idNumber = item.jdNumber;
       const idTitle = item.jdTitle;
-      const categoryNumber: JDCategoryNumbers = item.jdNumber.substr(
+      const categoryNumber: JdCategoryNumbers = item.jdNumber.substr(
         0,
         2
-      ) as JDCategoryNumbers;
+      ) as JdCategoryNumbers;
       const areaNumber = categoryNumberToAreaNumber(categoryNumber);
       // prettier-ignore
       jdSystem[projectNumber]!
@@ -145,5 +153,11 @@ export const userbaseItemsToJdSystem = (
     );
   }
 
-  return jdSystem;
+  /**
+   * If we reach this point, it's worked.
+   */
+  return {
+    success: true,
+    data: jdSystem,
+  };
 };

@@ -12,11 +12,11 @@ import { userbaseItemsToJdSystem } from "utils";
 import {
   AuthMachineEvent,
   JdSystem,
-  JDProjectNumbers,
-  JDAreaNumbers,
-  JDCategoryNumbers,
-  JDIdNumbers,
-  JDItem,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdIdNumbers,
+  JdItem,
   UserbaseError,
   UserbaseItem,
 } from "@types";
@@ -28,14 +28,14 @@ const databaseModel = createModel(
      * the databaseName in Userbase. We send this value down when we invoke
      * the machine.
      */
-    currentProject: "" as JDProjectNumbers,
+    currentProject: "" as JdProjectNumbers,
 
     /**
      * The currently-open area, category, and ID.
      */
-    currentArea: null as JDAreaNumbers | null,
-    currentCategory: null as JDCategoryNumbers | null,
-    currentId: null as JDIdNumbers | null,
+    currentArea: null as JdAreaNumbers | null,
+    currentCategory: null as JdCategoryNumbers | null,
+    currentId: null as JdIdNumbers | null,
 
     /**
      * currentUsername is the username of the currently-signed-in user. We send
@@ -81,7 +81,7 @@ const databaseModel = createModel(
        * one to open, it might not actually be new. Not that the API call to
        * Userbase cares either way.
        */
-      OPEN_DATABASE: (newDatabase: JDProjectNumbers) => ({
+      OPEN_DATABASE: (newDatabase: JdProjectNumbers) => ({
         newDatabase,
       }),
 
@@ -102,7 +102,7 @@ const databaseModel = createModel(
        * current database. Note that we don't insert a UserbaseItem, there's a
        * bunch of stuff on there (itemId) that Userbase generates for us.
        */
-      INSERT_ITEM: (item: JDItem) => ({ item }),
+      INSERT_ITEM: (item: JdItem) => ({ item }),
 
       /**
        * Sent by ubInsertItem when it was successful.
@@ -112,9 +112,9 @@ const databaseModel = createModel(
       /**
        * Sent by the helper functions when the user interacts with the app.
        */
-      OPEN_AREA: (area: JDAreaNumbers) => ({ area }),
-      OPEN_CATEGORY: (category: JDCategoryNumbers) => ({ category }),
-      OPEN_ID: (id: JDIdNumbers) => ({ id }),
+      OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
+      OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
+      OPEN_ID: (id: JdIdNumbers) => ({ id }),
     },
   }
 );
@@ -148,7 +148,7 @@ const assignNewUserbaseItem = databaseModel.assign({
       return context.userbaseItems;
     }
     /**
-     * Incoming event.item is of type JDItem. It doesn't contain the stuff that
+     * Incoming event.item is of type JdItem. It doesn't contain the stuff that
      * Userbase adds, so we fudge it here as it'll be immediately overwritten
      * by the changeHandler.
      */
@@ -186,8 +186,12 @@ const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
 
 const assignJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
   jdSystem: (context, event) => {
-    const jdSystem = userbaseItemsToJdSystem(event.userbaseItems);
-    return jdSystem;
+    const result = userbaseItemsToJdSystem(event.userbaseItems);
+    if (result.success) {
+      return result.data;
+    }
+    // TODO: improve handling of errors
+    return context.jdSystem;
   },
 });
 

@@ -1,7 +1,7 @@
 /**
- * JDProjectNumbers is the type which is all possible project numbers.
+ * JdProjectNumbers is the type which is all possible project numbers.
  */
-export type JDProjectNumbers =
+export type JdProjectNumbers =
   | "000"
   | "001"
   | "002"

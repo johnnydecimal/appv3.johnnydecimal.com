@@ -1,7 +1,7 @@
 /**
- * JDAreaNumbers is the type which is all possible area numbers.
+ * JdAreaNumbers is the type which is all possible area numbers.
  */
-export type JDAreaNumbers =
+export type JdAreaNumbers =
   | "00-09"
   | "10-19"
   | "20-29"

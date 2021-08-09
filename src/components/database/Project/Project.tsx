@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { JdSystem, JDProjectNumbers, JDAreaNumbers } from "@types";
+import { JdSystem, JdProjectNumbers, JdAreaNumbers } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Project = (props: any) => {
@@ -9,14 +9,14 @@ export const Project = (props: any) => {
     children,
   }: {
     jdSystem: JdSystem;
-    currentProject: JDProjectNumbers;
+    currentProject: JdProjectNumbers;
     children: React.ReactNode;
   } = props;
 
   const {
     openArea,
   }: {
-    openArea: (area: JDAreaNumbers | null) => void;
+    openArea: (area: JdAreaNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
 
   /**

@@ -1,6 +1,6 @@
-import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
+import { JdAreaNumbers, JdCategoryNumbers, JdIdNumbers } from "@types";
 
-const allAreas: JDAreaNumbers[] = [
+const allAreas: JdAreaNumbers[] = [
   "00-09",
   "10-19",
   "20-29",
@@ -13,7 +13,7 @@ const allAreas: JDAreaNumbers[] = [
   "90-99",
 ];
 
-const allCategories: JDCategoryNumbers[] = [
+const allCategories: JdCategoryNumbers[] = [
   "00",
   "01",
   "02",
@@ -116,7 +116,7 @@ const allCategories: JDCategoryNumbers[] = [
   "99",
 ];
 
-const allIds: JDIdNumbers[] = [
+const allIds: JdIdNumbers[] = [
   "00.00",
   "00.01",
   "00.02",

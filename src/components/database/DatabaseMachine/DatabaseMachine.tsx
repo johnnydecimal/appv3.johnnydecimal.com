@@ -9,11 +9,11 @@ import { AuthMachineReactContext } from "components/authentication";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ActorRefFrom } from "xstate";
 import {
-  JDProjectNumbers,
-  JDAreaNumbers,
-  JDCategoryNumbers,
-  JDIdNumbers,
-  JDItem,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdIdNumbers,
+  JdItem,
 } from "@types";
 
 // === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -25,6 +25,13 @@ import { Project } from "../Project/Project";
 import { Area } from "../Area/Area";
 import { Category } from "../Category/Category";
 import { ID } from "../ID/ID";
+
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
+declare global {
+  interface Window {
+    DatabaseMachine: any;
+  } // Cypress testing
+}
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
 // https://kyleshevlin.com/how-to-render-an-object-in-react
@@ -58,14 +65,21 @@ export const DatabaseMachine = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree.
    */
-  const changeDatabase = (newDatabase: JDProjectNumbers) => {
+  const changeDatabase = (newDatabase: JdProjectNumbers) => {
     send({
       type: "OPEN_DATABASE",
       newDatabase,
     });
   };
 
-  const openArea = (area: JDAreaNumbers) => {
+  const insertItem = (item: JdItem) => {
+    send({
+      type: "INSERT_ITEM",
+      item,
+    });
+  };
+
+  const openArea = (area: JdAreaNumbers) => {
     console.log("openArea() fired");
     send({
       type: "OPEN_AREA",
@@ -73,26 +87,32 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const openCategory = (category: JDCategoryNumbers) => {
+  const openCategory = (category: JdCategoryNumbers) => {
     send({
       type: "OPEN_CATEGORY",
       category,
     });
   };
-  const openId = (id: JDIdNumbers) => {
+  const openId = (id: JdIdNumbers) => {
     send({
       type: "OPEN_ID",
       id,
     });
   };
-
-  const insertItem = (item: JDItem) => {
-    send({
-      type: "INSERT_ITEM",
-      item,
-    });
-  };
   //#endregion
+
+  /**
+   * If we're testing, expose all of this on `window`.
+   */
+  if ("Cypress" in window) {
+    window.DatabaseMachine = {
+      changeDatabase,
+      insertItem,
+      openArea,
+      openCategory,
+      openId,
+    };
+  }
 
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,
@@ -112,7 +132,7 @@ export const DatabaseMachine = () => {
     e.preventDefault();
     // TODO: obvs in real life we have to make sure that the user can only
     //       create a DB with the right format; but this is a fudge anyway
-    changeDatabase(formRef!.current!.value as JDProjectNumbers);
+    changeDatabase(formRef!.current!.value as JdProjectNumbers);
   };
   const formRef = React.createRef<HTMLInputElement>();
   const handleSubmitNewItem = (e: any) => {
@@ -141,7 +161,7 @@ export const DatabaseMachine = () => {
       <form onSubmit={handleSubmit}>
         <label>
           New project:
-          <input type="text" ref={formRef} />
+          <input id="new-project" ref={formRef} type="text" />
           <input type="submit" value="submit" />
         </label>
       </form>

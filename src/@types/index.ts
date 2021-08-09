@@ -1,9 +1,9 @@
 export type { JdSystem } from "./JdSystem";
-export type { JDProjectNumbers } from "./JDProjectNumbers";
-export type { JDAreaNumbers } from "./JDAreaNumbers";
-export type { JDCategoryNumbers } from "./JDCategoryNumbers";
-export type { JDIdNumbers } from "./JDIdNumbers";
-export type { JDItem } from "./JDItem";
+export type { JdProjectNumbers } from "./JdProjectNumbers";
+export type { JdAreaNumbers } from "./JdAreaNumbers";
+export type { JdCategoryNumbers } from "./JdCategoryNumbers";
+export type { JdIdNumbers } from "./JdIdNumbers";
+export type { JdItem } from "./JdItem";
 
 export type {
   JDUserProfile,

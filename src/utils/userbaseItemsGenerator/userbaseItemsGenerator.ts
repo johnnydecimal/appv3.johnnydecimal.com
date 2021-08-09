@@ -6,10 +6,10 @@ import { shuffleArray } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
-  JDAreaNumbers,
-  JDCategoryNumbers,
-  JDIdNumbers,
-  JDProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdIdNumbers,
+  JdProjectNumbers,
   UserbaseItem,
 } from "@types";
 
@@ -23,10 +23,10 @@ import {
  * Note that **no consistency checks** are performed here. Junk in, junk out.
  */
 export const userbaseItemsGenerator = (
-  jdProjects?: JDProjectNumbers[],
-  jdAreas?: JDAreaNumbers[],
-  jdCategories?: JDCategoryNumbers[],
-  jdIds?: JDIdNumbers[]
+  jdProjects?: JdProjectNumbers[],
+  jdAreas?: JdAreaNumbers[],
+  jdCategories?: JdCategoryNumbers[],
+  jdIds?: JdIdNumbers[]
 ) => {
   // console.log("Starting to create the über-JDSystem.");
   // const startTime = window.performance.now();

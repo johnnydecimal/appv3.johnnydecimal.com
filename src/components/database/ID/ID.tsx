@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import {
   JdSystem,
-  JDProjectNumbers,
-  JDAreaNumbers,
-  JDCategoryNumbers,
-  JDIdNumbers,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -17,16 +17,16 @@ export const ID = ({
 }: // children,
 {
   jdSystem: JdSystem;
-  currentProject: JDProjectNumbers;
-  currentArea: JDAreaNumbers;
-  currentCategory: JDCategoryNumbers;
-  currentId: JDIdNumbers | null;
+  currentProject: JdProjectNumbers;
+  currentArea: JdAreaNumbers;
+  currentCategory: JdCategoryNumbers;
+  currentId: JdIdNumbers | null;
   // children: React.ReactNode;
 }) => {
   const {
     openId,
   }: {
-    openId: (id: JDIdNumbers) => void;
+    openId: (id: JdIdNumbers) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentId) {
     /**
@@ -68,7 +68,7 @@ export const ID = ({
       .ids
   ).sort((a, b) => {
     return Number(a) - Number(b);
-  }) as JDIdNumbers[];
+  }) as JdIdNumbers[];
 
   return (
     <div>

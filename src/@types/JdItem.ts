@@ -1,8 +1,8 @@
 import type {
-  JDProjectNumbers,
-  JDAreaNumbers,
-  JDCategoryNumbers,
-  JDIdNumbers,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdIdNumbers,
 } from ".";
 
 /**
@@ -15,28 +15,28 @@ import type {
  * - `meta` contains any user-defined metadata
  */
 
-export type JDItem =
+export type JdItem =
   | {
       jdType: "project";
-      jdNumber: JDProjectNumbers;
+      jdNumber: JdProjectNumbers;
       jdTitle: string;
       meta?: Object;
     }
   | {
       jdType: "area";
-      jdNumber: JDAreaNumbers;
+      jdNumber: JdAreaNumbers;
       jdTitle: string;
       meta?: Object;
     }
   | {
       jdType: "category";
-      jdNumber: JDCategoryNumbers;
+      jdNumber: JdCategoryNumbers;
       jdTitle: string;
       meta?: Object;
     }
   | {
       jdType: "id";
-      jdNumber: JDIdNumbers;
+      jdNumber: JdIdNumbers;
       jdTitle: string;
       meta?: Object;
     };

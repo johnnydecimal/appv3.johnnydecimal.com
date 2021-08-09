@@ -3,8 +3,8 @@
  * created by `helpers/userbaseItemsToInternalJdProject`.
  */
 
-import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
-import { JDProjectNumbers } from "./JDProjectNumbers";
+import { JdAreaNumbers, JdCategoryNumbers, JdIdNumbers } from "@types";
+import { JdProjectNumbers } from "./JdProjectNumbers";
 
 interface InternalJDId {
   title: string;
@@ -13,19 +13,19 @@ interface InternalJDId {
 
 type InternalJDCategory = {
   title: string;
-  ids: { [K in JDIdNumbers]?: InternalJDId };
+  ids: { [K in JdIdNumbers]?: InternalJDId };
   meta?: { [key: string]: any };
 };
 
 type InternalJDArea = {
   title: string;
-  categories: { [K in JDCategoryNumbers]?: InternalJDCategory };
+  categories: { [K in JdCategoryNumbers]?: InternalJDCategory };
   meta?: { [key: string]: any };
 };
 
 type InternalJDProject = {
   title: string;
-  areas: { [K in JDAreaNumbers]?: InternalJDArea };
+  areas: { [K in JdAreaNumbers]?: InternalJDArea };
   meta?: { [key: string]: any };
 };
 
@@ -34,7 +34,7 @@ type InternalJDProject = {
  * https://stackoverflow.com/questions/51659420/consider-using-a-mapped-object-type-instead-whats-a-mapped-object-type-and#51659490
  */
 export type JdSystem = {
-  [K in JDProjectNumbers]?: InternalJDProject;
+  [K in JdProjectNumbers]?: InternalJDProject;
 };
 
 export const test: JdSystem = {

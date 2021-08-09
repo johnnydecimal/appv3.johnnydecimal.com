@@ -149,6 +149,7 @@ export const authMachine = authModel.createMachine(
     states: {
       init: {
         entry: [
+          clearLog,
           send({
             type: "LOG",
             message: "Initialised.",

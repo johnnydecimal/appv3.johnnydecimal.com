@@ -1,9 +1,9 @@
 import { useContext } from "react";
 import {
   JdSystem,
-  JDProjectNumbers,
-  JDAreaNumbers,
-  JDCategoryNumbers,
+  JdProjectNumbers,
+  JdAreaNumbers,
+  JdCategoryNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -14,16 +14,16 @@ export const Area = ({
   children,
 }: {
   jdSystem: JdSystem;
-  currentProject: JDProjectNumbers;
-  currentArea: JDAreaNumbers | null;
+  currentProject: JdProjectNumbers;
+  currentArea: JdAreaNumbers | null;
   children: React.ReactNode;
 }) => {
   const {
     openArea,
     openCategory,
   }: {
-    openArea: (area: JDAreaNumbers) => void;
-    openCategory: (category: JDCategoryNumbers | null) => void;
+    openArea: (area: JdAreaNumbers) => void;
+    openCategory: (category: JdCategoryNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentArea) {
     /**
@@ -63,7 +63,7 @@ export const Area = ({
    */
   const areas = Object.keys(jdSystem[currentProject]!.areas).sort((a, b) => {
     return Number(a.charAt(0)) - Number(b.charAt(0));
-  }) as JDAreaNumbers[];
+  }) as JdAreaNumbers[];
 
   return (
     <div>
