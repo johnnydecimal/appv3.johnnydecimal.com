@@ -2,7 +2,7 @@ import { useContext } from "react";
 import {
   JdSystem,
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
@@ -15,14 +15,14 @@ export const Area = ({
 }: {
   jdSystem: JdSystem;
   currentProject: JDProjectNumbers;
-  currentArea: JDAreaNumbers | null;
+  currentArea: JdAreaNumbers | null;
   children: React.ReactNode;
 }) => {
   const {
     openArea,
     openCategory,
   }: {
-    openArea: (area: JDAreaNumbers) => void;
+    openArea: (area: JdAreaNumbers) => void;
     openCategory: (category: JDCategoryNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentArea) {
@@ -63,7 +63,7 @@ export const Area = ({
    */
   const areas = Object.keys(jdSystem[currentProject]!.areas).sort((a, b) => {
     return Number(a.charAt(0)) - Number(b.charAt(0));
-  }) as JDAreaNumbers[];
+  }) as JdAreaNumbers[];
 
   return (
     <div>

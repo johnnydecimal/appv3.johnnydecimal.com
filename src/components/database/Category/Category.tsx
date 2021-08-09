@@ -2,7 +2,7 @@ import { useContext } from "react";
 import {
   JdSystem,
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   JDIdNumbers,
 } from "@types";
@@ -17,7 +17,7 @@ export const Category = ({
 }: {
   jdSystem: JdSystem;
   currentProject: JDProjectNumbers;
-  currentArea: JDAreaNumbers;
+  currentArea: JdAreaNumbers;
   currentCategory: JDCategoryNumbers | null;
   children: React.ReactNode;
 }) => {

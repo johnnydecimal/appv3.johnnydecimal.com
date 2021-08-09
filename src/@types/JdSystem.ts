@@ -3,7 +3,7 @@
  * created by `helpers/userbaseItemsToInternalJdProject`.
  */
 
-import { JDAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
+import { JdAreaNumbers, JDCategoryNumbers, JDIdNumbers } from "@types";
 import { JDProjectNumbers } from "./JDProjectNumbers";
 
 interface InternalJDId {
@@ -25,7 +25,7 @@ type InternalJDArea = {
 
 type InternalJDProject = {
   title: string;
-  areas: { [K in JDAreaNumbers]?: InternalJDArea };
+  areas: { [K in JdAreaNumbers]?: InternalJDArea };
   meta?: { [key: string]: any };
 };
 

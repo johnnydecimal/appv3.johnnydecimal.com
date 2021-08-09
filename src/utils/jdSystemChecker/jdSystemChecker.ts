@@ -1,7 +1,7 @@
 import {
   JdSystem,
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   JDIdNumbers,
 } from "@types";
@@ -35,7 +35,7 @@ export {};
 export const isAreaDuplicate = (
   jdSystem: JdSystem,
   currentProject: JDProjectNumbers,
-  areaToCheck: JDAreaNumbers
+  areaToCheck: JdAreaNumbers
 ): Boolean => {
   if (jdSystem[currentProject]?.areas[areaToCheck]) {
     return true;

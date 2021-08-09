@@ -5,7 +5,7 @@ import { categoryNumberToAreaNumber } from "utils";
 import {
   JdSystem,
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   UserbaseItem,
 } from "@types";
@@ -77,7 +77,7 @@ export const userbaseItemsToJdSystem = (
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "area") {
-      const areaNumber = item.jdNumber as JDAreaNumbers;
+      const areaNumber = item.jdNumber as JdAreaNumbers;
       const areaTitle = item.jdTitle;
       /**
        * The forcing-TS-to-believe! here assumes that we haven't screwed up

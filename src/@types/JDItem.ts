@@ -1,6 +1,6 @@
 import type {
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   JDIdNumbers,
 } from ".";
@@ -24,7 +24,7 @@ export type JDItem =
     }
   | {
       jdType: "area";
-      jdNumber: JDAreaNumbers;
+      jdNumber: JdAreaNumbers;
       jdTitle: string;
       meta?: Object;
     }

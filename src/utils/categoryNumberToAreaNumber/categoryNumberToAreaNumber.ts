@@ -1,10 +1,10 @@
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JDAreaNumbers, JDCategoryNumbers } from "@types";
+import { JdAreaNumbers, JDCategoryNumbers } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const categoryNumberToAreaNumber = (
   category: JDCategoryNumbers
-): JDAreaNumbers => {
+): JdAreaNumbers => {
   /**
    * We ts-ignore later, but testing shows that it isn't possible to write a
    * call to this function that doesn't take a valid JDCategoryNumber, so we're

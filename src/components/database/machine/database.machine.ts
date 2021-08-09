@@ -13,7 +13,7 @@ import {
   AuthMachineEvent,
   JdSystem,
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   JDIdNumbers,
   JDItem,
@@ -33,7 +33,7 @@ const databaseModel = createModel(
     /**
      * The currently-open area, category, and ID.
      */
-    currentArea: null as JDAreaNumbers | null,
+    currentArea: null as JdAreaNumbers | null,
     currentCategory: null as JDCategoryNumbers | null,
     currentId: null as JDIdNumbers | null,
 
@@ -112,7 +112,7 @@ const databaseModel = createModel(
       /**
        * Sent by the helper functions when the user interacts with the app.
        */
-      OPEN_AREA: (area: JDAreaNumbers) => ({ area }),
+      OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
       OPEN_CATEGORY: (category: JDCategoryNumbers) => ({ category }),
       OPEN_ID: (id: JDIdNumbers) => ({ id }),
     },

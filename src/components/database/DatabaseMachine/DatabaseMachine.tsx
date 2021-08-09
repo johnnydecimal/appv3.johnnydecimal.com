@@ -10,7 +10,7 @@ import { AuthMachineReactContext } from "components/authentication";
 import { ActorRefFrom } from "xstate";
 import {
   JDProjectNumbers,
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   JDIdNumbers,
   JDItem,
@@ -79,7 +79,7 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const openArea = (area: JDAreaNumbers) => {
+  const openArea = (area: JdAreaNumbers) => {
     console.log("openArea() fired");
     send({
       type: "OPEN_AREA",

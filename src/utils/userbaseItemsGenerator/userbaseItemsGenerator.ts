@@ -6,7 +6,7 @@ import { shuffleArray } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
-  JDAreaNumbers,
+  JdAreaNumbers,
   JDCategoryNumbers,
   JDIdNumbers,
   JDProjectNumbers,
@@ -24,7 +24,7 @@ import {
  */
 export const userbaseItemsGenerator = (
   jdProjects?: JDProjectNumbers[],
-  jdAreas?: JDAreaNumbers[],
+  jdAreas?: JdAreaNumbers[],
   jdCategories?: JDCategoryNumbers[],
   jdIds?: JDIdNumbers[]
 ) => {
