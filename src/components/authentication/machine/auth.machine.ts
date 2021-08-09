@@ -482,6 +482,7 @@ export const authMachine = authModel.createMachine(
         },
         on: {
           REPORT_USER_DELETED: {
+            actions: [clearLog],
             target: "#authMachine.init",
           },
         },
