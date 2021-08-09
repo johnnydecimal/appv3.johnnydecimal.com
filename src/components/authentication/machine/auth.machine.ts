@@ -149,6 +149,7 @@ export const authMachine = authModel.createMachine(
     states: {
       init: {
         entry: [
+          clearLog,
           send({
             type: "LOG",
             message: "Initialised.",
@@ -482,7 +483,6 @@ export const authMachine = authModel.createMachine(
         },
         on: {
           REPORT_USER_DELETED: {
-            actions: [clearLog],
             target: "#authMachine.init",
           },
         },
