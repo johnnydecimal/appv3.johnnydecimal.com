@@ -1,5 +1,5 @@
 import type {
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
@@ -18,7 +18,7 @@ import type {
 export type JdItem =
   | {
       jdType: "project";
-      jdNumber: JDProjectNumbers;
+      jdNumber: JdProjectNumbers;
       jdTitle: string;
       meta?: Object;
     }

@@ -1,6 +1,6 @@
 import {
   JdSystem,
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
@@ -34,7 +34,7 @@ export {};
 
 export const isAreaDuplicate = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
+  currentProject: JdProjectNumbers,
   areaToCheck: JdAreaNumbers
 ): Boolean => {
   if (jdSystem[currentProject]?.areas[areaToCheck]) {
@@ -45,7 +45,7 @@ export const isAreaDuplicate = (
 
 export const isCategoryDuplicate = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
+  currentProject: JdProjectNumbers,
   categoryToCheck: JdCategoryNumbers
 ): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
@@ -62,7 +62,7 @@ export const isCategoryDuplicate = (
 
 export const isIdDuplicate = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
+  currentProject: JdProjectNumbers,
   idToCheck: JdIdNumbers
 ): Boolean => {
   const category = idNumberToCategoryNumber(idToCheck);
@@ -81,7 +81,7 @@ export const isIdDuplicate = (
 
 export const parentAreaExists = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
+  currentProject: JdProjectNumbers,
   categoryToCheck: JdCategoryNumbers
 ): Boolean => {
   const area = categoryNumberToAreaNumber(categoryToCheck);
@@ -97,7 +97,7 @@ export const parentAreaExists = (
 
 export const parentCategoryExists = (
   jdSystem: JdSystem,
-  currentProject: JDProjectNumbers,
+  currentProject: JdProjectNumbers,
   idToCheck: JdIdNumbers
 ): Boolean => {
   const category = idNumberToCategoryNumber(idToCheck);

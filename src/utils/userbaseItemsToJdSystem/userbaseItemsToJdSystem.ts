@@ -4,7 +4,7 @@ import { categoryNumberToAreaNumber } from "utils";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import {
   JdSystem,
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   UserbaseItem,
@@ -50,11 +50,11 @@ export const userbaseItemsToJdSystem = (
   /**
    * New! Zeroth pass: get the project itself and create the base object.
    */
-  let projectNumber: JDProjectNumbers = "000";
+  let projectNumber: JdProjectNumbers = "000";
   while (i < len) {
     const item = userbaseItems[i].item;
     if (item.jdType === "project") {
-      projectNumber = item.jdNumber as JDProjectNumbers;
+      projectNumber = item.jdNumber as JdProjectNumbers;
       const projectTitle = item.jdTitle;
       jdSystem[projectNumber] = {
         title: projectTitle,

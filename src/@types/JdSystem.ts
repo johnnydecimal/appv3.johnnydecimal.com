@@ -4,7 +4,7 @@
  */
 
 import { JdAreaNumbers, JdCategoryNumbers, JdIdNumbers } from "@types";
-import { JDProjectNumbers } from "./JDProjectNumbers";
+import { JdProjectNumbers } from "./JdProjectNumbers";
 
 interface InternalJDId {
   title: string;
@@ -34,7 +34,7 @@ type InternalJDProject = {
  * https://stackoverflow.com/questions/51659420/consider-using-a-mapped-object-type-instead-whats-a-mapped-object-type-and#51659490
  */
 export type JdSystem = {
-  [K in JDProjectNumbers]?: InternalJDProject;
+  [K in JdProjectNumbers]?: InternalJDProject;
 };
 
 export const test: JdSystem = {

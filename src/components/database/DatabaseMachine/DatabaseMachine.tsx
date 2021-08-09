@@ -9,7 +9,7 @@ import { AuthMachineReactContext } from "components/authentication";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ActorRefFrom } from "xstate";
 import {
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
@@ -65,7 +65,7 @@ export const DatabaseMachine = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree.
    */
-  const changeDatabase = (newDatabase: JDProjectNumbers) => {
+  const changeDatabase = (newDatabase: JdProjectNumbers) => {
     send({
       type: "OPEN_DATABASE",
       newDatabase,
@@ -132,7 +132,7 @@ export const DatabaseMachine = () => {
     e.preventDefault();
     // TODO: obvs in real life we have to make sure that the user can only
     //       create a DB with the right format; but this is a fudge anyway
-    changeDatabase(formRef!.current!.value as JDProjectNumbers);
+    changeDatabase(formRef!.current!.value as JdProjectNumbers);
   };
   const formRef = React.createRef<HTMLInputElement>();
   const handleSubmitNewItem = (e: any) => {

@@ -1,5 +1,5 @@
 export type { JdSystem } from "./JdSystem";
-export type { JDProjectNumbers } from "./JDProjectNumbers";
+export type { JdProjectNumbers } from "./JdProjectNumbers";
 export type { JdAreaNumbers } from "./JdAreaNumbers";
 export type { JdCategoryNumbers } from "./JdCategoryNumbers";
 export type { JdIdNumbers } from "./JdIdNumbers";

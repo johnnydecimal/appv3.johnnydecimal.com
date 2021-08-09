@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import {
   JdSystem,
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
@@ -17,7 +17,7 @@ export const ID = ({
 }: // children,
 {
   jdSystem: JdSystem;
-  currentProject: JDProjectNumbers;
+  currentProject: JdProjectNumbers;
   currentArea: JdAreaNumbers;
   currentCategory: JdCategoryNumbers;
   currentId: JdIdNumbers | null;

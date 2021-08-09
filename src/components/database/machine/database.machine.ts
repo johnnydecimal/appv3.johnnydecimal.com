@@ -12,7 +12,7 @@ import { userbaseItemsToJdSystem } from "utils";
 import {
   AuthMachineEvent,
   JdSystem,
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
@@ -28,7 +28,7 @@ const databaseModel = createModel(
      * the databaseName in Userbase. We send this value down when we invoke
      * the machine.
      */
-    currentProject: "" as JDProjectNumbers,
+    currentProject: "" as JdProjectNumbers,
 
     /**
      * The currently-open area, category, and ID.
@@ -81,7 +81,7 @@ const databaseModel = createModel(
        * one to open, it might not actually be new. Not that the API call to
        * Userbase cares either way.
        */
-      OPEN_DATABASE: (newDatabase: JDProjectNumbers) => ({
+      OPEN_DATABASE: (newDatabase: JdProjectNumbers) => ({
         newDatabase,
       }),
 

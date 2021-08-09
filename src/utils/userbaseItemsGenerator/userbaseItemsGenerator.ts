@@ -9,7 +9,7 @@ import {
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
-  JDProjectNumbers,
+  JdProjectNumbers,
   UserbaseItem,
 } from "@types";
 
@@ -23,7 +23,7 @@ import {
  * Note that **no consistency checks** are performed here. Junk in, junk out.
  */
 export const userbaseItemsGenerator = (
-  jdProjects?: JDProjectNumbers[],
+  jdProjects?: JdProjectNumbers[],
   jdAreas?: JdAreaNumbers[],
   jdCategories?: JdCategoryNumbers[],
   jdIds?: JdIdNumbers[]

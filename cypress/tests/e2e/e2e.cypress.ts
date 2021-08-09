@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 
-import { JDProjectNumbers } from "../../../src/@types";
+import { JdProjectNumbers } from "../../../src/@types";
 
 describe("new user first run", () => {
   const userId = `cy_${nanoid(6)}`;
@@ -53,7 +53,7 @@ describe("new user first run", () => {
       // Using the function exposed on `window`, switch again
       .window()
       .its("DatabaseMachine.changeDatabase")
-      .then((changeDatabase: (newDatabase: JDProjectNumbers) => void) => {
+      .then((changeDatabase: (newDatabase: JdProjectNumbers) => void) => {
         changeDatabase("002");
       })
       .get("#project")

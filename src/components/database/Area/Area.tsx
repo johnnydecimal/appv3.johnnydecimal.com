@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import {
   JdSystem,
-  JDProjectNumbers,
+  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
 } from "@types";
@@ -14,7 +14,7 @@ export const Area = ({
   children,
 }: {
   jdSystem: JdSystem;
-  currentProject: JDProjectNumbers;
+  currentProject: JdProjectNumbers;
   currentArea: JdAreaNumbers | null;
   children: React.ReactNode;
 }) => {
