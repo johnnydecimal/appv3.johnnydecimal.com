@@ -12,7 +12,7 @@ import {
   JDProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
-  JDIdNumbers,
+  JdIdNumbers,
   JDItem,
 } from "@types";
 
@@ -93,7 +93,7 @@ export const DatabaseMachine = () => {
       category,
     });
   };
-  const openId = (id: JDIdNumbers) => {
+  const openId = (id: JdIdNumbers) => {
     send({
       type: "OPEN_ID",
       id,

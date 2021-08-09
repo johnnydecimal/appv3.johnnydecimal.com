@@ -4,7 +4,7 @@ import {
   JDProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
-  JDIdNumbers,
+  JdIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -26,7 +26,7 @@ export const Category = ({
     openId,
   }: {
     openCategory: (category: JdCategoryNumbers) => void;
-    openId: (id: JDIdNumbers | null) => void;
+    openId: (id: JdIdNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentCategory) {
     /**

@@ -2,7 +2,7 @@ export type { JdSystem } from "./JdSystem";
 export type { JDProjectNumbers } from "./JDProjectNumbers";
 export type { JdAreaNumbers } from "./JdAreaNumbers";
 export type { JdCategoryNumbers } from "./JdCategoryNumbers";
-export type { JDIdNumbers } from "./JDIdNumbers";
+export type { JdIdNumbers } from "./JdIdNumbers";
 export type { JDItem } from "./JDItem";
 
 export type {

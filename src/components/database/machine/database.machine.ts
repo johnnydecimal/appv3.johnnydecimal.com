@@ -15,7 +15,7 @@ import {
   JDProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
-  JDIdNumbers,
+  JdIdNumbers,
   JDItem,
   UserbaseError,
   UserbaseItem,
@@ -35,7 +35,7 @@ const databaseModel = createModel(
      */
     currentArea: null as JdAreaNumbers | null,
     currentCategory: null as JdCategoryNumbers | null,
-    currentId: null as JDIdNumbers | null,
+    currentId: null as JdIdNumbers | null,
 
     /**
      * currentUsername is the username of the currently-signed-in user. We send
@@ -114,7 +114,7 @@ const databaseModel = createModel(
        */
       OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
       OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
-      OPEN_ID: (id: JDIdNumbers) => ({ id }),
+      OPEN_ID: (id: JdIdNumbers) => ({ id }),
     },
   }
 );

@@ -8,7 +8,7 @@ import { shuffleArray } from "utils";
 import {
   JdAreaNumbers,
   JdCategoryNumbers,
-  JDIdNumbers,
+  JdIdNumbers,
   JDProjectNumbers,
   UserbaseItem,
 } from "@types";
@@ -26,7 +26,7 @@ export const userbaseItemsGenerator = (
   jdProjects?: JDProjectNumbers[],
   jdAreas?: JdAreaNumbers[],
   jdCategories?: JdCategoryNumbers[],
-  jdIds?: JDIdNumbers[]
+  jdIds?: JdIdNumbers[]
 ) => {
   // console.log("Starting to create the über-JDSystem.");
   // const startTime = window.performance.now();

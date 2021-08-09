@@ -1,9 +1,9 @@
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JdCategoryNumbers, JDIdNumbers } from "@types";
+import { JdCategoryNumbers, JdIdNumbers } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const idNumberToCategoryNumber = (
-  id: JDIdNumbers
+  id: JdIdNumbers
 ): JdCategoryNumbers => {
   return id.slice(0, 2) as JdCategoryNumbers;
 };

@@ -2,7 +2,7 @@ import type {
   JDProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
-  JDIdNumbers,
+  JdIdNumbers,
 } from ".";
 
 /**
@@ -36,7 +36,7 @@ export type JDItem =
     }
   | {
       jdType: "id";
-      jdNumber: JDIdNumbers;
+      jdNumber: JdIdNumbers;
       jdTitle: string;
       meta?: Object;
     };

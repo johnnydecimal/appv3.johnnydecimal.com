@@ -4,7 +4,7 @@ import {
   JDProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
-  JDIdNumbers,
+  JdIdNumbers,
 } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -20,13 +20,13 @@ export const ID = ({
   currentProject: JDProjectNumbers;
   currentArea: JdAreaNumbers;
   currentCategory: JdCategoryNumbers;
-  currentId: JDIdNumbers | null;
+  currentId: JdIdNumbers | null;
   // children: React.ReactNode;
 }) => {
   const {
     openId,
   }: {
-    openId: (id: JDIdNumbers) => void;
+    openId: (id: JdIdNumbers) => void;
   } = useContext(DatabaseMachineReactContext);
   if (currentId) {
     /**
@@ -68,7 +68,7 @@ export const ID = ({
       .ids
   ).sort((a, b) => {
     return Number(a) - Number(b);
-  }) as JDIdNumbers[];
+  }) as JdIdNumbers[];
 
   return (
     <div>
