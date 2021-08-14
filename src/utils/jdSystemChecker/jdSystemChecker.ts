@@ -4,11 +4,11 @@ import {
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
+  JdItem,
 } from "@types";
 import { categoryNumberToAreaNumber } from "utils";
 import { idNumberToCategoryNumber } from "utils/idNumberToCategoryNumber/idNumberToCategoryNumber";
 
-export {};
 /**
  * JD system checker.
  *
@@ -32,18 +32,18 @@ export {};
  * build some super simple, re-useable functions that we string together.
  */
 
-export const isAreaDuplicate = (
+export const areaIsNotDuplicate = (
   jdSystem: JdSystem,
   currentProject: JdProjectNumbers,
   areaToCheck: JdAreaNumbers
 ): Boolean => {
   if (jdSystem[currentProject]?.areas[areaToCheck]) {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 };
 
-export const isCategoryDuplicate = (
+export const categoryIsNotDuplicate = (
   jdSystem: JdSystem,
   currentProject: JdProjectNumbers,
   categoryToCheck: JdCategoryNumbers
@@ -55,12 +55,12 @@ export const isCategoryDuplicate = (
       ?.areas[area]
       ?.categories[categoryToCheck]
   ) {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 };
 
-export const isIdDuplicate = (
+export const idIsNotDuplicate = (
   jdSystem: JdSystem,
   currentProject: JdProjectNumbers,
   idToCheck: JdIdNumbers
@@ -74,9 +74,9 @@ export const isIdDuplicate = (
     ?.categories[category]
     ?.ids[idToCheck]
   ) {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 };
 
 export const parentAreaExists = (
@@ -111,4 +111,87 @@ export const parentCategoryExists = (
     return true;
   }
   return false;
+};
+
+export const jdSystemInsertCheck = (
+  jdSystem: JdSystem,
+  currentProject: JdProjectNumbers,
+  itemToCheck: JdItem
+):
+  | {
+      success: false;
+      message: string;
+    }
+  | {
+      success: true;
+    } => {
+  switch (itemToCheck.jdType) {
+    case "project":
+      // We don't handle this here. Error.
+      return {
+        success: false,
+        message: "We don't handle project insertion here.",
+      };
+
+    case "area":
+      // Check if the area is a duplicate
+      if (areaIsNotDuplicate(jdSystem, currentProject, itemToCheck.jdNumber)) {
+        return {
+          success: true,
+        };
+      } else {
+        return {
+          success: false,
+          message: "The area already exists.",
+        };
+      }
+
+    case "category":
+      if (
+        categoryIsNotDuplicate(jdSystem, currentProject, itemToCheck.jdNumber)
+      ) {
+        if (parentAreaExists(jdSystem, currentProject, itemToCheck.jdNumber)) {
+          return {
+            success: true,
+          };
+        } else {
+          return {
+            success: false,
+            message: "Parent area does not exist for this category.",
+          };
+        }
+      } else {
+        return {
+          success: false,
+          message: "The category already exists.",
+        };
+      }
+
+    case "id":
+      if (idIsNotDuplicate(jdSystem, currentProject, itemToCheck.jdNumber)) {
+        if (
+          parentCategoryExists(jdSystem, currentProject, itemToCheck.jdNumber)
+        ) {
+          return {
+            success: true,
+          };
+        } else {
+          return {
+            success: false,
+            message: "Parent category does not exist for this ID.",
+          };
+        }
+      } else {
+        return {
+          success: false,
+          message: "The ID already exists.",
+        };
+      }
+
+    default:
+      return {
+        success: false,
+        message: "You managed to hit the default case, which isn't possible.",
+      };
+  }
 };

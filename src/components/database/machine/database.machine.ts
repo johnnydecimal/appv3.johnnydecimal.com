@@ -374,17 +374,35 @@ export const databaseMachine = databaseModel.createMachine(
             ],
             on: {
               INSERT_ITEM: {
-                target: "#databaseMachine.itemInserter.insertingItem",
+                target: "#databaseMachine.itemInserter.requestItemInsertion",
               },
             },
           },
         },
       },
       itemInserter: {
+        /**
+         * We're going to put a guard on here and it's the thing that will
+         * check our current local context to see if the new item is allowed.
+         *
+         * If it is, we'll transition to the state where `ubInsertItem` is
+         * invoked. If it isn't, we should throw a warning or something.
+         *
+         * Remember that INSERT_ITEM calls directly to insertingItem here.
+         *
+         * Alternatively we could do this checking down in `ubInsertItem` but
+         * it's going to make more sense later to see it visualised here.
+         */
         type: "compound",
         initial: "idle",
         states: {
           idle: {},
+          requestItemInsertion: {
+            always: {
+              cond: (context, event) => false,
+              target: "insertingItem",
+            },
+          },
           insertingItem: {
             entry: [
               /**
