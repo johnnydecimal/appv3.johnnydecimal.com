@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { JdAreaNumbers, JdCategoryNumbers, JdIdNumbers } from "@types";
 
 const allAreas: JdAreaNumbers[] = [
