@@ -11,6 +11,7 @@ import { AuthMachine } from "components/authentication";
 if (!("Cypress" in window)) {
   inspect({
     // url: 'https://statecharts.io/inspect', // (default)
+    // url: "https://stately.ai/viz",
     iframe: false, // open in new window
   });
 }

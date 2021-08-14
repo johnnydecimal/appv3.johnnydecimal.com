@@ -106,10 +106,12 @@ const assignUser = authModel.assign<
 >({
   user: (_context, event) => event.user,
 });
+
 const assignAndLogError = authModel.assign<"ERROR" | "SIGNUP_FAILED">({
   error: (_context, event) => event.error,
   log: (context, event) => addToLog(context, event.error.message, "text-red"),
 });
+
 const clearError = authModel.assign<
   | "A_USER_IS_SIGNED_IN"
   | "NO_USER_IS_SIGNED_IN"
@@ -119,9 +121,11 @@ const clearError = authModel.assign<
 >({
   error: (_context, _event) => undefined,
 });
+
 const clearLog = authModel.assign({
   log: () => [],
 });
+
 const clearUser = authModel.assign<
   "ERROR" | "THE_USER_WAS_SIGNED_OUT" | "SIGNOUT_FAILED_SO_WE_FORCE_IT_ANYWAY"
 >({
@@ -219,6 +223,7 @@ export const authMachine = authModel.createMachine(
             invoke: {
               src: "userbaseSignIn",
             },
+
             on: {
               SIGNED_IN: {
                 actions: [assignUser, clearError],
@@ -353,6 +358,20 @@ export const authMachine = authModel.createMachine(
             ],
             invoke: {
               src: "userbaseSignUp",
+            },
+            after: {
+              1000: {
+                actions: [
+                  (context) =>
+                    addToLog(context, "Generating cryptographic keys."),
+                ],
+              },
+              2000: {
+                actions: [
+                  (context) =>
+                    addToLog(context, "Creating end-to-end encrypted account."),
+                ],
+              },
             },
             on: {
               SIGNUP_WAS_SUCCESSFUL: {

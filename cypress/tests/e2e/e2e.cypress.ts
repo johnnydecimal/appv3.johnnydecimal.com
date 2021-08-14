@@ -31,6 +31,10 @@ describe("new user first run", () => {
       .get("#password")
       .type("test123{enter}")
       .get("body")
+      .contains("Generating cryptographic keys")
+      .get("body")
+      .contains("Creating end-to-end encrypted account")
+      .get("body")
       .contains("Sign out", { timeout: 10000 })
 
       // Default project 001 has been created
