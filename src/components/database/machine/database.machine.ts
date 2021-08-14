@@ -20,6 +20,7 @@ import {
   UserbaseError,
   UserbaseItem,
 } from "@types";
+import { jdSystemInsertCheck } from "utils/jdSystemChecker/jdSystemChecker";
 
 const databaseModel = createModel(
   {
@@ -358,6 +359,12 @@ export const databaseMachine = databaseModel.createMachine(
               /**
                * If the item which represents the project doesn't exist,
                * create it.
+               *
+               * Okay this is terrible putting this here. It makes it impossible
+               * to figure out from the diagram what's going on.
+               *
+               * This needs to be moved as a minimum first step to make this
+               * thing more understandable.
                */
               pure((context) => {
                 if (context.userbaseItems.length === 0) {
@@ -398,10 +405,27 @@ export const databaseMachine = databaseModel.createMachine(
         states: {
           idle: {},
           requestItemInsertion: {
-            always: {
-              cond: (context, event) => false,
-              target: "insertingItem",
-            },
+            always: [
+              {
+                cond: (context, event) => {
+                  if (event.type === "INSERT_ITEM") {
+                    const { success } = jdSystemInsertCheck(
+                      context.jdSystem,
+                      context.currentProject,
+                      event.item
+                    );
+                    return success;
+                    // TODO: Handle the error.
+                  }
+                  return false;
+                },
+                target: "insertingItem",
+              },
+              {
+                target: "idle",
+                // actions: [() => alert("requestItemInsertion error!")],
+              },
+            ],
           },
           insertingItem: {
             entry: [
@@ -518,10 +542,6 @@ export const databaseMachine = databaseModel.createMachine(
             });
             return;
           }
-
-          /**
-           * Ensure that the system is valid after this insert.
-           */
 
           userbase
             .insertItem({
