@@ -74,7 +74,42 @@ describe("new user first run", () => {
         });
       })
       .get("body")
-      .contains("area zero niner");
+      .contains("area zero niner")
+
+      // Create a new category
+      .window()
+      .its("DatabaseMachine.insertItem")
+      .then((insertItem: (newItem: JdItem) => void) => {
+        insertItem({
+          jdType: "category",
+          jdNumber: "00",
+          jdTitle: "category zero",
+        });
+      })
+      .get("body")
+      .contains("area zero niner")
+      .click()
+      .get("body")
+      .contains("category zero")
+
+      // Create a new id
+      .window()
+      .its("DatabaseMachine.insertItem")
+      .then((insertItem: (newItem: JdItem) => void) => {
+        insertItem({
+          jdType: "id",
+          jdNumber: "00.00",
+          jdTitle: "id zero zero",
+        });
+      })
+      .get("body")
+      .contains("area zero niner")
+      .click()
+      .get("body")
+      .contains("category zero")
+      .click()
+      .get("body")
+      .contains("id zero zero");
   });
 });
 
