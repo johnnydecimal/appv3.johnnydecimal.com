@@ -1,7 +1,6 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
-import { pure } from "xstate/lib/actions";
 import userbase, { Database } from "userbase-js";
 import { nanoid } from "nanoid";
 
@@ -97,6 +96,13 @@ const databaseModel = createModel(
        * Sent by ubOpenDatabase when it successfully opens a database.
        */
       REPORT_DATABASE_OPENED: () => ({}),
+
+      /**
+       * When we open a new database, if it needs to have the project item
+       * set up we send this specific event. Makes the machine easier to reason.
+       */
+      CREATE_PROJECT_ITEM: () => ({}),
+      PROJECT_CREATED: () => ({}),
 
       /**
        * Sent by the helper function whenever we want to add a new item to the
@@ -355,33 +361,26 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           databaseOpen: {
-            entry: [
-              /**
-               * If the item which represents the project doesn't exist,
-               * create it.
-               *
-               * Okay this is terrible putting this here. It makes it impossible
-               * to figure out from the diagram what's going on.
-               *
-               * This needs to be moved as a minimum first step to make this
-               * thing more understandable.
-               */
-              pure((context) => {
-                if (context.userbaseItems.length === 0) {
-                  return send({
-                    type: "INSERT_ITEM",
-                    item: {
-                      jdType: "project",
-                      jdNumber: context.currentProject,
-                      jdTitle: `Project ${context.currentProject}`,
-                    },
-                  });
-                }
-              }),
+            always: [
+              {
+                cond: (context) => context.userbaseItems.length === 0,
+                target: "creatingProjectItem",
+              },
             ],
             on: {
               INSERT_ITEM: {
                 target: "#databaseMachine.itemInserter.requestItemInsertion",
+              },
+            },
+          },
+          creatingProjectItem: {
+            invoke: {
+              src: "ubCreateProjectItem",
+            },
+            on: {
+              PROJECT_CREATED: {
+                actions: [() => alert("yeah")],
+                target: "databaseOpen",
               },
             },
           },
@@ -550,6 +549,44 @@ export const databaseMachine = databaseModel.createMachine(
             })
             .then(() => {
               sendBack({ type: "ITEM_INSERTED" });
+            })
+            .catch((error) => {
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
+      ubCreateProjectItem:
+        (context) => (sendBack: (event: DatabaseMachineEvent) => void) => {
+          /**
+           * This should only be invoked after checking that there's nothing
+           * in the current database, but let's be sure.
+           */
+          if (context.userbaseItems.length !== 0) {
+            sendParent<any, any, AuthMachineEvent>({
+              type: "ERROR",
+              error: {
+                name: "DuplicateProjectInsertion",
+                message:
+                  "You invoked ubCreateProjectItem on a UserbaseItems which already contains an item.",
+                status: 903.21, // TODO Ooh they can be JD IDs, nice
+              },
+            });
+          }
+
+          userbase
+            .insertItem({
+              databaseName: context.currentProject,
+              item: {
+                jdType: "project",
+                jdNumber: context.currentProject,
+                jdTitle: `Project ${context.currentProject}`,
+              },
+            })
+            .then(() => {
+              console.log("sendingBack PROJECT_CREATED");
+              sendBack({ type: "PROJECT_CREATED" });
             })
             .catch((error) => {
               sendParent<any, any, AuthMachineEvent>({
