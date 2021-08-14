@@ -8,8 +8,8 @@ import merge from "deepmerge";
 import { databaseMachine } from "components/database";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ISignInFormData } from "../SignInForm/SignInForm";
-import { ISignUpFormData } from "../SignUpForm/SignUpForm";
+import type { SignInFormData } from "../SignInForm/SignInForm";
+import type { SignUpFormData } from "../SignUpForm/SignUpForm";
 
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
@@ -49,7 +49,7 @@ const authModel = createModel(
       NO_USER_IS_SIGNED_IN: () => ({}),
 
       // -- From the signedOut state
-      ATTEMPT_SIGNIN: (formData: ISignInFormData) => ({ formData }),
+      ATTEMPT_SIGNIN: (formData: SignInFormData) => ({ formData }),
       SIGNED_IN: (user: UserResult) => ({ user }),
       SWITCH_TO_THE_SIGNUP_PAGE: () => ({}),
       ACKNOWLEDGE_DIRE_WARNING_ABOUT_E2E_ENCRYPTION: () => ({}),
@@ -58,7 +58,7 @@ const authModel = createModel(
 
       // -- From the signUp state
       SWITCH_TO_THE_SIGNIN_PAGE: () => ({}),
-      ATTEMPT_SIGNUP: (formData: ISignUpFormData) => ({ formData }),
+      ATTEMPT_SIGNUP: (formData: SignUpFormData) => ({ formData }),
       SIGNUP_WAS_SUCCESSFUL: (user: UserResult) => ({ user }),
       SIGNUP_FAILED: (error: UserbaseError) => ({ error }),
 

@@ -7,7 +7,7 @@ import { AuthMachineReactContext } from "../AuthMachine/context";
 import { LogViewer } from "../LogViewer/LogViewer";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export interface ISignUpFormData {
+export interface SignUpFormData {
   username: string;
   password: string;
 }
@@ -28,7 +28,7 @@ export const SignUpForm = () => {
   /**
    * Set up react-hook-form.
    */
-  const { handleSubmit, register } = useForm<ISignUpFormData>();
+  const { handleSubmit, register } = useForm<SignUpFormData>();
 
   /**
    * Construct the UI.

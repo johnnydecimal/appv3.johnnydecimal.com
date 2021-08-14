@@ -7,8 +7,10 @@ import { DatabaseMachine } from "components/database";
 // === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { authMachine } from "../machine/auth.machine";
 import { AuthMachineReactContext } from "./context";
-import { SignInForm, ISignInFormData } from "../SignInForm/SignInForm";
-import { SignUpForm, ISignUpFormData } from "../SignUpForm/SignUpForm";
+import { SignInForm } from "../SignInForm/SignInForm";
+import { SignUpForm } from "../SignUpForm/SignUpForm";
+import type { SignInFormData } from "../SignInForm/SignInForm";
+import type { SignUpFormData } from "../SignUpForm/SignUpForm";
 
 // === Temp ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const FourOhFour = () => <div>404</div>;
@@ -30,14 +32,14 @@ export const AuthMachine = () => {
    * child components. These are the functions which send events, so we don't
    * ever send `send` down the tree.
    */
-  const handleSignIn = (formData: ISignInFormData) => {
+  const handleSignIn = (formData: SignInFormData) => {
     send({
       type: "ATTEMPT_SIGNIN",
       formData,
     });
   };
 
-  const handleSignUp = (formData: ISignUpFormData) => {
+  const handleSignUp = (formData: SignUpFormData) => {
     send({
       type: "ATTEMPT_SIGNUP",
       formData,
