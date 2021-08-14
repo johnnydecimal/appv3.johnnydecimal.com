@@ -91,6 +91,20 @@ it("checks that you can't add a duplicate category", () => {
   });
 });
 
+it("checks that you can't add a category if the parent area doesn't exist", () => {
+  const categoryToCheck: JdItem = {
+    jdType: "category",
+    jdNumber: "10",
+    jdTitle: "Category 10-19",
+  };
+  expect(
+    jdSystemInsertCheck(sampleProject, "000", categoryToCheck)
+  ).toStrictEqual({
+    success: false,
+    message: "Parent area does not exist for this category.",
+  });
+});
+
 it("checks that you can add a valid category", () => {
   const categoryToCheck: JdItem = {
     jdType: "category",
@@ -104,7 +118,7 @@ it("checks that you can add a valid category", () => {
   });
 });
 
-it("checks that you can't add a duplicate id", () => {
+it("checks that you can't add a duplicate ID", () => {
   const idToCheck: JdItem = {
     jdType: "id",
     jdNumber: "00.00",
@@ -116,7 +130,19 @@ it("checks that you can't add a duplicate id", () => {
   });
 });
 
-it("checks that you can add a valid id", () => {
+it("checks that you can't add an ID if the parent category doesn't exist", () => {
+  const idToCheck: JdItem = {
+    jdType: "id",
+    jdNumber: "99.99",
+    jdTitle: "ID 99.99",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", idToCheck)).toStrictEqual({
+    success: false,
+    message: "Parent category does not exist for this ID.",
+  });
+});
+
+it("checks that you can add a valid ID", () => {
   const idToCheck: JdItem = {
     jdType: "id",
     jdNumber: "00.01",
