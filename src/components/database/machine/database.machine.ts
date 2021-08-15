@@ -73,7 +73,7 @@ const databaseModel = createModel(
       /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
-      // GOT_DATABASES: (databases: Database[]) => ({ databases }),
+      GOT_DATABASES: (databases: Database[]) => ({ databases }),
 
       /**
        * Sent by the changeDatabase(newDatabase) helper function when we want
@@ -141,9 +141,9 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 //#region  ===-===  Actions     ===-===-===-===-===-===-===-===-===-===-===-===
-// const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
-//   databases: (_, event) => event.databases,
-// });
+const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
+  databases: (_, event) => event.databases,
+});
 
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentProject: (_context, event) => event.newDatabase,
@@ -334,23 +334,23 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           gettingDatabases: {
-            //       invoke: {
-            //         src: "ubGetDatabases",
-            //       },
-            //       on: {
-            //         GOT_DATABASES: {
-            //           actions: [assignDatabases],
-            //           target: "idle",
-            //         },
-            //       },
+            invoke: {
+              src: "ubGetDatabases",
+            },
+            on: {
+              GOT_DATABASES: {
+                actions: [assignDatabases],
+                target: "idle",
+              },
+            },
           },
-          //     idle: {
-          //       after: {
-          //         60000: {
-          //           target: "gettingDatabases",
-          //         },
-          //       },
-          //     },
+          idle: {
+            after: {
+              60000: {
+                target: "gettingDatabases",
+              },
+            },
+          },
         },
       },
       //#endregion
@@ -539,23 +539,23 @@ export const databaseMachine = databaseModel.createMachine(
   },
   {
     services: {
-      // ubGetDatabases:
-      //   () => (sendBack: (event: DatabaseMachineEvent) => void) => {
-      //     /**
-      //      * Get the array of databases. Is always returned, can be empty.
-      //      */
-      //     userbase
-      //       .getDatabases()
-      //       .then(({ databases }) => {
-      //         sendBack({ type: "GOT_DATABASES", databases });
-      //       })
-      //       .catch((error: UserbaseError) =>
-      //         sendParent<any, any, AuthMachineEvent>({
-      //           type: "ERROR",
-      //           error,
-      //         })
-      //       );
-      //   },
+      ubGetDatabases:
+        () => (sendBack: (event: DatabaseMachineEvent) => void) => {
+          /**
+           * Get the array of databases. Is always returned, can be empty.
+           */
+          userbase
+            .getDatabases()
+            .then(({ databases }) => {
+              sendBack({ type: "GOT_DATABASES", databases });
+            })
+            .catch((error: UserbaseError) =>
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              })
+            );
+        },
       ubOpenDatabase:
         (context: DatabaseMachineContext) =>
         (sendBack: (event: DatabaseMachineEvent) => void) => {
