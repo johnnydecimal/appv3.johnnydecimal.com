@@ -298,7 +298,7 @@ export const databaseMachine = databaseModel.createMachine(
       },
     },
     states: {
-      databaseOpener: {
+      database: {
         /**
          * Noting that the `invoke` which actually opens the database is
          * currently on the root.
@@ -307,47 +307,52 @@ export const databaseMachine = databaseModel.createMachine(
         initial: "init",
         states: {
           init: {
-            on: {},
+            on: {
+              REPORT_DATABASE_OPENED: {
+                target: "databaseOpen",
+              },
+            },
           },
+          databaseOpen: {},
         },
       },
 
       //#region databaseGetter
-      // databaseGetter: {
-      //   /**
-      //    * This state loops itself every 60s and is responsible for getting the
-      //    * current list of databases. This is assigned to context but nothing
-      //    * else is done: it's just so that we have the list available if we want
-      //    * to switch databases.
-      //    */
-      //   type: "compound",
-      //   initial: "waitingForDatabaseToBeOpen",
-      //   states: {
-      //     waitingForDatabaseToBeOpen: {
-      //       on: {
-      //         REPORT_DATABASE_OPENED: "gettingDatabases",
-      //       },
-      //     },
-      //     gettingDatabases: {
-      //       invoke: {
-      //         src: "ubGetDatabases",
-      //       },
-      //       on: {
-      //         GOT_DATABASES: {
-      //           actions: [assignDatabases],
-      //           target: "idle",
-      //         },
-      //       },
-      //     },
-      //     idle: {
-      //       after: {
-      //         60000: {
-      //           target: "gettingDatabases",
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+      databaseGetter: {
+        //   /**
+        //    * This state loops itself every 60s and is responsible for getting the
+        //    * current list of databases. This is assigned to context but nothing
+        //    * else is done: it's just so that we have the list available if we want
+        //    * to switch databases.
+        //    */
+        type: "compound",
+        initial: "init",
+        states: {
+          init: {
+            on: {
+              REPORT_DATABASE_OPENED: "gettingDatabases",
+            },
+          },
+          gettingDatabases: {
+            //       invoke: {
+            //         src: "ubGetDatabases",
+            //       },
+            //       on: {
+            //         GOT_DATABASES: {
+            //           actions: [assignDatabases],
+            //           target: "idle",
+            //         },
+            //       },
+          },
+          //     idle: {
+          //       after: {
+          //         60000: {
+          //           target: "gettingDatabases",
+          //         },
+          //       },
+          //     },
+        },
+      },
       //#endregion
 
       //#region databaseState
