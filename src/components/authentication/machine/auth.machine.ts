@@ -5,7 +5,8 @@ import userbase, { UserProfile, UserResult } from "userbase-js";
 import merge from "deepmerge";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { databaseMachine } from "components/database";
+// import { databaseMachine } from "components/database";
+import { database2Machine } from "components/database";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import type { SignInFormData } from "../SignInForm/SignInForm";
@@ -425,25 +426,29 @@ export const authMachine = authModel.createMachine(
                   }),
                 ],
                 invoke: {
-                  id: "databaseMachine",
-                  src: databaseMachine,
-                  data: {
-                    /**
-                     * We tell TS that this property must exist because we create
-                     * it when a new user is created, and only ever update (vs.
-                     * delete) it.
-                     */
-                    currentProject: (context: AuthMachineContext) =>
-                      context.user!.profile!.currentProject,
-                    currentUsername: (context: AuthMachineContext) =>
-                      context.user!.username,
-                    databases: () => [],
-                    userbaseItems: () => [],
-                    jdSystem: () => {
-                      return {};
-                    },
-                  },
+                  id: "database2Machine",
+                  src: database2Machine,
                 },
+                // invoke: {
+                //   id: "databaseMachine",
+                //   src: databaseMachine,
+                //   data: {
+                //     /**
+                //      * We tell TS that this property must exist because we create
+                //      * it when a new user is created, and only ever update (vs.
+                //      * delete) it.
+                //      */
+                //     currentProject: (context: AuthMachineContext) =>
+                //       context.user!.profile!.currentProject,
+                //     currentUsername: (context: AuthMachineContext) =>
+                //       context.user!.username,
+                //     databases: () => [],
+                //     userbaseItems: () => [],
+                //     jdSystem: () => {
+                //       return {};
+                //     },
+                //   },
+                // },
               },
             },
           },

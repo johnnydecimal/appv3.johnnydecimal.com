@@ -2,7 +2,8 @@
 import { useMachine } from "@xstate/react";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { DatabaseMachine } from "components/database";
+// import { DatabaseMachine } from "components/database";
+import { Database2Machine } from "components/database";
 
 // === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { authMachine } from "../machine/auth.machine";
@@ -100,7 +101,7 @@ export const AuthMachine = () => {
       RenderComponent = <SignUpForm />;
       break;
     case state.matches("signedIn"):
-      RenderComponent = <DatabaseMachine />;
+      RenderComponent = <Database2Machine />;
       // RenderComponent = <div>Ah-ha! 2</div>;
       break;
     default:

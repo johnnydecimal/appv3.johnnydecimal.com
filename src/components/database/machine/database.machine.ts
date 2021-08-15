@@ -1,11 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  assign,
-  ContextFrom,
-  EventFrom,
-  send as xstateSend,
-  sendParent,
-} from "xstate";
+import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 import { nanoid } from "nanoid";
