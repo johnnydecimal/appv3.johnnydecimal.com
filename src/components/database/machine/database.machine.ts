@@ -1,11 +1,5 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  assign,
-  ContextFrom,
-  EventFrom,
-  send as xstateSend,
-  sendParent,
-} from "xstate";
+import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 import { nanoid } from "nanoid";
@@ -287,55 +281,58 @@ export const databaseMachine = databaseModel.createMachine(
         ],
         target: "#databaseMachine",
       },
-      OPEN_AREA: {
-        actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
-      },
-      OPEN_CATEGORY: {
-        actions: [assignCurrentCategory, clearCurrentId],
-      },
-      OPEN_ID: {
-        actions: [assignCurrentId],
-      },
+      // OPEN_AREA: {
+      //   actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
+      // },
+      // OPEN_CATEGORY: {
+      //   actions: [assignCurrentCategory, clearCurrentId],
+      // },
+      // OPEN_ID: {
+      //   actions: [assignCurrentId],
+      // },
       ALERT: {
         actions: [() => console.debug("🛎 ALERT fired")],
       },
     },
     states: {
-      databaseGetter: {
-        /**
-         * This state loops itself every 60s and is responsible for getting the
-         * current list of databases. This is assigned to context but nothing
-         * else is done: it's just so that we have the list available if we want
-         * to switch databases.
-         */
-        type: "compound",
-        initial: "waitingForDatabaseToBeOpen",
-        states: {
-          waitingForDatabaseToBeOpen: {
-            on: {
-              REPORT_DATABASE_OPENED: "gettingDatabases",
-            },
-          },
-          gettingDatabases: {
-            invoke: {
-              src: "ubGetDatabases",
-            },
-            on: {
-              GOT_DATABASES: {
-                actions: [assignDatabases],
-                target: "idle",
-              },
-            },
-          },
-          idle: {
-            after: {
-              60000: {
-                target: "gettingDatabases",
-              },
-            },
-          },
-        },
-      },
+      //#region databaseGetter
+      // databaseGetter: {
+      //   /**
+      //    * This state loops itself every 60s and is responsible for getting the
+      //    * current list of databases. This is assigned to context but nothing
+      //    * else is done: it's just so that we have the list available if we want
+      //    * to switch databases.
+      //    */
+      //   type: "compound",
+      //   initial: "waitingForDatabaseToBeOpen",
+      //   states: {
+      //     waitingForDatabaseToBeOpen: {
+      //       on: {
+      //         REPORT_DATABASE_OPENED: "gettingDatabases",
+      //       },
+      //     },
+      //     gettingDatabases: {
+      //       invoke: {
+      //         src: "ubGetDatabases",
+      //       },
+      //       on: {
+      //         GOT_DATABASES: {
+      //           actions: [assignDatabases],
+      //           target: "idle",
+      //         },
+      //       },
+      //     },
+      //     idle: {
+      //       after: {
+      //         60000: {
+      //           target: "gettingDatabases",
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      //#endregion
+      //#region databaseState
       databaseState: {
         /**
          * We moved the opening of the database to the root, but this state
@@ -357,7 +354,6 @@ export const databaseMachine = databaseModel.createMachine(
                   send({
                     type: "GET_DATABASES",
                   }),
-
                   /**
                    * Send auth.machine an update event. This causes its local
                    * context to be updated, and it to update Userbase with the
@@ -426,89 +422,94 @@ export const databaseMachine = databaseModel.createMachine(
           },
         },
       },
-      itemInserter: {
-        /**
-         * We're going to put a guard on here and it's the thing that will
-         * check our current local context to see if the new item is allowed.
-         *
-         * If it is, we'll transition to the state where `ubInsertItem` is
-         * invoked. If it isn't, we should throw a warning or something.
-         *
-         * Remember that INSERT_ITEM calls directly to insertingItem here.
-         *
-         * Alternatively we could do this checking down in `ubInsertItem` but
-         * it's going to make more sense later to see it visualised here.
-         */
-        type: "compound",
-        initial: "idle",
-        states: {
-          idle: {},
-          requestItemInsertion: {
-            always: [
-              {
-                cond: (context, event) => {
-                  if (event.type === "INSERT_ITEM") {
-                    const { success } = jdSystemInsertCheck(
-                      context.jdSystem,
-                      context.currentProject,
-                      event.item
-                    );
-                    return success;
-                    // TODO: Handle the error.
-                  }
-                  return false;
-                },
-                target: "insertingItem",
-              },
-              {
-                target: "idle",
-                // actions: [() => alert("requestItemInsertion error!")],
-              },
-            ],
-          },
-          insertingItem: {
-            entry: [
-              /**
-               * Add the new item to the local context. This ensures an instant
-               * response in the UI.
-               */
-              assignNewUserbaseItem,
-            ],
-            invoke: {
-              /**
-               * Invoke a service to push the new item to Userbase. The
-               * changeHandler will then fire, overwriting our local context
-               * with the same item, so nothing should change.
-               */
-              src: "ubInsertItem",
-            },
-            on: {
-              ITEM_INSERTED: {
-                target: "idle",
-              },
-            },
-          },
-        },
-      },
-      itemReceiver: {
-        /**
-         * The changeHandler() that we set up when we open a database fires
-         * the event which we listen for here. It fires when the database is
-         * initially opened, and whenever any remote changes are detected.
-         * When that happens we assign the array of userbaseItems to context.
-         */
-        type: "compound",
-        initial: "listening",
-        states: {
-          listening: {
-            on: {
-              USERBASE_ITEMS_UPDATED: {
-                actions: [assignUserbaseItems, assignJdSystem],
-              },
-            },
-          },
-        },
-      },
+      //#endregion
+      //#region itemInserter
+      // itemInserter: {
+      //   /**
+      //    * We're going to put a guard on here and it's the thing that will
+      //    * check our current local context to see if the new item is allowed.
+      //    *
+      //    * If it is, we'll transition to the state where `ubInsertItem` is
+      //    * invoked. If it isn't, we should throw a warning or something.
+      //    *
+      //    * Remember that INSERT_ITEM calls directly to insertingItem here.
+      //    *
+      //    * Alternatively we could do this checking down in `ubInsertItem` but
+      //    * it's going to make more sense later to see it visualised here.
+      //    */
+      //   type: "compound",
+      //   initial: "idle",
+      //   states: {
+      //     idle: {},
+      //     requestItemInsertion: {
+      //       always: [
+      //         {
+      //           cond: (context, event) => {
+      //             if (event.type === "INSERT_ITEM") {
+      //               const { success } = jdSystemInsertCheck(
+      //                 context.jdSystem,
+      //                 context.currentProject,
+      //                 event.item
+      //               );
+      //               return success;
+      //               // TODO: Handle the error.
+      //             }
+      //             return false;
+      //           },
+      //           target: "insertingItem",
+      //         },
+      //         {
+      //           target: "idle",
+      //           // actions: [() => alert("requestItemInsertion error!")],
+      //         },
+      //       ],
+      //     },
+      //     insertingItem: {
+      //       entry: [
+      //         /**
+      //          * Add the new item to the local context. This ensures an instant
+      //          * response in the UI.
+      //          */
+      //         assignNewUserbaseItem,
+      //       ],
+      //       invoke: {
+      //         /**
+      //          * Invoke a service to push the new item to Userbase. The
+      //          * changeHandler will then fire, overwriting our local context
+      //          * with the same item, so nothing should change.
+      //          */
+      //         src: "ubInsertItem",
+      //       },
+      //       on: {
+      //         ITEM_INSERTED: {
+      //           target: "idle",
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      //#endregion
+      //#region itemReceiver
+      // itemReceiver: {
+      //   /**
+      //    * The changeHandler() that we set up when we open a database fires
+      //    * the event which we listen for here. It fires when the database is
+      //    * initially opened, and whenever any remote changes are detected.
+      //    * When that happens we assign the array of userbaseItems to context.
+      //    */
+      //   type: "compound",
+      //   initial: "listening",
+      //   states: {
+      //     listening: {
+      //       on: {
+      //         USERBASE_ITEMS_UPDATED: {
+      //           actions: [assignUserbaseItems, assignJdSystem],
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      //#endregion
     },
   },
   {
