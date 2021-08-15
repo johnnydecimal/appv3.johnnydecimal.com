@@ -1,5 +1,11 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { ContextFrom, EventFrom, send as xstateSend, sendParent } from "xstate";
+import {
+  assign,
+  ContextFrom,
+  EventFrom,
+  send as xstateSend,
+  sendParent,
+} from "xstate";
 import { createModel } from "xstate/lib/model";
 import userbase, { Database } from "userbase-js";
 import { nanoid } from "nanoid";
@@ -122,6 +128,11 @@ const databaseModel = createModel(
       OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
       OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
       OPEN_ID: (id: JdIdNumbers) => ({ id }),
+
+      /**
+       * Testing #TODO delete
+       */
+      ALERT: () => ({}),
     },
   }
 );
@@ -285,6 +296,9 @@ export const databaseMachine = databaseModel.createMachine(
       OPEN_ID: {
         actions: [assignCurrentId],
       },
+      ALERT: {
+        actions: [() => console.debug("🛎 ALERT fired")],
+      },
     },
     states: {
       databaseGetter: {
@@ -364,6 +378,11 @@ export const databaseMachine = databaseModel.createMachine(
             always: [
               {
                 cond: (context) => context.userbaseItems.length === 0,
+                actions: () =>
+                  console.debug(
+                    "%c> `always` from `databaseOpen` to `creatingProjectItem`",
+                    "color: orange"
+                  ),
                 target: "creatingProjectItem",
               },
             ],
@@ -379,7 +398,25 @@ export const databaseMachine = databaseModel.createMachine(
             },
             on: {
               PROJECT_CREATED: {
-                actions: [() => alert("yeah")],
+                target: "waitingForUserbaseItemsToBeUpdated",
+              },
+            },
+          },
+          waitingForUserbaseItemsToBeUpdated: {
+            /**
+             * We can't transition straight back to `databaseOpen` because
+             * context.userbaseItems.length is still 0. So we just wait until
+             * the insertion we just made is pushed back to us by the cH().
+             */
+            entry: [
+              () =>
+                console.debug(
+                  "%c> entry: waitingForUserbaseItemsToBeUpdated",
+                  "color: orange"
+                ),
+            ],
+            on: {
+              USERBASE_ITEMS_UPDATED: {
                 target: "databaseOpen",
               },
             },
@@ -585,7 +622,7 @@ export const databaseMachine = databaseModel.createMachine(
               },
             })
             .then(() => {
-              console.log("sendingBack PROJECT_CREATED");
+              console.debug("%c> sendingBack PROJECT_CREATED", "color: orange");
               sendBack({ type: "PROJECT_CREATED" });
             })
             .catch((error) => {

@@ -57,8 +57,6 @@ export const DatabaseMachine = () => {
   const { jdSystem, currentProject, currentArea, currentCategory, currentId } =
     state.context;
 
-  console.log("dbMachine.context:", state.context);
-
   //#region helper functions
   /**
    * Declare the functions which are the things we're going to pass down to our
@@ -80,7 +78,6 @@ export const DatabaseMachine = () => {
   };
 
   const openArea = (area: JdAreaNumbers) => {
-    console.log("openArea() fired");
     send({
       type: "OPEN_AREA",
       area,
@@ -234,7 +231,7 @@ export const DatabaseMachine = () => {
           </Area>
         </Project>
       ) : (
-        <div>A flash as we generate the system</div>
+        <div>jdSystem.currentProject does not yet exist.</div>
       )}
       {/*
       <div>appMachine.state: {JSON.stringify(state.value)}</div>

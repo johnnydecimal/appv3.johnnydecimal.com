@@ -28,9 +28,6 @@ export const userbaseItemsGenerator = (
   jdCategories?: JdCategoryNumbers[],
   jdIds?: JdIdNumbers[]
 ) => {
-  // console.log("Starting to create the über-JDSystem.");
-  // const startTime = window.performance.now();
-
   // Set up the return array
   const userbaseItems: UserbaseItem[] = [];
 
@@ -106,13 +103,6 @@ export const userbaseItemsGenerator = (
 
   // Shuffle it
   const shuffledUserbaseItems: UserbaseItem[] = shuffleArray(userbaseItems);
-
-  // const endTime = window.performance.now();
-  // console.log(
-  //   `Creating all possibilities and shuffling them took ${
-  //     endTime - startTime
-  //   }ms.`
-  // );
 
   return shuffledUserbaseItems;
 };
