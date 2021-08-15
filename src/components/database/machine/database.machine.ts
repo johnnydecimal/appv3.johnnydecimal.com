@@ -68,12 +68,12 @@ const databaseModel = createModel(
        * Sits on the root and transitions to `databaseGetter` whenever we
        * need it to. (We call it on demand.)
        */
-      GET_DATABASES: () => ({}),
+      // GET_DATABASES: () => ({}),
 
       /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
-      GOT_DATABASES: (databases: Database[]) => ({ databases }),
+      // GOT_DATABASES: (databases: Database[]) => ({ databases }),
 
       /**
        * Sent by the changeDatabase(newDatabase) helper function when we want
@@ -101,27 +101,27 @@ const databaseModel = createModel(
        * When we open a new database, if it needs to have the project item
        * set up we send this specific event. Makes the machine easier to reason.
        */
-      CREATE_PROJECT_ITEM: () => ({}),
-      PROJECT_CREATED: () => ({}),
+      // CREATE_PROJECT_ITEM: () => ({}),
+      // PROJECT_CREATED: () => ({}),
 
       /**
        * Sent by the helper function whenever we want to add a new item to the
        * current database. Note that we don't insert a UserbaseItem, there's a
        * bunch of stuff on there (itemId) that Userbase generates for us.
        */
-      INSERT_ITEM: (item: JdItem) => ({ item }),
+      // INSERT_ITEM: (item: JdItem) => ({ item }),
 
       /**
        * Sent by ubInsertItem when it was successful.
        */
-      ITEM_INSERTED: () => ({}),
+      // ITEM_INSERTED: () => ({}),
 
       /**
        * Sent by the helper functions when the user interacts with the app.
        */
-      OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
-      OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
-      OPEN_ID: (id: JdIdNumbers) => ({ id }),
+      // OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
+      // OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
+      // OPEN_ID: (id: JdIdNumbers) => ({ id }),
 
       /**
        * Testing #TODO delete
@@ -134,59 +134,62 @@ const databaseModel = createModel(
 export type DatabaseMachineContext = ContextFrom<typeof databaseModel>;
 export type DatabaseMachineEvent = EventFrom<typeof databaseModel>;
 
+/**
+ * A `send` function typed to this machine.
+ */
 const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 //#region  ===-===  Actions     ===-===-===-===-===-===-===-===-===-===-===-===
-const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
-  databases: (_, event) => event.databases,
-});
+// const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
+//   databases: (_, event) => event.databases,
+// });
 
 const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
   currentProject: (_context, event) => event.newDatabase,
 });
 
-const assignNewUserbaseItem = databaseModel.assign({
-  /**
-   * This is fired whenever we add a new item to the database. We add it to the
-   * local context immediately so that our UI is nice and responsive.
-   */
-  userbaseItems: (context, event) => {
-    /**
-     * This action is fired by a state which was reached indirectly, so we can't
-     * use the <"TYPE"> syntax to narrow the event. Do it the old way.
-     */
-    if (event.type !== "INSERT_ITEM") {
-      return context.userbaseItems;
-    }
-    /**
-     * Incoming event.item is of type JdItem. It doesn't contain the stuff that
-     * Userbase adds, so we fudge it here as it'll be immediately overwritten
-     * by the changeHandler.
-     */
-    const newItem: UserbaseItem = {
-      itemId: nanoid(),
-      item: {
-        ...event.item,
-      },
-      createdBy: {
-        username: context.currentUsername,
-        timestamp: new Date(),
-      },
-    };
-    const newUserbaseItems = [];
-    if (typeof context.userbaseItems === "undefined") {
-      /**
-       * This is weird given that context.userbaseItems has been initialised
-       * as an empty array, but whatever.
-       */
-      newUserbaseItems.push(newItem);
-    } else {
-      newUserbaseItems.push(...context.userbaseItems, newItem);
-    }
-    return newUserbaseItems;
-  },
-});
+// const assignNewUserbaseItem = databaseModel.assign({
+//   /**
+//    * This is fired whenever we add a new item to the database. We add it to the
+//    * local context immediately so that our UI is nice and responsive.
+//    */
+//   userbaseItems: (context, event) => {
+//     /**
+//      * This action is fired by a state which was reached indirectly, so we can't
+//      * use the <"TYPE"> syntax to narrow the event. Do it the old way.
+//      */
+//     if (event.type !== "INSERT_ITEM") {
+//       return context.userbaseItems;
+//     }
+//     /**
+//      * Incoming event.item is of type JdItem. It doesn't contain the stuff that
+//      * Userbase adds, so we fudge it here as it'll be immediately overwritten
+//      * by the changeHandler.
+//      */
+//     const newItem: UserbaseItem = {
+//       itemId: nanoid(),
+//       item: {
+//         ...event.item,
+//       },
+//       createdBy: {
+//         username: context.currentUsername,
+//         timestamp: new Date(),
+//       },
+//     };
+//     const newUserbaseItems = [];
+//     if (typeof context.userbaseItems === "undefined") {
+//       /**
+//        * This is weird given that context.userbaseItems has been initialised
+//        * as an empty array, but whatever.
+//        */
+//       newUserbaseItems.push(newItem);
+//     } else {
+//       newUserbaseItems.push(...context.userbaseItems, newItem);
+//     }
+//     return newUserbaseItems;
+//   },
+// });
 
 const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
   /**
@@ -217,33 +220,33 @@ const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
   userbaseItems: () => [],
 });
 
-const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
-  currentArea: (context, event) => event.area,
-});
+// const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
+//   currentArea: (context, event) => event.area,
+// });
 
-const assignCurrentCategory = databaseModel.assign<"OPEN_CATEGORY">({
-  currentCategory: (context, event) => event.category,
-});
+// const assignCurrentCategory = databaseModel.assign<"OPEN_CATEGORY">({
+//   currentCategory: (context, event) => event.category,
+// });
 
-const assignCurrentId = databaseModel.assign<"OPEN_ID">({
-  currentId: (context, event) => event.id,
-});
+// const assignCurrentId = databaseModel.assign<"OPEN_ID">({
+//   currentId: (context, event) => event.id,
+// });
 
-const clearCurrentArea = databaseModel.assign<"OPEN_DATABASE">({
-  currentArea: () => null,
-});
+// const clearCurrentArea = databaseModel.assign<"OPEN_DATABASE">({
+//   currentArea: () => null,
+// });
 
-const clearCurrentCategory = databaseModel.assign<
-  "OPEN_DATABASE" | "OPEN_AREA"
->({
-  currentCategory: () => null,
-});
+// const clearCurrentCategory = databaseModel.assign<
+//   "OPEN_DATABASE" | "OPEN_AREA"
+// >({
+//   currentCategory: () => null,
+// });
 
-const clearCurrentId = databaseModel.assign<
-  "OPEN_DATABASE" | "OPEN_AREA" | "OPEN_CATEGORY"
->({
-  currentId: () => null,
-});
+// const clearCurrentId = databaseModel.assign<
+//   "OPEN_DATABASE" | "OPEN_AREA" | "OPEN_CATEGORY"
+// >({
+//   currentId: () => null,
+// });
 //#endregion
 
 //#region  ===-===  Main        ===-===-===-===-===-===-===-===-===-===-===-===
@@ -268,19 +271,19 @@ export const databaseMachine = databaseModel.createMachine(
       src: "ubOpenDatabase",
     },
     on: {
-      GET_DATABASES: {
-        target: "#databaseMachine.databaseGetter",
-      },
-      OPEN_DATABASE: {
-        actions: [
-          assignNewDatabase,
-          clearUserbaseItems,
-          clearCurrentArea,
-          clearCurrentCategory,
-          clearCurrentId,
-        ],
-        target: "#databaseMachine",
-      },
+      // GET_DATABASES: {
+      //   target: "#databaseMachine.databaseGetter",
+      // },
+      // OPEN_DATABASE: {
+      //   actions: [
+      //     assignNewDatabase,
+      //     clearUserbaseItems,
+      //     clearCurrentArea,
+      //     clearCurrentCategory,
+      //     clearCurrentId,
+      //   ],
+      //   target: "#databaseMachine",
+      // },
       // OPEN_AREA: {
       //   actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
       // },
@@ -295,6 +298,20 @@ export const databaseMachine = databaseModel.createMachine(
       },
     },
     states: {
+      databaseOpener: {
+        /**
+         * Noting that the `invoke` which actually opens the database is
+         * currently on the root.
+         */
+        type: "compound",
+        initial: "init",
+        states: {
+          init: {
+            on: {},
+          },
+        },
+      },
+
       //#region databaseGetter
       // databaseGetter: {
       //   /**
@@ -332,97 +349,99 @@ export const databaseMachine = databaseModel.createMachine(
       //   },
       // },
       //#endregion
+
       //#region databaseState
-      databaseState: {
-        /**
-         * We moved the opening of the database to the root, but this state
-         * still does a bunch of admin for us.
-         */
-        type: "compound",
-        initial: "openingDatabase",
-        states: {
-          openingDatabase: {
-            on: {
-              REPORT_DATABASE_OPENED: {
-                actions: [
-                  /**
-                   * Creating a new database doesn't automatically push it to
-                   * the local list of available databases: we short-circuit the
-                   * 60s refresh and fetch them immediately (after which 60s
-                   * sevice will resume).
-                   */
-                  send({
-                    type: "GET_DATABASES",
-                  }),
-                  /**
-                   * Send auth.machine an update event. This causes its local
-                   * context to be updated, and it to update Userbase with the
-                   * new profile.
-                   */
-                  sendParent<any, any, AuthMachineEvent>((context) => ({
-                    type: "UPDATE_USER_PROFILE",
-                    profile: {
-                      currentProject: context.currentProject,
-                    },
-                  })),
-                ],
-                target: "databaseOpen",
-              },
-            },
-          },
-          databaseOpen: {
-            entry: [
-              (context) => console.debug("> databaseOpen, context:", context),
-            ],
-            always: [
-              {
-                cond: (context) => context.userbaseItems.length === 0,
-                actions: () =>
-                  console.debug(
-                    "%c> `always` from `databaseOpen` to `creatingProjectItem`",
-                    "color: orange"
-                  ),
-                target: "creatingProjectItem",
-              },
-            ],
-            // on: {
-            //   INSERT_ITEM: {
-            //     target: "#databaseMachine.itemInserter.requestItemInsertion",
-            //   },
-            // },
-          },
-          creatingProjectItem: {
-            invoke: {
-              src: "ubCreateProjectItem",
-            },
-            on: {
-              PROJECT_CREATED: {
-                target: "waitingForUserbaseItemsToBeUpdated",
-              },
-            },
-          },
-          waitingForUserbaseItemsToBeUpdated: {
-            //   /**
-            //    * We can't transition straight back to `databaseOpen` because
-            //    * context.userbaseItems.length is still 0. So we just wait until
-            //    * the insertion we just made is pushed back to us by the cH().
-            //    */
-            //   entry: [
-            //     () =>
-            //       console.debug(
-            //         "%c> entry: waitingForUserbaseItemsToBeUpdated",
-            //         "color: orange"
-            //       ),
-            //   ],
-            //   on: {
-            //     USERBASE_ITEMS_UPDATED: {
-            //       target: "databaseOpen",
-            //     },
-            //   },
-          },
-        },
-      },
+      // databaseState: {
+      /**
+       * We moved the opening of the database to the root, but this state
+       * still does a bunch of admin for us.
+       */
+      // type: "compound",
+      // initial: "openingDatabase",
+      // states: {
+      //   openingDatabase: {
+      //     on: {
+      //       REPORT_DATABASE_OPENED: {
+      //         actions: [
+      /**
+       * Creating a new database doesn't automatically push it to
+       * the local list of available databases: we short-circuit the
+       * 60s refresh and fetch them immediately (after which 60s
+       * sevice will resume).
+       */
+      // send({
+      //   type: "GET_DATABASES",
+      // }),
+      /**
+       * Send auth.machine an update event. This causes its local
+       * context to be updated, and it to update Userbase with the
+       * new profile.
+       */
+      //         sendParent<any, any, AuthMachineEvent>((context) => ({
+      //           type: "UPDATE_USER_PROFILE",
+      //           profile: {
+      //             currentProject: context.currentProject,
+      //           },
+      //         })),
+      //       ],
+      //       target: "databaseOpen",
+      //     },
+      //   },
+      // },
+      // databaseOpen: {
+      //   entry: [
+      //     (context) => console.debug("> databaseOpen, context:", context),
+      //   ],
+      //   always: [
+      //     {
+      //       cond: (context) => context.userbaseItems.length === 0,
+      //       actions: () =>
+      //         console.debug(
+      //           "%c> `always` from `databaseOpen` to `creatingProjectItem`",
+      //           "color: orange"
+      //         ),
+      //       target: "creatingProjectItem",
+      //     },
+      //   ],
+      // on: {
+      //   INSERT_ITEM: {
+      //     target: "#databaseMachine.itemInserter.requestItemInsertion",
+      //   },
+      // },
+      // },
+      // creatingProjectItem: {
+      //   invoke: {
+      //     src: "ubCreateProjectItem",
+      //   },
+      //   on: {
+      //     PROJECT_CREATED: {
+      //       target: "waitingForUserbaseItemsToBeUpdated",
+      //     },
+      //   },
+      // },
+      // waitingForUserbaseItemsToBeUpdated: {
+      //   /**
+      //    * We can't transition straight back to `databaseOpen` because
+      //    * context.userbaseItems.length is still 0. So we just wait until
+      //    * the insertion we just made is pushed back to us by the cH().
+      //    */
+      //   entry: [
+      //     () =>
+      //       console.debug(
+      //         "%c> entry: waitingForUserbaseItemsToBeUpdated",
+      //         "color: orange"
+      //       ),
+      //   ],
+      //   on: {
+      //     USERBASE_ITEMS_UPDATED: {
+      //       target: "databaseOpen",
+      //     },
+      //   },
+      // },
+      //   },
+      // },
       //#endregion
+
       //#region itemInserter
       // itemInserter: {
       //   /**
@@ -489,6 +508,7 @@ export const databaseMachine = databaseModel.createMachine(
       //   },
       // },
       //#endregion
+
       //#region itemReceiver
       // itemReceiver: {
       //   /**
@@ -514,23 +534,23 @@ export const databaseMachine = databaseModel.createMachine(
   },
   {
     services: {
-      ubGetDatabases:
-        () => (sendBack: (event: DatabaseMachineEvent) => void) => {
-          /**
-           * Get the array of databases. Is always returned, can be empty.
-           */
-          userbase
-            .getDatabases()
-            .then(({ databases }) => {
-              sendBack({ type: "GOT_DATABASES", databases });
-            })
-            .catch((error: UserbaseError) =>
-              sendParent<any, any, AuthMachineEvent>({
-                type: "ERROR",
-                error,
-              })
-            );
-        },
+      // ubGetDatabases:
+      //   () => (sendBack: (event: DatabaseMachineEvent) => void) => {
+      //     /**
+      //      * Get the array of databases. Is always returned, can be empty.
+      //      */
+      //     userbase
+      //       .getDatabases()
+      //       .then(({ databases }) => {
+      //         sendBack({ type: "GOT_DATABASES", databases });
+      //       })
+      //       .catch((error: UserbaseError) =>
+      //         sendParent<any, any, AuthMachineEvent>({
+      //           type: "ERROR",
+      //           error,
+      //         })
+      //       );
+      //   },
       ubOpenDatabase:
         (context: DatabaseMachineContext) =>
         (sendBack: (event: DatabaseMachineEvent) => void) => {
@@ -563,86 +583,86 @@ export const databaseMachine = databaseModel.createMachine(
               });
             });
         },
-      ubInsertItem:
-        (context, event) =>
-        (sendBack: (event: DatabaseMachineEvent) => void) => {
-          if (event.type !== "INSERT_ITEM") {
-            /**
-             * Twist TypeScript's arm.
-             */
-            sendParent<any, any, AuthMachineEvent>({
-              type: "ERROR",
-              error: {
-                name: "UserbaseInsertItemCallError",
-                message: `userbaseInsertItem() was invoked from a state that
-                  wasn't reached by sending INSERT_ITEM. As a result,
-                  'event.item' won't exist, so this function will now return.`,
-                status: 905, // Customise me later
-              },
-            });
-            return;
-          }
+      // ubInsertItem:
+      //   (context, event) =>
+      //   (sendBack: (event: DatabaseMachineEvent) => void) => {
+      //     if (event.type !== "INSERT_ITEM") {
+      //       /**
+      //        * Twist TypeScript's arm.
+      //        */
+      //       sendParent<any, any, AuthMachineEvent>({
+      //         type: "ERROR",
+      //         error: {
+      //           name: "UserbaseInsertItemCallError",
+      //           message: `userbaseInsertItem() was invoked from a state that
+      //             wasn't reached by sending INSERT_ITEM. As a result,
+      //             'event.item' won't exist, so this function will now return.`,
+      //           status: 905, // Customise me later
+      //         },
+      //       });
+      //       return;
+      //     }
 
-          userbase
-            .insertItem({
-              databaseName: context.currentProject,
-              item: event.item,
-            })
-            .then(() => {
-              sendBack({ type: "ITEM_INSERTED" });
-            })
-            .catch((error) => {
-              sendParent<any, any, AuthMachineEvent>({
-                type: "ERROR",
-                error,
-              });
-            });
-        },
-      ubCreateProjectItem:
-        (context) => (sendBack: (event: DatabaseMachineEvent) => void) => {
-          /**
-           * This should only be invoked after checking that there's nothing
-           * in the current database, but let's be sure.
-           */
-          if (context.userbaseItems.length !== 0) {
-            sendParent<any, any, AuthMachineEvent>({
-              type: "ERROR",
-              error: {
-                name: "DuplicateProjectInsertion",
-                message:
-                  "You invoked ubCreateProjectItem on a UserbaseItems which already contains an item.",
-                status: 903.21, // TODO Ooh they can be JD IDs, nice
-              },
-            });
-          }
+      //     userbase
+      //       .insertItem({
+      //         databaseName: context.currentProject,
+      //         item: event.item,
+      //       })
+      //       .then(() => {
+      //         sendBack({ type: "ITEM_INSERTED" });
+      //       })
+      //       .catch((error) => {
+      //         sendParent<any, any, AuthMachineEvent>({
+      //           type: "ERROR",
+      //           error,
+      //         });
+      //       });
+      //   },
+      //   ubCreateProjectItem:
+      //     (context) => (sendBack: (event: DatabaseMachineEvent) => void) => {
+      //       /**
+      //        * This should only be invoked after checking that there's nothing
+      //        * in the current database, but let's be sure.
+      //        */
+      //       if (context.userbaseItems.length !== 0) {
+      //         sendParent<any, any, AuthMachineEvent>({
+      //           type: "ERROR",
+      //           error: {
+      //             name: "DuplicateProjectInsertion",
+      //             message:
+      //               "You invoked ubCreateProjectItem on a UserbaseItems which already contains an item.",
+      //             status: 903.21, // TODO Ooh they can be JD IDs, nice
+      //           },
+      //         });
+      //       }
 
-          console.debug(
-            "%c> ubCreateProjectItem just about to userbase.insertItem()",
-            "color: orange"
-          );
-          userbase
-            .insertItem({
-              databaseName: context.currentProject,
-              item: {
-                jdType: "project",
-                jdNumber: context.currentProject,
-                jdTitle: `Project ${context.currentProject}`,
-              },
-            })
-            .then(() => {
-              console.debug(
-                "%c> ubCreateProjectItem about to sendBack(PROJECT_CREATED)",
-                "color: orange"
-              );
-              sendBack({ type: "PROJECT_CREATED" });
-            })
-            .catch((error) => {
-              sendParent<any, any, AuthMachineEvent>({
-                type: "ERROR",
-                error,
-              });
-            });
-        },
+      //       console.debug(
+      //         "%c> ubCreateProjectItem just about to userbase.insertItem()",
+      //         "color: orange"
+      //       );
+      //       userbase
+      //         .insertItem({
+      //           databaseName: context.currentProject,
+      //           item: {
+      //             jdType: "project",
+      //             jdNumber: context.currentProject,
+      //             jdTitle: `Project ${context.currentProject}`,
+      //           },
+      //         })
+      //         .then(() => {
+      //           console.debug(
+      //             "%c> ubCreateProjectItem about to sendBack(PROJECT_CREATED)",
+      //             "color: orange"
+      //           );
+      //           sendBack({ type: "PROJECT_CREATED" });
+      //         })
+      //         .catch((error) => {
+      //           sendParent<any, any, AuthMachineEvent>({
+      //             type: "ERROR",
+      //             error,
+      //           });
+      //         });
+      //     },
     },
   }
 );

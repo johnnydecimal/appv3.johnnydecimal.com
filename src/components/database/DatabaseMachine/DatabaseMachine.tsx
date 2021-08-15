@@ -72,32 +72,32 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const insertItem = (item: JdItem) => {
-    send({
-      type: "INSERT_ITEM",
-      item,
-    });
-  };
+  // const insertItem = (item: JdItem) => {
+  //   send({
+  //     type: "INSERT_ITEM",
+  //     item,
+  //   });
+  // };
 
-  const openArea = (area: JdAreaNumbers) => {
-    send({
-      type: "OPEN_AREA",
-      area,
-    });
-  };
+  // const openArea = (area: JdAreaNumbers) => {
+  //   send({
+  //     type: "OPEN_AREA",
+  //     area,
+  //   });
+  // };
 
-  const openCategory = (category: JdCategoryNumbers) => {
-    send({
-      type: "OPEN_CATEGORY",
-      category,
-    });
-  };
-  const openId = (id: JdIdNumbers) => {
-    send({
-      type: "OPEN_ID",
-      id,
-    });
-  };
+  // const openCategory = (category: JdCategoryNumbers) => {
+  //   send({
+  //     type: "OPEN_CATEGORY",
+  //     category,
+  //   });
+  // };
+  // const openId = (id: JdIdNumbers) => {
+  //   send({
+  //     type: "OPEN_ID",
+  //     id,
+  //   });
+  // };
   //#endregion
 
   /**
@@ -106,10 +106,10 @@ export const DatabaseMachine = () => {
   // if ("Cypress" in window) {
   window.DatabaseMachine = {
     changeDatabase,
-    insertItem,
-    openArea,
-    openCategory,
-    openId,
+    // insertItem,
+    // openArea,
+    // openCategory,
+    // openId,
     userbase,
   };
   // }
@@ -121,10 +121,10 @@ export const DatabaseMachine = () => {
    */
   const DatabaseReactContextValue = {
     changeDatabase,
-    insertItem,
-    openArea,
-    openCategory,
-    openId,
+    // insertItem,
+    // openArea,
+    // openCategory,
+    // openId,
   };
 
   //#region temporary shit while we build it
@@ -135,16 +135,16 @@ export const DatabaseMachine = () => {
     changeDatabase(formRef!.current!.value as JdProjectNumbers);
   };
   const formRef = React.createRef<HTMLInputElement>();
-  const handleSubmitNewItem = (e: any) => {
-    e.preventDefault();
-    insertItem({
-      // @ts-ignore
-      jdType: jdTypeRef!.current!.value,
-      // @ts-ignore
-      jdNumber: jdNumberRef!.current!.value,
-      jdTitle: jdTitleRef!.current!.value,
-    });
-  };
+  // const handleSubmitNewItem = (e: any) => {
+  //   e.preventDefault();
+  //   insertItem({
+  //     // @ts-ignore
+  //     jdType: jdTypeRef!.current!.value,
+  //     // @ts-ignore
+  //     jdNumber: jdNumberRef!.current!.value,
+  //     jdTitle: jdTitleRef!.current!.value,
+  //   });
+  // };
   const jdTypeRef = React.createRef<HTMLInputElement>();
   const jdNumberRef = React.createRef<HTMLInputElement>();
   const jdTitleRef = React.createRef<HTMLInputElement>();
@@ -167,7 +167,7 @@ export const DatabaseMachine = () => {
       </form>
       <hr className="my-2" />
       <h2>Create item</h2>
-      <form onSubmit={handleSubmitNewItem}>
+      {/* <form onSubmit={handleSubmitNewItem}>
         <label>
           New item:
           <input
@@ -190,7 +190,7 @@ export const DatabaseMachine = () => {
           />
           <input type="submit" value="submit" />
         </label>
-      </form>
+      </form> */}
       <hr className="my-12" />
       {/**
        * What's passed as a prop vs. being pulled out of Context?
