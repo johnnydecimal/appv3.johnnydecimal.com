@@ -2,6 +2,7 @@
 import React from "react";
 import { useContext } from "react";
 import { useActor } from "@xstate/react";
+import userbase from "userbase-js";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { AuthMachineReactContext } from "components/authentication";
@@ -29,8 +30,9 @@ import { ID } from "../ID/ID";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 declare global {
   interface Window {
+    // Cypress testing
     DatabaseMachine: any;
-  } // Cypress testing
+  }
 }
 
 // === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -101,15 +103,16 @@ export const DatabaseMachine = () => {
   /**
    * If we're testing, expose all of this on `window`.
    */
-  if ("Cypress" in window) {
-    window.DatabaseMachine = {
-      changeDatabase,
-      insertItem,
-      openArea,
-      openCategory,
-      openId,
-    };
-  }
+  // if ("Cypress" in window) {
+  window.DatabaseMachine = {
+    changeDatabase,
+    insertItem,
+    openArea,
+    openCategory,
+    openId,
+    userbase,
+  };
+  // }
 
   /**
    * `DatabaseReactContextValue` contains all of the helper/sender functions,

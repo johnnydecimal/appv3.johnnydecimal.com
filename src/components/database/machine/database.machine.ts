@@ -375,6 +375,9 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           databaseOpen: {
+            entry: [
+              (context) => console.debug("> databaseOpen, context:", context),
+            ],
             always: [
               {
                 cond: (context) => context.userbaseItems.length === 0,
@@ -386,11 +389,11 @@ export const databaseMachine = databaseModel.createMachine(
                 target: "creatingProjectItem",
               },
             ],
-            on: {
-              INSERT_ITEM: {
-                target: "#databaseMachine.itemInserter.requestItemInsertion",
-              },
-            },
+            // on: {
+            //   INSERT_ITEM: {
+            //     target: "#databaseMachine.itemInserter.requestItemInsertion",
+            //   },
+            // },
           },
           creatingProjectItem: {
             invoke: {
@@ -403,23 +406,23 @@ export const databaseMachine = databaseModel.createMachine(
             },
           },
           waitingForUserbaseItemsToBeUpdated: {
-            /**
-             * We can't transition straight back to `databaseOpen` because
-             * context.userbaseItems.length is still 0. So we just wait until
-             * the insertion we just made is pushed back to us by the cH().
-             */
-            entry: [
-              () =>
-                console.debug(
-                  "%c> entry: waitingForUserbaseItemsToBeUpdated",
-                  "color: orange"
-                ),
-            ],
-            on: {
-              USERBASE_ITEMS_UPDATED: {
-                target: "databaseOpen",
-              },
-            },
+            //   /**
+            //    * We can't transition straight back to `databaseOpen` because
+            //    * context.userbaseItems.length is still 0. So we just wait until
+            //    * the insertion we just made is pushed back to us by the cH().
+            //    */
+            //   entry: [
+            //     () =>
+            //       console.debug(
+            //         "%c> entry: waitingForUserbaseItemsToBeUpdated",
+            //         "color: orange"
+            //       ),
+            //   ],
+            //   on: {
+            //     USERBASE_ITEMS_UPDATED: {
+            //       target: "databaseOpen",
+            //     },
+            //   },
           },
         },
       },
@@ -612,6 +615,10 @@ export const databaseMachine = databaseModel.createMachine(
             });
           }
 
+          console.debug(
+            "%c> ubCreateProjectItem just about to userbase.insertItem()",
+            "color: orange"
+          );
           userbase
             .insertItem({
               databaseName: context.currentProject,
@@ -622,7 +629,10 @@ export const databaseMachine = databaseModel.createMachine(
               },
             })
             .then(() => {
-              console.debug("%c> sendingBack PROJECT_CREATED", "color: orange");
+              console.debug(
+                "%c> ubCreateProjectItem about to sendBack(PROJECT_CREATED)",
+                "color: orange"
+              );
               sendBack({ type: "PROJECT_CREATED" });
             })
             .catch((error) => {
