@@ -471,102 +471,16 @@ export const authMachine = authModel.createMachine(
             },
           },
           {
+            /**
+             * Update the user's profile so we push the new `currentProject`.
+             * Note that we don't care what this returns as long as it's not
+             * an error.
+             */
             id: "profileUpdater",
             src: "userbaseUpdateUserProfile",
           },
         ],
       },
-      //#region unused
-      // databaseOpener: {
-      //   /**
-      //    * This state is responsible for the invokation of our database.mc.
-      //    *
-      //    * We previously handled any database changes down in that machine,
-      //    * but given that a change to the currently open database is pretty
-      //    * disastrous for any in-flight CRUDs, and that it shouldn't really
-      //    * be possible anyway -- it's only this session that controls the
-      //    * open database, there's no way for it to be changed remotely --
-      //    * then we're going to move the handling of that up here.
-      //    *
-      //    * As such we now have a short loop of states so that we can exit
-      //    * the state where we open the database, thus closing the database
-      //    * and killing the previously-invoked `database.machine`.
-      //    */
-      //   type: "compound",
-      //   initial: "idle",
-      //   states: {
-      //     idle: {
-      //       invoke: {
-      //         id: "databaseMachine",
-      //         src: databaseMachine,
-      //         data: {
-      //           /**
-      //            * We tell TS that this property must exist because we create
-      //            * it when a new user is created, and only ever update (vs.
-      //            * delete) it.
-      //            */
-      //           currentProject: (context: AuthMachineContext) =>
-      //             context.user!.profile!.currentProject,
-      //           currentUsername: (context: AuthMachineContext) =>
-      //             context.user!.username,
-      //           databases: () => [],
-      //           userbaseItems: () => [],
-      //           jdSystem: () => {
-      //             return {};
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
-      // profileUpdater: {
-      //   type: "compound",
-      //   initial: "idle",
-      //   states: {
-      //     idle: {
-      //       on: {
-      //         UPDATE_USER_PROFILE: {
-      //           target: "updatingUserProfile",
-      //         },
-      //       },
-      //     },
-      //     updatingUserProfile: {
-      //       entry: [
-      //         /**
-      //          * Take event.profile, deepmerge it with context.user.profile,
-      //          * and update context.user.profile.
-      //          */
-      //         assign({
-      //           user: (context, event) => {
-      //             if (event.type !== "UPDATE_USER_PROFILE") {
-      //               return context.user;
-      //             }
-      //             const newUserProfile = merge(
-      //               context.user!.profile!,
-      //               event.profile
-      //             );
-      //             const newUser = {
-      //               ...(context.user as UserResult),
-      //               profile: {
-      //                 ...newUserProfile,
-      //               } as UserProfile,
-      //             };
-      //             return newUser;
-      //           },
-      //         }),
-      //       ],
-      //       invoke: {
-      //         src: "userbaseUpdateUserProfile",
-      //       },
-      //       on: {
-      //         USER_PROFILE_UPDATED: {
-      //           target: "idle",
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
-      //#endregion
       deletingUser: {
         invoke: {
           src: "userbaseDeleteUser",
