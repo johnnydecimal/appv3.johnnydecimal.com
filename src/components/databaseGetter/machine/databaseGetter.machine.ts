@@ -1,10 +1,16 @@
+// === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import userbase, { Database } from "userbase-js";
 import { EventFrom, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
+
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { AuthMachineEvent, UserbaseError } from "@types";
 
+// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const databaseGetterModel = createModel(
-  {},
+  {
+    // No context on this machine.
+  },
   {
     events: {
       /**
@@ -29,9 +35,6 @@ export type DatabaseGetterMachineEvent = EventFrom<typeof databaseGetterModel>;
  * `signedIn` state. Remembering that an OPEN_DATABASE event on that state is
  * external, a new instance of this machine will be invoked every time the
  * current database changes.
- *
- * If that OPEN_DATABASE event created a new database, we're too early here to
- * detect it. So what can we do about that?
  */
 export const databaseGetterMachine = databaseGetterModel.createMachine(
   {
@@ -51,7 +54,7 @@ export const databaseGetterMachine = databaseGetterModel.createMachine(
           GOT_DATABASES: {
             target: "idle",
             actions: [
-              sendParent<any, any, AuthMachineEvent>((context, event) => ({
+              sendParent<any, any, AuthMachineEvent>((_, event) => ({
                 type: "GOT_DATABASES",
                 databases: event.databases,
               })),

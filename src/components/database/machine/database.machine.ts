@@ -45,13 +45,6 @@ const databaseModel = createModel(
     currentUsername: "",
 
     /**
-     * The array of the user's available database objects, returned by Userbase.
-     * The `databaseName` property on each object is the 3-digit JD project
-     * code, which is a string.
-     */
-    databases: [] as Database[],
-
-    /**
      * When we open any given database, `userbaseItems` is the array of Items
      * which makes up that database.
      */
@@ -64,19 +57,6 @@ const databaseModel = createModel(
   },
   {
     events: {
-      /**
-       * Sits on the root and transitions to `databaseGetter` whenever we
-       * need it to. (We call it on demand.)
-       */
-      // GET_DATABASES: () => ({}),
-
-      /**
-       * Sent by ubGetDatabases, which calls itself every 60s.
-       *
-       * MOVED TO databaseGetterMachine
-       */
-      // GOT_DATABASES: (databases: Database[]) => ({ databases }),
-
       /**
        * Sent by the changeDatabase(newDatabase) helper function when we want
        * to open a new or existing database -- `newDatabase` refers to the new
@@ -143,9 +123,6 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 //#region  ===-===  Actions     ===-===-===-===-===-===-===-===-===-===-===-===
-// const assignDatabases = databaseModel.assign<"GOT_DATABASES">({
-//   databases: (_, event) => event.databases,
-// });
 
 // const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
 //   currentProject: (_context, event) => event.newDatabase,
@@ -324,82 +301,7 @@ export const databaseMachine = databaseModel.createMachine(
         },
       },
 
-      //#region databaseGetter
-      // databaseGetter: {
-      //   //   /**
-      //   //    * This state loops itself every 60s and is responsible for getting the
-      //   //    * current list of databases. This is assigned to context but nothing
-      //   //    * else is done: it's just so that we have the list available if we want
-      //   //    * to switch databases.
-      //   //    */
-      //   type: "compound",
-      //   initial: "init",
-      //   states: {
-      //     init: {
-      //       on: {
-      //         REPORT_DATABASE_OPENED: "gettingDatabases",
-      //       },
-      //     },
-      //     gettingDatabases: {
-      //       invoke: {
-      //         src: "ubGetDatabases",
-      //       },
-      //       on: {
-      //         GOT_DATABASES: {
-      //           actions: [assignDatabases],
-      //           target: "idle",
-      //         },
-      //       },
-      //     },
-      //     idle: {
-      //       after: {
-      //         60000: {
-      //           target: "gettingDatabases",
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
-      //#endregion
-
       //#region databaseState
-      // databaseState: {
-      /**
-       * We moved the opening of the database to the root, but this state
-       * still does a bunch of admin for us.
-       */
-      // type: "compound",
-      // initial: "openingDatabase",
-      // states: {
-      //   openingDatabase: {
-      //     on: {
-      //       REPORT_DATABASE_OPENED: {
-      //         actions: [
-      /**
-       * Creating a new database doesn't automatically push it to
-       * the local list of available databases: we short-circuit the
-       * 60s refresh and fetch them immediately (after which 60s
-       * sevice will resume).
-       */
-      // send({
-      //   type: "GET_DATABASES",
-      // }),
-      /**
-       * Send auth.machine an update event. This causes its local
-       * context to be updated, and it to update Userbase with the
-       * new profile.
-       */
-      //         sendParent<any, any, AuthMachineEvent>((context) => ({
-      //           type: "UPDATE_USER_PROFILE",
-      //           profile: {
-      //             currentProject: context.currentProject,
-      //           },
-      //         })),
-      //       ],
-      //       target: "databaseOpen",
-      //     },
-      //   },
-      // },
       // databaseOpen: {
       //   entry: [
       //     (context) => console.debug("> databaseOpen, context:", context),
@@ -546,23 +448,6 @@ export const databaseMachine = databaseModel.createMachine(
   },
   {
     services: {
-      // ubGetDatabases:
-      //   () => (sendBack: (event: DatabaseMachineEvent) => void) => {
-      //     /**
-      //      * Get the array of databases. Is always returned, can be empty.
-      //      */
-      //     userbase
-      //       .getDatabases()
-      //       .then(({ databases }) => {
-      //         sendBack({ type: "GOT_DATABASES", databases });
-      //       })
-      //       .catch((error: UserbaseError) =>
-      //         sendParent<any, any, AuthMachineEvent>({
-      //           type: "ERROR",
-      //           error,
-      //         })
-      //       );
-      //   },
       ubOpenDatabase:
         (context: DatabaseMachineContext) =>
         (sendBack: (event: DatabaseMachineEvent) => void) => {
