@@ -9,8 +9,16 @@ import { authMachine } from "../machine/auth.machine";
 import { AuthMachineReactContext } from "./context";
 import { SignInForm } from "../SignInForm/SignInForm";
 import { SignUpForm } from "../SignUpForm/SignUpForm";
+
+// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import type { SignInFormData } from "../SignInForm/SignInForm";
 import type { SignUpFormData } from "../SignUpForm/SignUpForm";
+declare global {
+  interface Window {
+    // TODO: For testing, remove in prod
+    AuthMachine: any;
+  }
+}
 
 // === Temp ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const FourOhFour = () => <div>404</div>;
@@ -26,6 +34,8 @@ export const AuthMachine = () => {
   const [state, send] = useMachine(authMachine, {
     devTools: true,
   });
+
+  window.AuthMachine = { send };
 
   /**
    * Declare the functions which are the things we're going to pass down to our
