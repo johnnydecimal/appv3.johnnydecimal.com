@@ -317,6 +317,13 @@ export const databaseMachine = databaseModel.createMachine(
         states: {
           idle: {
             on: {
+              CALLBACK_REPORT_DATABASE_OPENED: {
+                target: "listening",
+              },
+            },
+          },
+          listening: {
+            on: {
               REQUEST_INSERT_ITEM: [
                 {
                   cond: (context, event) => {
