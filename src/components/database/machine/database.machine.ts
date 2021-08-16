@@ -84,7 +84,7 @@ const databaseModel = createModel(
        * set up we send this specific event. Makes the machine easier to reason.
        */
       // CREATE_PROJECT_ITEM: () => ({}),
-      // PROJECT_CREATED: () => ({}),
+      CALLBACK_PROJECT_CREATED: () => ({}),
 
       /**
        * Sent by the helper function whenever we want to add a new item to the
@@ -298,7 +298,32 @@ export const databaseMachine = databaseModel.createMachine(
               },
             },
           },
-          databaseOpen: {},
+          databaseOpen: {
+            always: [
+              {
+                cond: (context) => context.userbaseItems.length === 0,
+                target: "creatingProjectItem",
+              },
+            ],
+          },
+          creatingProjectItem: {
+            invoke: {
+              src: "ubCreateProjectItem",
+            },
+            always: [
+              /**
+               * So we've inserted the item, but we still need to wait for
+               * the cH() to fetch the items, and then for those items to be
+               * processed by the assign action, before we can go back to
+               * databaseOpen. Otherwise we end up in a loop because it'll
+               * check its context, length will be zero, etc.
+               */
+              {
+                cond: (context) => context.userbaseItems.length > 0,
+                target: "databaseOpen",
+              },
+            ],
+          },
         },
       },
 
@@ -482,6 +507,7 @@ export const databaseMachine = databaseModel.createMachine(
               });
             });
         },
+      //#region
       // ubInsertItem:
       //   (context, event) =>
       //   (sendBack: (event: DatabaseMachineEvent) => void) => {
@@ -517,51 +543,48 @@ export const databaseMachine = databaseModel.createMachine(
       //         });
       //       });
       //   },
-      //   ubCreateProjectItem:
-      //     (context) => (sendBack: (event: DatabaseMachineEvent) => void) => {
-      //       /**
-      //        * This should only be invoked after checking that there's nothing
-      //        * in the current database, but let's be sure.
-      //        */
-      //       if (context.userbaseItems.length !== 0) {
-      //         sendParent<any, any, AuthMachineEvent>({
-      //           type: "ERROR",
-      //           error: {
-      //             name: "DuplicateProjectInsertion",
-      //             message:
-      //               "You invoked ubCreateProjectItem on a UserbaseItems which already contains an item.",
-      //             status: 903.21, // TODO Ooh they can be JD IDs, nice
-      //           },
-      //         });
-      //       }
+      //#endregion
+      ubCreateProjectItem:
+        (context) => (sendBack: (event: DatabaseMachineEvent) => void) => {
+          /**
+           * This should only be invoked after checking that there's nothing
+           * in the current database, but let's be sure.
+           */
+          if (context.userbaseItems.length !== 0) {
+            sendParent<any, any, AuthMachineEvent>({
+              type: "ERROR",
+              error: {
+                name: "DuplicateProjectInsertion",
+                message:
+                  "You invoked ubCreateProjectItem on a UserbaseItems which already contains an item.",
+                status: 903.21, // TODO Ooh they can be JD IDs, nice
+              },
+            });
+          }
 
-      //       console.debug(
-      //         "%c> ubCreateProjectItem just about to userbase.insertItem()",
-      //         "color: orange"
-      //       );
-      //       userbase
-      //         .insertItem({
-      //           databaseName: context.currentProject,
-      //           item: {
-      //             jdType: "project",
-      //             jdNumber: context.currentProject,
-      //             jdTitle: `Project ${context.currentProject}`,
-      //           },
-      //         })
-      //         .then(() => {
-      //           console.debug(
-      //             "%c> ubCreateProjectItem about to sendBack(PROJECT_CREATED)",
-      //             "color: orange"
-      //           );
-      //           sendBack({ type: "PROJECT_CREATED" });
-      //         })
-      //         .catch((error) => {
-      //           sendParent<any, any, AuthMachineEvent>({
-      //             type: "ERROR",
-      //             error,
-      //           });
-      //         });
-      //     },
+          userbase
+            .insertItem({
+              databaseName: context.currentProject,
+              item: {
+                jdType: "project",
+                jdNumber: context.currentProject,
+                jdTitle: `Project ${context.currentProject}`,
+              },
+            })
+            .then(() => {
+              /**
+               * Doesn't actually do anything -- just for the inspector.
+               * #TODO figure out how to handle timeouts?
+               */
+              sendBack({ type: "CALLBACK_PROJECT_CREATED" });
+            })
+            .catch((error) => {
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
     },
   }
 );
