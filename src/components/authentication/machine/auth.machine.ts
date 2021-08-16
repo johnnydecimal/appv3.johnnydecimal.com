@@ -1,11 +1,18 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { assign, ContextFrom, EventFrom, send as xstateSend } from "xstate";
+import {
+  assign,
+  ContextFrom,
+  EventFrom,
+  send as xstateSend,
+  SendActionOptions,
+} from "xstate";
 import { createModel } from "xstate/lib/model";
-import userbase, { UserProfile, UserResult } from "userbase-js";
+import userbase, { Database, UserProfile, UserResult } from "userbase-js";
 import merge from "deepmerge";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "components/database";
+import { databaseGetterMachine } from "components/databaseGetter";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import type { SignInFormData } from "../SignInForm/SignInForm";
@@ -35,6 +42,16 @@ const authModel = createModel(
      * where there is no signed in user.
      */
     user: undefined as undefined | UserResult,
+
+    /**
+     * The array of the user's available database objects, returned by Userbase.
+     * The `databaseName` property on each object is the 3-digit JD project
+     * code, which is a string.
+     *
+     * This is populated by our databaseGetterMachine, who sends an event back
+     * here.
+     */
+    databases: [] as Database[],
   },
   {
     events: {
@@ -74,6 +91,12 @@ const authModel = createModel(
       // UPDATE_USER_PROFILE: (profile: UserProfile) => ({ profile }),
       USER_PROFILE_UPDATED: () => ({}),
 
+      // == Sent up from the invoked databaseMachine.
+      REPORT_DATABASE_OPENED: () => ({}),
+
+      // == Sent up from the invoked databaseGetter.
+      GOT_DATABASES: (databases: Database[]) => ({ databases }),
+
       // == Catch-all error for the whole app ==-==-==
       /**
        * This is the only ERROR state; children also send their errors here.
@@ -102,6 +125,11 @@ const addToLog = (
 export type AuthMachineContext = ContextFrom<typeof authModel>;
 export type AuthMachineEvent = EventFrom<typeof authModel>;
 
+/*
+ * Create a `send` action strongly typed to this machine. Note that this
+ * precludes its use as a sender to other machines -- just use `xstateSend`
+ * for that.
+ */
 const send = (event: AuthMachineEvent) =>
   xstateSend<any, any, AuthMachineEvent>(event);
 
@@ -130,6 +158,17 @@ const assignCurrentProject = authModel.assign<"OPEN_DATABASE">({
     // `profile` exists because we create it when we create the user.
     newUser.profile!.currentProject = event.currentProject;
     return newUser;
+  },
+});
+
+const assignDatabases = authModel.assign<"GOT_DATABASES">({
+  databases: (_, event) => {
+    console.debug(
+      "%c> assignDatabases: databases",
+      "color: orange",
+      event.databases
+    );
+    return event.databases;
   },
 });
 
@@ -445,6 +484,18 @@ export const authMachine = authModel.createMachine(
             // ...which is what is used to open the database.
             target: "#authMachine.signedIn",
           },
+          GOT_DATABASES: {
+            actions: [assignDatabases],
+          },
+          REPORT_DATABASE_OPENED: {
+            actions: [
+              /**
+               * Use the native `send` event as the locally scoped `send` is
+               * typed to this specific machine.
+               */
+              xstateSend({ type: "GET_DATABASES" }, { to: "databaseGetter" }),
+            ],
+          },
         },
         invoke: [
           {
@@ -478,6 +529,14 @@ export const authMachine = authModel.createMachine(
              */
             id: "profileUpdater",
             src: "userbaseUpdateUserProfile",
+          },
+          {
+            /**
+             * Invoke the databaseGetter, which loops every 60s and sends an
+             * event back here with `event.databases`.
+             */
+            id: "databaseGetter",
+            src: databaseGetterMachine,
           },
         ],
       },
