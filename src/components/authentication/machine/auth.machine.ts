@@ -1,14 +1,7 @@
 // === External ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  assign,
-  ContextFrom,
-  EventFrom,
-  send as xstateSend,
-  SendActionOptions,
-} from "xstate";
+import userbase, { Database, UserResult } from "userbase-js";
+import { ContextFrom, EventFrom, send as xstateSend } from "xstate";
 import { createModel } from "xstate/lib/model";
-import userbase, { Database, UserProfile, UserResult } from "userbase-js";
-import merge from "deepmerge";
 
 // === Internal ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { databaseMachine } from "components/database";
