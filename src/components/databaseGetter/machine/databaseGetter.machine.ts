@@ -16,7 +16,7 @@ const databaseGetterModel = createModel(
       /**
        * Sent by ubGetDatabases, which calls itself every 60s.
        */
-      GOT_DATABASES: (databases: Database[]) => ({ databases }),
+      CALLBACK_GOT_DATABASES: (databases: Database[]) => ({ databases }),
 
       /**
        * Sent by the parent when it detects the opening of a new database; this
@@ -51,11 +51,16 @@ export const databaseGetterMachine = databaseGetterModel.createMachine(
           src: "ubGetDatabases",
         },
         on: {
-          GOT_DATABASES: {
+          CALLBACK_GOT_DATABASES: {
             target: "idle",
             actions: [
+              () =>
+                console.debug(
+                  "%c> dbG.m/gettingDatabases/on/CALLBACK_GOT_DATABASES sendingParent SENDPARENT_GOT_DATABASES",
+                  "color: orange"
+                ),
               sendParent<any, any, AuthMachineEvent>((_, event) => ({
-                type: "GOT_DATABASES",
+                type: "SENDPARENT_GOT_DATABASES",
                 databases: event.databases,
               })),
             ],
@@ -81,7 +86,11 @@ export const databaseGetterMachine = databaseGetterModel.createMachine(
           userbase
             .getDatabases()
             .then(({ databases }) => {
-              sendBack({ type: "GOT_DATABASES", databases });
+              console.debug(
+                "%c> dbG.m: ubGetDatabases sendingBack CALLBACK_GOT_DATABASES",
+                "color: orange"
+              );
+              sendBack({ type: "CALLBACK_GOT_DATABASES", databases });
             })
             .catch((error: UserbaseError) =>
               sendParent<any, any, AuthMachineEvent>({

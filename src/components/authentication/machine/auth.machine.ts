@@ -92,10 +92,10 @@ const authModel = createModel(
       USER_PROFILE_UPDATED: () => ({}),
 
       // == Sent up from the invoked databaseMachine.
-      REPORT_DATABASE_OPENED: () => ({}),
+      SENDPARENT_REPORT_DATABASE_OPENED: () => ({}),
 
       // == Sent up from the invoked databaseGetter.
-      GOT_DATABASES: (databases: Database[]) => ({ databases }),
+      SENDPARENT_GOT_DATABASES: (databases: Database[]) => ({ databases }),
 
       // == Catch-all error for the whole app ==-==-==
       /**
@@ -161,7 +161,7 @@ const assignCurrentProject = authModel.assign<"OPEN_DATABASE">({
   },
 });
 
-const assignDatabases = authModel.assign<"GOT_DATABASES">({
+const assignDatabases = authModel.assign<"SENDPARENT_GOT_DATABASES">({
   databases: (_, event) => {
     console.debug(
       "%c> assignDatabases: databases",
@@ -484,10 +484,10 @@ export const authMachine = authModel.createMachine(
             // ...which is what is used to open the database.
             target: "#authMachine.signedIn",
           },
-          GOT_DATABASES: {
+          SENDPARENT_GOT_DATABASES: {
             actions: [assignDatabases],
           },
-          REPORT_DATABASE_OPENED: {
+          SENDPARENT_REPORT_DATABASE_OPENED: {
             actions: [
               /**
                * Use the native `send` event as the locally scoped `send` is

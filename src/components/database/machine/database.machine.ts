@@ -70,14 +70,14 @@ const databaseModel = createModel(
       /**
        * Sent by the changeHandler() when the remote database changes.
        */
-      USERBASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
+      CALLBACK_USERBASE_ITEMS_UPDATED: (userbaseItems: UserbaseItem[]) => ({
         userbaseItems,
       }),
 
       /**
        * Sent by ubOpenDatabase when it successfully opens a database.
        */
-      REPORT_DATABASE_OPENED: () => ({}),
+      CALLBACK_REPORT_DATABASE_OPENED: () => ({}),
 
       /**
        * When we open a new database, if it needs to have the project item
@@ -170,15 +170,16 @@ const send = (event: DatabaseMachineEvent) =>
 //   },
 // });
 
-const assignUserbaseItems = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
-  /**
-   * This is fired by the changeHandler() and contains the entire array of
-   * userbaseItems.
-   */
-  userbaseItems: (context, event) => event.userbaseItems,
-});
+const assignUserbaseItems =
+  databaseModel.assign<"CALLBACK_USERBASE_ITEMS_UPDATED">({
+    /**
+     * This is fired by the changeHandler() and contains the entire array of
+     * userbaseItems.
+     */
+    userbaseItems: (context, event) => event.userbaseItems,
+  });
 
-const assignJdSystem = databaseModel.assign<"USERBASE_ITEMS_UPDATED">({
+const assignJdSystem = databaseModel.assign<"CALLBACK_USERBASE_ITEMS_UPDATED">({
   jdSystem: (context, event) => {
     const result = userbaseItemsToJdSystem(event.userbaseItems);
     if (result.success) {
@@ -287,11 +288,11 @@ export const databaseMachine = databaseModel.createMachine(
         states: {
           init: {
             on: {
-              REPORT_DATABASE_OPENED: {
+              CALLBACK_REPORT_DATABASE_OPENED: {
                 target: "databaseOpen",
                 actions: [
                   sendParent<any, any, AuthMachineEvent>({
-                    type: "REPORT_DATABASE_OPENED",
+                    type: "SENDPARENT_REPORT_DATABASE_OPENED",
                   }),
                 ],
               },
@@ -347,7 +348,7 @@ export const databaseMachine = databaseModel.createMachine(
       //       ),
       //   ],
       //   on: {
-      //     USERBASE_ITEMS_UPDATED: {
+      //     CALLBACK_USERBASE_ITEMS_UPDATED: {
       //       target: "databaseOpen",
       //     },
       //   },
@@ -423,7 +424,6 @@ export const databaseMachine = databaseModel.createMachine(
       // },
       //#endregion
 
-      //#region itemReceiver
       itemReceiver: {
         /**
          * The changeHandler() that we set up when we open a database fires
@@ -436,14 +436,13 @@ export const databaseMachine = databaseModel.createMachine(
         states: {
           listening: {
             on: {
-              USERBASE_ITEMS_UPDATED: {
+              CALLBACK_USERBASE_ITEMS_UPDATED: {
                 actions: [assignUserbaseItems, assignJdSystem],
               },
             },
           },
         },
       },
-      //#endregion
     },
   },
   {
@@ -462,11 +461,14 @@ export const databaseMachine = databaseModel.createMachine(
                  * something with its payload.
                  */
 
-                sendBack({ type: "USERBASE_ITEMS_UPDATED", userbaseItems });
+                sendBack({
+                  type: "CALLBACK_USERBASE_ITEMS_UPDATED",
+                  userbaseItems,
+                });
               },
             })
             .then(() => {
-              sendBack({ type: "REPORT_DATABASE_OPENED" });
+              sendBack({ type: "CALLBACK_REPORT_DATABASE_OPENED" });
             })
             .catch((error: UserbaseError) => {
               /**
@@ -563,4 +565,3 @@ export const databaseMachine = databaseModel.createMachine(
     },
   }
 );
-//#endregion
