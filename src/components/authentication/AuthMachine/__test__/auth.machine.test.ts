@@ -46,7 +46,7 @@ it("should reach signedIn.idle if a user is signed in", (done) => {
 
   const authService = interpret(mockAuthMachine).onTransition((state) => {
     // this is where we expect it to end up
-    if (state.matches({ signedIn: { databaseOpener: "idle" } })) {
+    if (state.matches("signedIn")) {
       done();
     }
   });
@@ -132,7 +132,7 @@ it("should sign up a new user", (done) => {
 
   const authService = interpret(mockAuthMachine).onTransition((state) => {
     // this is where we expect it to end up
-    if (state.matches({ signedIn: { databaseOpener: "idle" } })) {
+    if (state.matches("signedIn")) {
       done();
     }
   });
