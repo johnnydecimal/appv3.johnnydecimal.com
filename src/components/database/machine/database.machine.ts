@@ -425,12 +425,12 @@ export const databaseMachine = databaseModel.createMachine(
 
       //#region itemReceiver
       itemReceiver: {
-        //   /**
-        //    * The changeHandler() that we set up when we open a database fires
-        //    * the event which we listen for here. It fires when the database is
-        //    * initially opened, and whenever any remote changes are detected.
-        //    * When that happens we assign the array of userbaseItems to context.
-        //    */
+        /**
+         * The changeHandler() that we set up when we open a database fires
+         * the event which we listen for here. It fires when the database is
+         * initially opened, and whenever any remote changes are detected.
+         * When that happens we assign the array of userbaseItems to context.
+         */
         type: "compound",
         initial: "listening",
         states: {

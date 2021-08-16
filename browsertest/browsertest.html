@@ -25,7 +25,7 @@
             // logged in
             userbase
               .openDatabase({
-                databaseName: "donkey",
+                databaseName: "002",
                 changeHandler: (items) =>
                   console.debug("database changed, is now:", items),
               })
@@ -34,7 +34,7 @@
           } else {
             userbase
               .signIn({
-                username: "h13",
+                username: "j0",
                 password: "test123",
                 rememberMe: "local",
               })
@@ -46,7 +46,7 @@
                 // console.debug(user);
                 userbase
                   .openDatabase({
-                    databaseName: "donkey",
+                    databaseName: "002",
                     changeHandler: (items) =>
                       console.debug("database changed, is now:", items),
                   })
