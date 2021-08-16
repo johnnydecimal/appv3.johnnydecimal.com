@@ -15,6 +15,7 @@ import {
   JdCategoryNumbers,
   JdIdNumbers,
   JdItem,
+  AuthMachineEvent,
 } from "@types";
 
 // === Intra-component  ===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -45,9 +46,15 @@ declare global {
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
-  const { handleSignOut, state: authState } = useContext(
-    AuthMachineReactContext
-  );
+  const {
+    handleSignOut,
+    send: authSend,
+    state: authState,
+  }: {
+    handleSignOut: () => void;
+    send: (event: AuthMachineEvent) => void;
+    state: any;
+  } = useContext(AuthMachineReactContext);
 
   /**
    * We invoked `dbMachine` from `authMachine`. Grab its state/send actions.
@@ -66,18 +73,18 @@ export const DatabaseMachine = () => {
    * ever send `send` down the tree.
    */
   const changeDatabase = (newDatabase: JdProjectNumbers) => {
-    send({
+    authSend({
       type: "OPEN_DATABASE",
-      newDatabase,
+      currentProject: newDatabase,
     });
   };
 
-  // const insertItem = (item: JdItem) => {
-  //   send({
-  //     type: "INSERT_ITEM",
-  //     item,
-  //   });
-  // };
+  const insertItem = (item: JdItem) => {
+    send({
+      type: "REQUEST_INSERT_ITEM",
+      item,
+    });
+  };
 
   // const openArea = (area: JdAreaNumbers) => {
   //   send({
@@ -135,16 +142,16 @@ export const DatabaseMachine = () => {
     changeDatabase(formRef!.current!.value as JdProjectNumbers);
   };
   const formRef = React.createRef<HTMLInputElement>();
-  // const handleSubmitNewItem = (e: any) => {
-  //   e.preventDefault();
-  //   insertItem({
-  //     // @ts-ignore
-  //     jdType: jdTypeRef!.current!.value,
-  //     // @ts-ignore
-  //     jdNumber: jdNumberRef!.current!.value,
-  //     jdTitle: jdTitleRef!.current!.value,
-  //   });
-  // };
+  const handleSubmitNewItem = (e: any) => {
+    e.preventDefault();
+    insertItem({
+      // @ts-ignore
+      jdType: jdTypeRef!.current!.value,
+      // @ts-ignore
+      jdNumber: jdNumberRef!.current!.value,
+      jdTitle: jdTitleRef!.current!.value,
+    });
+  };
   const jdTypeRef = React.createRef<HTMLInputElement>();
   const jdNumberRef = React.createRef<HTMLInputElement>();
   const jdTitleRef = React.createRef<HTMLInputElement>();
@@ -167,7 +174,7 @@ export const DatabaseMachine = () => {
       </form>
       <hr className="my-2" />
       <h2>Create item</h2>
-      {/* <form onSubmit={handleSubmitNewItem}>
+      <form onSubmit={handleSubmitNewItem}>
         <label>
           New item:
           <input
@@ -190,7 +197,7 @@ export const DatabaseMachine = () => {
           />
           <input type="submit" value="submit" />
         </label>
-      </form> */}
+      </form>
       <hr className="my-12" />
       {/**
        * What's passed as a prop vs. being pulled out of Context?

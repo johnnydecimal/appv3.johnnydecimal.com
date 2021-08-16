@@ -6,6 +6,9 @@ import {
   jdSystemInsertCheck,
   parentAreaExists,
   parentCategoryExists,
+  isAreaNumber,
+  isCategoryNumber,
+  isIdNumber,
 } from "../jdSystemChecker";
 
 const sampleProject: JdSystem = {
@@ -151,4 +154,130 @@ it("checks that you can add a valid ID", () => {
   expect(jdSystemInsertCheck(sampleProject, "000", idToCheck)).toStrictEqual({
     success: true,
   });
+});
+
+it("checks that you can't add an invalid area number", () => {
+  const areaToCheck1: JdItem = {
+    jdType: "area",
+    // @ts-expect-error
+    jdNumber: "10-18",
+    jdTitle: "Area ~~invalid~~",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", areaToCheck1)).toStrictEqual(
+    {
+      success: false,
+      message: "You tried to add an area with an invalid area number.",
+    }
+  );
+
+  const areaToCheck2: JdItem = {
+    jdType: "area",
+    // @ts-expect-error
+    jdNumber: null,
+    jdTitle: "Area ~~invalid~~",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", areaToCheck2)).toStrictEqual(
+    {
+      success: false,
+      message: "You tried to add an area with an invalid area number.",
+    }
+  );
+
+  const areaToCheck3: JdItem = {
+    jdType: "area",
+    // @ts-expect-error
+    jdNumber: false,
+    jdTitle: "Area ~~invalid~~",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", areaToCheck3)).toStrictEqual(
+    {
+      success: false,
+      message: "You tried to add an area with an invalid area number.",
+    }
+  );
+});
+
+it("checks that you can't add an invalid category number", () => {
+  const categoryToCheck1: JdItem = {
+    jdType: "category",
+    // @ts-expect-error
+    jdNumber: "18 ",
+    jdTitle: "Category ~~invalid~~",
+  };
+  expect(
+    jdSystemInsertCheck(sampleProject, "000", categoryToCheck1)
+  ).toStrictEqual({
+    success: false,
+    message: "You tried to add a category with an invalid category number.",
+  });
+});
+
+it("checks that you can't add an invalid id number", () => {
+  const idToCheck1: JdItem = {
+    jdType: "id",
+    // @ts-expect-error
+    jdNumber: "18.38 ",
+    jdTitle: "ID ~~invalid~~",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", idToCheck1)).toStrictEqual({
+    success: false,
+    message: "You tried to add an ID with an invalid ID number.",
+  });
+});
+
+it("really checks every edge case of isAreaNumber", () => {
+  expect(isAreaNumber("00-09")).toBeTruthy();
+  expect(isAreaNumber("90-99")).toBeTruthy();
+  // @ts-expect-error
+  expect(isAreaNumber("91-99")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber("90-98")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber("00-99")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber(" 00-09")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber("00-09 ")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber("00- 09")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber("just some nonsense")).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber(false)).toBeFalsy();
+  // @ts-expect-error
+  expect(isAreaNumber(null)).toBeFalsy();
+});
+
+it("really checks every edge case of isCategoryNumber", () => {
+  expect(isCategoryNumber("00")).toBeTruthy();
+  expect(isCategoryNumber("99")).toBeTruthy();
+  // @ts-expect-error
+  expect(isCategoryNumber("0 0")).toBeFalsy();
+  // @ts-expect-error
+  expect(isCategoryNumber(" 00")).toBeFalsy();
+  // @ts-expect-error
+  expect(isCategoryNumber("00 ")).toBeFalsy();
+  // @ts-expect-error
+  expect(isCategoryNumber("nonsense")).toBeFalsy();
+  // @ts-expect-error
+  expect(isCategoryNumber(false)).toBeFalsy();
+  // @ts-expect-error
+  expect(isCategoryNumber(null)).toBeFalsy();
+});
+
+it("really checks every edge case of isIdNumber", () => {
+  expect(isIdNumber("00.00")).toBeTruthy();
+  expect(isIdNumber("99.99")).toBeTruthy();
+  // @ts-expect-error
+  expect(isIdNumber("00. 00")).toBeFalsy();
+  // @ts-expect-error
+  expect(isIdNumber(" 00.00")).toBeFalsy();
+  // @ts-expect-error
+  expect(isIdNumber("00.00 ")).toBeFalsy();
+  // @ts-expect-error
+  expect(isIdNumber("nonsense")).toBeFalsy();
+  // @ts-expect-error
+  expect(isIdNumber(false)).toBeFalsy();
+  // @ts-expect-error
+  expect(isIdNumber(null)).toBeFalsy();
 });

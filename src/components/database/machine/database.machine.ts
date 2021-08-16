@@ -91,12 +91,12 @@ const databaseModel = createModel(
        * current database. Note that we don't insert a UserbaseItem, there's a
        * bunch of stuff on there (itemId) that Userbase generates for us.
        */
-      // INSERT_ITEM: (item: JdItem) => ({ item }),
+      REQUEST_INSERT_ITEM: (item: JdItem) => ({ item }),
 
       /**
        * Sent by ubInsertItem when it was successful.
        */
-      // ITEM_INSERTED: () => ({}),
+      CALLBACK_ITEM_INSERTED: () => ({}),
 
       /**
        * Sent by the helper functions when the user interacts with the app.
@@ -123,52 +123,47 @@ const send = (event: DatabaseMachineEvent) =>
   xstateSend<any, any, DatabaseMachineEvent>(event);
 
 //#region  ===-===  Actions     ===-===-===-===-===-===-===-===-===-===-===-===
-
-// const assignNewDatabase = databaseModel.assign<"OPEN_DATABASE">({
-//   currentProject: (_context, event) => event.newDatabase,
-// });
-
-// const assignNewUserbaseItem = databaseModel.assign({
-//   /**
-//    * This is fired whenever we add a new item to the database. We add it to the
-//    * local context immediately so that our UI is nice and responsive.
-//    */
-//   userbaseItems: (context, event) => {
-//     /**
-//      * This action is fired by a state which was reached indirectly, so we can't
-//      * use the <"TYPE"> syntax to narrow the event. Do it the old way.
-//      */
-//     if (event.type !== "INSERT_ITEM") {
-//       return context.userbaseItems;
-//     }
-//     /**
-//      * Incoming event.item is of type JdItem. It doesn't contain the stuff that
-//      * Userbase adds, so we fudge it here as it'll be immediately overwritten
-//      * by the changeHandler.
-//      */
-//     const newItem: UserbaseItem = {
-//       itemId: nanoid(),
-//       item: {
-//         ...event.item,
-//       },
-//       createdBy: {
-//         username: context.currentUsername,
-//         timestamp: new Date(),
-//       },
-//     };
-//     const newUserbaseItems = [];
-//     if (typeof context.userbaseItems === "undefined") {
-//       /**
-//        * This is weird given that context.userbaseItems has been initialised
-//        * as an empty array, but whatever.
-//        */
-//       newUserbaseItems.push(newItem);
-//     } else {
-//       newUserbaseItems.push(...context.userbaseItems, newItem);
-//     }
-//     return newUserbaseItems;
-//   },
-// });
+const assignNewUserbaseItem = databaseModel.assign({
+  /**
+   * This is fired whenever we add a new item to the database. We add it to the
+   * local context immediately so that our UI is nice and responsive.
+   */
+  userbaseItems: (context, event) => {
+    /**
+     * This action is fired by a state which was reached indirectly, so we can't
+     * use the <"TYPE"> syntax to narrow the event. Do it the old way.
+     */
+    if (event.type !== "REQUEST_INSERT_ITEM") {
+      return context.userbaseItems;
+    }
+    /**
+     * Incoming event.item is of type JdItem. It doesn't contain the stuff that
+     * Userbase adds, so we fudge it here as it'll be immediately overwritten
+     * by the changeHandler.
+     */
+    const newItem: UserbaseItem = {
+      itemId: nanoid(),
+      item: {
+        ...event.item,
+      },
+      createdBy: {
+        username: context.currentUsername,
+        timestamp: new Date(),
+      },
+    };
+    const newUserbaseItems = [];
+    if (typeof context.userbaseItems === "undefined") {
+      /**
+       * This is weird given that context.userbaseItems has been initialised
+       * as an empty array, but whatever.
+       */
+      newUserbaseItems.push(newItem);
+    } else {
+      newUserbaseItems.push(...context.userbaseItems, newItem);
+    }
+    return newUserbaseItems;
+  },
+});
 
 const assignUserbaseItems =
   databaseModel.assign<"CALLBACK_USERBASE_ITEMS_UPDATED">({
@@ -188,16 +183,6 @@ const assignJdSystem = databaseModel.assign<"CALLBACK_USERBASE_ITEMS_UPDATED">({
     // TODO: improve handling of errors
     return context.jdSystem;
   },
-});
-
-const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
-  /**
-   * As soon as we open a new database, the existing userbaseItems
-   * become invalid. Rather than wait the fraction of a second for the
-   * changeHandler() to update them, we clear them here. This will make
-   * the UI more snappy. The cH() will fire immediately and re-populate.
-   */
-  userbaseItems: () => [],
 });
 
 // const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
@@ -230,14 +215,6 @@ const clearUserbaseItems = databaseModel.assign<"OPEN_DATABASE">({
 //#endregion
 
 //#region  ===-===  Main        ===-===-===-===-===-===-===-===-===-===-===-===
-/**
- * There's only one way a database can be opened (or created): by changing
- * context.currentProject and transitioning back to the root of this machine.
- * The root-level OPEN_DATABASE does this for us.
- *
- * This way we guarantee that context.currentProject is actually the database
- * which is open.
- */
 export const databaseMachine = databaseModel.createMachine(
   {
     id: "databaseMachine",
@@ -251,19 +228,6 @@ export const databaseMachine = databaseModel.createMachine(
       src: "ubOpenDatabase",
     },
     on: {
-      // GET_DATABASES: {
-      //   target: "#databaseMachine.databaseGetter",
-      // },
-      // OPEN_DATABASE: {
-      //   actions: [
-      //     assignNewDatabase,
-      //     clearUserbaseItems,
-      //     clearCurrentArea,
-      //     clearCurrentCategory,
-      //     clearCurrentId,
-      //   ],
-      //   target: "#databaseMachine",
-      // },
       // OPEN_AREA: {
       //   actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
       // },
@@ -327,128 +291,6 @@ export const databaseMachine = databaseModel.createMachine(
         },
       },
 
-      //#region databaseState
-      // databaseOpen: {
-      //   entry: [
-      //     (context) => console.debug("> databaseOpen, context:", context),
-      //   ],
-      //   always: [
-      //     {
-      //       cond: (context) => context.userbaseItems.length === 0,
-      //       actions: () =>
-      //         console.debug(
-      //           "%c> `always` from `databaseOpen` to `creatingProjectItem`",
-      //           "color: orange"
-      //         ),
-      //       target: "creatingProjectItem",
-      //     },
-      //   ],
-      // on: {
-      //   INSERT_ITEM: {
-      //     target: "#databaseMachine.itemInserter.requestItemInsertion",
-      //   },
-      // },
-      // },
-      // creatingProjectItem: {
-      //   invoke: {
-      //     src: "ubCreateProjectItem",
-      //   },
-      //   on: {
-      //     PROJECT_CREATED: {
-      //       target: "waitingForUserbaseItemsToBeUpdated",
-      //     },
-      //   },
-      // },
-      // waitingForUserbaseItemsToBeUpdated: {
-      //   /**
-      //    * We can't transition straight back to `databaseOpen` because
-      //    * context.userbaseItems.length is still 0. So we just wait until
-      //    * the insertion we just made is pushed back to us by the cH().
-      //    */
-      //   entry: [
-      //     () =>
-      //       console.debug(
-      //         "%c> entry: waitingForUserbaseItemsToBeUpdated",
-      //         "color: orange"
-      //       ),
-      //   ],
-      //   on: {
-      //     CALLBACK_USERBASE_ITEMS_UPDATED: {
-      //       target: "databaseOpen",
-      //     },
-      //   },
-      // },
-      //   },
-      // },
-      //#endregion
-
-      //#region itemInserter
-      // itemInserter: {
-      //   /**
-      //    * We're going to put a guard on here and it's the thing that will
-      //    * check our current local context to see if the new item is allowed.
-      //    *
-      //    * If it is, we'll transition to the state where `ubInsertItem` is
-      //    * invoked. If it isn't, we should throw a warning or something.
-      //    *
-      //    * Remember that INSERT_ITEM calls directly to insertingItem here.
-      //    *
-      //    * Alternatively we could do this checking down in `ubInsertItem` but
-      //    * it's going to make more sense later to see it visualised here.
-      //    */
-      //   type: "compound",
-      //   initial: "idle",
-      //   states: {
-      //     idle: {},
-      //     requestItemInsertion: {
-      //       always: [
-      //         {
-      //           cond: (context, event) => {
-      //             if (event.type === "INSERT_ITEM") {
-      //               const { success } = jdSystemInsertCheck(
-      //                 context.jdSystem,
-      //                 context.currentProject,
-      //                 event.item
-      //               );
-      //               return success;
-      //               // TODO: Handle the error.
-      //             }
-      //             return false;
-      //           },
-      //           target: "insertingItem",
-      //         },
-      //         {
-      //           target: "idle",
-      //           // actions: [() => alert("requestItemInsertion error!")],
-      //         },
-      //       ],
-      //     },
-      //     insertingItem: {
-      //       entry: [
-      //         /**
-      //          * Add the new item to the local context. This ensures an instant
-      //          * response in the UI.
-      //          */
-      //         assignNewUserbaseItem,
-      //       ],
-      //       invoke: {
-      //         /**
-      //          * Invoke a service to push the new item to Userbase. The
-      //          * changeHandler will then fire, overwriting our local context
-      //          * with the same item, so nothing should change.
-      //          */
-      //         src: "ubInsertItem",
-      //       },
-      //       on: {
-      //         ITEM_INSERTED: {
-      //           target: "idle",
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
-      //#endregion
-
       itemReceiver: {
         /**
          * The changeHandler() that we set up when we open a database fires
@@ -463,6 +305,47 @@ export const databaseMachine = databaseModel.createMachine(
             on: {
               CALLBACK_USERBASE_ITEMS_UPDATED: {
                 actions: [assignUserbaseItems, assignJdSystem],
+              },
+            },
+          },
+        },
+      },
+
+      itemInserter: {
+        type: "compound",
+        initial: "idle",
+        states: {
+          idle: {
+            on: {
+              REQUEST_INSERT_ITEM: [
+                {
+                  cond: (context, event) => {
+                    if (event.type === "REQUEST_INSERT_ITEM") {
+                      const { success } = jdSystemInsertCheck(
+                        context.jdSystem,
+                        context.currentProject,
+                        event.item
+                      );
+                      return success;
+                      // TODO: Handle the error.
+                    }
+                    return false;
+                  },
+                  target: "insertingItem",
+                },
+                {
+                  // Handle the error here.
+                },
+              ],
+            },
+          },
+          insertingItem: {
+            invoke: {
+              src: "ubInsertItem",
+            },
+            on: {
+              CALLBACK_ITEM_INSERTED: {
+                target: "idle",
               },
             },
           },
@@ -507,43 +390,41 @@ export const databaseMachine = databaseModel.createMachine(
               });
             });
         },
-      //#region
-      // ubInsertItem:
-      //   (context, event) =>
-      //   (sendBack: (event: DatabaseMachineEvent) => void) => {
-      //     if (event.type !== "INSERT_ITEM") {
-      //       /**
-      //        * Twist TypeScript's arm.
-      //        */
-      //       sendParent<any, any, AuthMachineEvent>({
-      //         type: "ERROR",
-      //         error: {
-      //           name: "UserbaseInsertItemCallError",
-      //           message: `userbaseInsertItem() was invoked from a state that
-      //             wasn't reached by sending INSERT_ITEM. As a result,
-      //             'event.item' won't exist, so this function will now return.`,
-      //           status: 905, // Customise me later
-      //         },
-      //       });
-      //       return;
-      //     }
+      ubInsertItem:
+        (context, event) =>
+        (sendBack: (event: DatabaseMachineEvent) => void) => {
+          if (event.type !== "REQUEST_INSERT_ITEM") {
+            /**
+             * Twist TypeScript's arm.
+             */
+            sendParent<any, any, AuthMachineEvent>({
+              type: "ERROR",
+              error: {
+                name: "UserbaseInsertItemCallError",
+                message: `userbaseInsertItem() was invoked from a state that
+                  wasn't reached by sending REQUEST_INSERT_ITEM. As a result,
+                  'event.item' won't exist, so this function will now return.`,
+                status: 905, // Customise me later
+              },
+            });
+            return;
+          }
 
-      //     userbase
-      //       .insertItem({
-      //         databaseName: context.currentProject,
-      //         item: event.item,
-      //       })
-      //       .then(() => {
-      //         sendBack({ type: "ITEM_INSERTED" });
-      //       })
-      //       .catch((error) => {
-      //         sendParent<any, any, AuthMachineEvent>({
-      //           type: "ERROR",
-      //           error,
-      //         });
-      //       });
-      //   },
-      //#endregion
+          userbase
+            .insertItem({
+              databaseName: context.currentProject,
+              item: event.item,
+            })
+            .then(() => {
+              sendBack({ type: "CALLBACK_ITEM_INSERTED" });
+            })
+            .catch((error) => {
+              sendParent<any, any, AuthMachineEvent>({
+                type: "ERROR",
+                error,
+              });
+            });
+        },
       ubCreateProjectItem:
         (context) => (sendBack: (event: DatabaseMachineEvent) => void) => {
           /**

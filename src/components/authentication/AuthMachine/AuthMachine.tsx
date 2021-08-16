@@ -93,6 +93,7 @@ export const AuthMachine = () => {
     handleSignIn,
     handleSignOut,
     handleSignUp,
+    send,
     state,
     switchToSignIn,
     switchToSignUp,

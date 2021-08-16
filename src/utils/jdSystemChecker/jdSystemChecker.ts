@@ -113,6 +113,20 @@ export const parentCategoryExists = (
   return false;
 };
 
+export const isAreaNumber = (areaNumber: JdAreaNumbers): boolean => {
+  return /^(\d)0-(\1)9$/.test(areaNumber);
+};
+
+export const isCategoryNumber = (
+  categoryNumber: JdCategoryNumbers
+): boolean => {
+  return /^\d\d$/.test(categoryNumber);
+};
+
+export const isIdNumber = (idNumber: JdIdNumbers): boolean => {
+  return /^\d\d\.\d\d$/.test(idNumber);
+};
+
 export const jdSystemInsertCheck = (
   jdSystem: JdSystem,
   currentProject: JdProjectNumbers,
@@ -134,6 +148,14 @@ export const jdSystemInsertCheck = (
       };
 
     case "area":
+      // Check if it's actually an area number
+      if (!isAreaNumber(itemToCheck.jdNumber)) {
+        return {
+          success: false,
+          message: "You tried to add an area with an invalid area number.",
+        };
+      }
+
       // Check if the area is a duplicate
       if (areaIsNotDuplicate(jdSystem, currentProject, itemToCheck.jdNumber)) {
         return {
@@ -147,6 +169,15 @@ export const jdSystemInsertCheck = (
       }
 
     case "category":
+      // Check if it's actually a category number
+      if (!isCategoryNumber(itemToCheck.jdNumber)) {
+        return {
+          success: false,
+          message:
+            "You tried to add a category with an invalid category number.",
+        };
+      }
+
       if (
         categoryIsNotDuplicate(jdSystem, currentProject, itemToCheck.jdNumber)
       ) {
@@ -168,6 +199,14 @@ export const jdSystemInsertCheck = (
       }
 
     case "id":
+      // Check it's actually an ID number
+      if (!isIdNumber(itemToCheck.jdNumber)) {
+        return {
+          success: false,
+          message: "You tried to add an ID with an invalid ID number.",
+        };
+      }
+
       if (idIsNotDuplicate(jdSystem, currentProject, itemToCheck.jdNumber)) {
         if (
           parentCategoryExists(jdSystem, currentProject, itemToCheck.jdNumber)
