@@ -217,7 +217,8 @@ const clearCurrentId = databaseModel.assign<
 export const databaseMachine = databaseModel.createMachine(
   {
     id: "databaseMachine",
-    type: "parallel",
+    type: "compound",
+    initial: "init",
     context: databaseModel.initialContext,
     invoke: {
       /**
@@ -227,6 +228,9 @@ export const databaseMachine = databaseModel.createMachine(
       src: "ubOpenDatabase",
     },
     on: {
+      CALLBACK_USERBASE_ITEMS_UPDATED: {
+        actions: [assignUserbaseItems, assignJdSystem],
+      },
       OPEN_AREA: {
         actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
       },
@@ -238,128 +242,82 @@ export const databaseMachine = databaseModel.createMachine(
       },
     },
     states: {
-      database: {
-        /**
-         * Noting that the `invoke` which actually opens the database is
-         * currently on the root.
-         */
-        type: "compound",
-        initial: "init",
-        states: {
-          init: {
-            on: {
-              CALLBACK_REPORT_DATABASE_OPENED: {
-                target: "databaseOpen",
-                actions: [
-                  sendParent<any, any, AuthMachineEvent>({
-                    type: "SENDPARENT_REPORT_DATABASE_OPENED",
-                  }),
-                ],
-              },
-            },
-          },
-          databaseOpen: {
-            always: [
-              {
-                cond: (context) => context.userbaseItems.length === 0,
-                target: "creatingProjectItem",
-              },
-            ],
-          },
-          creatingProjectItem: {
-            invoke: {
-              src: "ubCreateProjectItem",
-            },
-            always: [
-              /**
-               * So we've inserted the item, but we still need to wait for
-               * the cH() to fetch the items, and then for those items to be
-               * processed by the assign action, before we can go back to
-               * databaseOpen. Otherwise we end up in a loop because it'll
-               * check its context, length will be zero, etc.
-               */
-              {
-                cond: (context) => context.userbaseItems.length > 0,
-                target: "databaseOpen",
-              },
+      init: {
+        on: {
+          CALLBACK_REPORT_DATABASE_OPENED: {
+            target: "databaseOpen",
+            actions: [
+              sendParent<any, any, AuthMachineEvent>({
+                type: "SENDPARENT_REPORT_DATABASE_OPENED",
+              }),
             ],
           },
         },
       },
-
-      itemReceiver: {
-        /**
-         * The changeHandler() that we set up when we open a database fires
-         * the event which we listen for here. It fires when the database is
-         * initially opened, and whenever any remote changes are detected.
-         * When that happens we assign the array of userbaseItems to context.
-         */
-        type: "compound",
-        initial: "listening",
-        states: {
-          listening: {
-            on: {
-              CALLBACK_USERBASE_ITEMS_UPDATED: {
-                actions: [assignUserbaseItems, assignJdSystem],
-              },
-            },
+      databaseOpen: {
+        always: [
+          {
+            cond: (context) => context.userbaseItems.length === 0,
+            target: "creatingProjectItem",
           },
+        ],
+        on: {
+          REQUEST_INSERT_ITEM: [
+            {
+              cond: (context, event) => {
+                if (event.type === "REQUEST_INSERT_ITEM") {
+                  console.debug(
+                    "%c> jdSystemInsertCheck",
+                    "color: orange",
+                    jdSystemInsertCheck(
+                      context.jdSystem,
+                      context.currentProject,
+                      event.item
+                    )
+                  );
+                  const { success } = jdSystemInsertCheck(
+                    context.jdSystem,
+                    context.currentProject,
+                    event.item
+                  );
+                  return success;
+                  // TODO: Handle the error.
+                }
+                return false;
+              },
+              target: "insertingItem",
+            },
+            {
+              // Handle the error here.
+            },
+          ],
         },
       },
-
-      itemInserter: {
-        type: "compound",
-        initial: "idle",
-        states: {
-          idle: {
-            on: {
-              CALLBACK_REPORT_DATABASE_OPENED: {
-                target: "listening",
-              },
-            },
+      creatingProjectItem: {
+        invoke: {
+          src: "ubCreateProjectItem",
+        },
+        always: [
+          /**
+           * So we've inserted the item, but we still need to wait for
+           * the cH() to fetch the items, and then for those items to be
+           * processed by the assign action, before we can go back to
+           * databaseOpen. Otherwise we end up in a loop because it'll
+           * check its context, length will be zero, etc.
+           */
+          {
+            cond: (context) => context.userbaseItems.length > 0,
+            target: "databaseOpen",
           },
-          listening: {
-            on: {
-              REQUEST_INSERT_ITEM: [
-                {
-                  cond: (context, event) => {
-                    if (event.type === "REQUEST_INSERT_ITEM") {
-                      console.debug(
-                        "%c> jdSystemInsertCheck",
-                        "color: orange",
-                        jdSystemInsertCheck(
-                          context.jdSystem,
-                          context.currentProject,
-                          event.item
-                        )
-                      );
-                      const { success } = jdSystemInsertCheck(
-                        context.jdSystem,
-                        context.currentProject,
-                        event.item
-                      );
-                      return success;
-                      // TODO: Handle the error.
-                    }
-                    return false;
-                  },
-                  target: "insertingItem",
-                },
-                {
-                  // Handle the error here.
-                },
-              ],
-            },
-          },
-          insertingItem: {
-            invoke: {
-              src: "ubInsertItem",
-            },
-            on: {
-              CALLBACK_ITEM_INSERTED: {
-                target: "listening",
-              },
-            },
+        ],
+      },
+      insertingItem: {
+        invoke: {
+          src: "ubInsertItem",
+        },
+        on: {
+          CALLBACK_ITEM_INSERTED: {
+            target: "databaseOpen",
           },
         },
       },
