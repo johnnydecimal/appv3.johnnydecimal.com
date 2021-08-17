@@ -344,14 +344,6 @@ export const databaseMachine = databaseModel.createMachine(
                     return false;
                   },
                   target: "insertingItem",
-                  actions: [
-                    () => {
-                      console.debug(
-                        "%c> ✅ You tried to add something and it passed the test.",
-                        "color: orange"
-                      );
-                    },
-                  ],
                 },
                 {
                   // Handle the error here.
