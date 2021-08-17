@@ -86,26 +86,25 @@ export const DatabaseMachine = () => {
     });
   };
 
-  // const openArea = (area: JdAreaNumbers) => {
-  //   send({
-  //     type: "OPEN_AREA",
-  //     area,
-  //   });
-  // };
+  const openArea = (area: JdAreaNumbers) => {
+    send({
+      type: "OPEN_AREA",
+      area,
+    });
+  };
 
-  // const openCategory = (category: JdCategoryNumbers) => {
-  //   send({
-  //     type: "OPEN_CATEGORY",
-  //     category,
-  //   });
-  // };
-  // const openId = (id: JdIdNumbers) => {
-  //   send({
-  //     type: "OPEN_ID",
-  //     id,
-  //   });
-  // };
-  //#endregion
+  const openCategory = (category: JdCategoryNumbers) => {
+    send({
+      type: "OPEN_CATEGORY",
+      category,
+    });
+  };
+  const openId = (id: JdIdNumbers) => {
+    send({
+      type: "OPEN_ID",
+      id,
+    });
+  };
 
   /**
    * If we're testing, expose all of this on `window`.
@@ -113,10 +112,10 @@ export const DatabaseMachine = () => {
   // if ("Cypress" in window) {
   window.DatabaseMachine = {
     changeDatabase,
-    // insertItem,
-    // openArea,
-    // openCategory,
-    // openId,
+    insertItem,
+    openArea,
+    openCategory,
+    openId,
     userbase,
   };
   // }
@@ -128,10 +127,10 @@ export const DatabaseMachine = () => {
    */
   const DatabaseReactContextValue = {
     changeDatabase,
-    // insertItem,
-    // openArea,
-    // openCategory,
-    // openId,
+    insertItem,
+    openArea,
+    openCategory,
+    openId,
   };
 
   //#region temporary shit while we build it

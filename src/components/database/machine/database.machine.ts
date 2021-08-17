@@ -101,9 +101,9 @@ const databaseModel = createModel(
       /**
        * Sent by the helper functions when the user interacts with the app.
        */
-      // OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
-      // OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
-      // OPEN_ID: (id: JdIdNumbers) => ({ id }),
+      OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
+      OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
+      OPEN_ID: (id: JdIdNumbers) => ({ id }),
 
       /**
        * Testing #TODO delete
@@ -185,34 +185,33 @@ const assignJdSystem = databaseModel.assign<"CALLBACK_USERBASE_ITEMS_UPDATED">({
   },
 });
 
-// const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
-//   currentArea: (context, event) => event.area,
-// });
+const assignCurrentArea = databaseModel.assign<"OPEN_AREA">({
+  currentArea: (context, event) => event.area,
+});
 
-// const assignCurrentCategory = databaseModel.assign<"OPEN_CATEGORY">({
-//   currentCategory: (context, event) => event.category,
-// });
+const assignCurrentCategory = databaseModel.assign<"OPEN_CATEGORY">({
+  currentCategory: (context, event) => event.category,
+});
 
-// const assignCurrentId = databaseModel.assign<"OPEN_ID">({
-//   currentId: (context, event) => event.id,
-// });
+const assignCurrentId = databaseModel.assign<"OPEN_ID">({
+  currentId: (context, event) => event.id,
+});
 
-// const clearCurrentArea = databaseModel.assign<"OPEN_DATABASE">({
-//   currentArea: () => null,
-// });
+const clearCurrentArea = databaseModel.assign<"OPEN_DATABASE">({
+  currentArea: () => null,
+});
 
-// const clearCurrentCategory = databaseModel.assign<
-//   "OPEN_DATABASE" | "OPEN_AREA"
-// >({
-//   currentCategory: () => null,
-// });
+const clearCurrentCategory = databaseModel.assign<
+  "OPEN_DATABASE" | "OPEN_AREA"
+>({
+  currentCategory: () => null,
+});
 
-// const clearCurrentId = databaseModel.assign<
-//   "OPEN_DATABASE" | "OPEN_AREA" | "OPEN_CATEGORY"
-// >({
-//   currentId: () => null,
-// });
-//#endregion
+const clearCurrentId = databaseModel.assign<
+  "OPEN_DATABASE" | "OPEN_AREA" | "OPEN_CATEGORY"
+>({
+  currentId: () => null,
+});
 
 //#region  ===-===  Main        ===-===-===-===-===-===-===-===-===-===-===-===
 export const databaseMachine = databaseModel.createMachine(
@@ -228,17 +227,14 @@ export const databaseMachine = databaseModel.createMachine(
       src: "ubOpenDatabase",
     },
     on: {
-      // OPEN_AREA: {
-      //   actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
-      // },
-      // OPEN_CATEGORY: {
-      //   actions: [assignCurrentCategory, clearCurrentId],
-      // },
-      // OPEN_ID: {
-      //   actions: [assignCurrentId],
-      // },
-      ALERT: {
-        actions: [() => console.debug("🛎 ALERT fired")],
+      OPEN_AREA: {
+        actions: [assignCurrentArea, clearCurrentCategory, clearCurrentId],
+      },
+      OPEN_CATEGORY: {
+        actions: [assignCurrentCategory, clearCurrentId],
+      },
+      OPEN_ID: {
+        actions: [assignCurrentId],
       },
     },
     states: {
@@ -328,6 +324,15 @@ export const databaseMachine = databaseModel.createMachine(
                 {
                   cond: (context, event) => {
                     if (event.type === "REQUEST_INSERT_ITEM") {
+                      console.debug(
+                        "%c> jdSystemInsertCheck",
+                        "color: orange",
+                        jdSystemInsertCheck(
+                          context.jdSystem,
+                          context.currentProject,
+                          event.item
+                        )
+                      );
                       const { success } = jdSystemInsertCheck(
                         context.jdSystem,
                         context.currentProject,
@@ -339,6 +344,14 @@ export const databaseMachine = databaseModel.createMachine(
                     return false;
                   },
                   target: "insertingItem",
+                  actions: [
+                    () => {
+                      console.debug(
+                        "%c> ✅ You tried to add something and it passed the test.",
+                        "color: orange"
+                      );
+                    },
+                  ],
                 },
                 {
                   // Handle the error here.
@@ -352,7 +365,7 @@ export const databaseMachine = databaseModel.createMachine(
             },
             on: {
               CALLBACK_ITEM_INSERTED: {
-                target: "idle",
+                target: "listening",
               },
             },
           },

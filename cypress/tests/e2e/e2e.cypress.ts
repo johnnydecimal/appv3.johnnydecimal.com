@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 
 import { JdItem, JdProjectNumbers } from "../../../src/@types";
 
-describe("new user first run", () => {
+describe.only("new user first run", () => {
   const userId = `cy_${nanoid(6)}`;
 
   beforeEach(() => {
