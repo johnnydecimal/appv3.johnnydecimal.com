@@ -148,6 +148,14 @@ export const jdSystemInsertCheck = (
       };
 
     case "area":
+      // You must supply a title.
+      if (itemToCheck.jdTitle === "") {
+        return {
+          success: false,
+          message: "Your area must have a title.",
+        };
+      }
+
       // Check if it's actually an area number
       if (!isAreaNumber(itemToCheck.jdNumber)) {
         return {
@@ -169,6 +177,14 @@ export const jdSystemInsertCheck = (
       }
 
     case "category":
+      // You must supply a title.
+      if (itemToCheck.jdTitle === "") {
+        return {
+          success: false,
+          message: "Your category must have a title.",
+        };
+      }
+
       // Check if it's actually a category number
       if (!isCategoryNumber(itemToCheck.jdNumber)) {
         return {
@@ -199,6 +215,14 @@ export const jdSystemInsertCheck = (
       }
 
     case "id":
+      // You must supply a title.
+      if (itemToCheck.jdTitle === "") {
+        return {
+          success: false,
+          message: "Your ID must have a title.",
+        };
+      }
+
       // Check it's actually an ID number
       if (!isIdNumber(itemToCheck.jdNumber)) {
         return {

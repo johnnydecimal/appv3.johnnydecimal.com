@@ -9,7 +9,7 @@ import {
   isAreaNumber,
   isCategoryNumber,
   isIdNumber,
-} from "../jdSystemChecker";
+} from "../jdSystemInsertCheck";
 
 const sampleProject: JdSystem = {
   "000": {
@@ -280,4 +280,40 @@ it("really checks every edge case of isIdNumber", () => {
   expect(isIdNumber(false)).toBeFalsy();
   // @ts-expect-error
   expect(isIdNumber(null)).toBeFalsy();
+});
+
+it("checks that you can't add an area with no title", () => {
+  const idToCheck: JdItem = {
+    jdType: "area",
+    jdNumber: "80-89",
+    jdTitle: "",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", idToCheck)).toStrictEqual({
+    success: false,
+    message: "Your area must have a title.",
+  });
+});
+
+it("checks that you can't add a category no title", () => {
+  const idToCheck: JdItem = {
+    jdType: "category",
+    jdNumber: "80",
+    jdTitle: "",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", idToCheck)).toStrictEqual({
+    success: false,
+    message: "Your category must have a title.",
+  });
+});
+
+it("checks that you can't add an ID with no title", () => {
+  const idToCheck: JdItem = {
+    jdType: "id",
+    jdNumber: "00.08",
+    jdTitle: "",
+  };
+  expect(jdSystemInsertCheck(sampleProject, "000", idToCheck)).toStrictEqual({
+    success: false,
+    message: "Your ID must have a title.",
+  });
 });
