@@ -19,7 +19,7 @@ import {
   UserbaseError,
   UserbaseItem,
 } from "@types";
-import { jdSystemInsertCheck } from "utils/jdSystemChecker/jdSystemChecker";
+import { jdSystemInsertCheck } from "utils";
 
 const databaseModel = createModel(
   {
@@ -266,15 +266,6 @@ export const databaseMachine = databaseModel.createMachine(
             {
               cond: (context, event) => {
                 if (event.type === "REQUEST_INSERT_ITEM") {
-                  console.debug(
-                    "%c> jdSystemInsertCheck",
-                    "color: orange",
-                    jdSystemInsertCheck(
-                      context.jdSystem,
-                      context.currentProject,
-                      event.item
-                    )
-                  );
                   const { success } = jdSystemInsertCheck(
                     context.jdSystem,
                     context.currentProject,
