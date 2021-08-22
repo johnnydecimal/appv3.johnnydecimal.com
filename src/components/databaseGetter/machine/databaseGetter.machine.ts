@@ -54,11 +54,6 @@ export const databaseGetterMachine = databaseGetterModel.createMachine(
           CALLBACK_GOT_DATABASES: {
             target: "idle",
             actions: [
-              () =>
-                console.debug(
-                  "%c> dbG.m/gettingDatabases/on/CALLBACK_GOT_DATABASES sendingParent SENDPARENT_GOT_DATABASES",
-                  "color: orange"
-                ),
               sendParent<any, any, AuthMachineEvent>((_, event) => ({
                 type: "SENDPARENT_GOT_DATABASES",
                 databases: event.databases,
