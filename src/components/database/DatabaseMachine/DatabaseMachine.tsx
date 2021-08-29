@@ -223,18 +223,21 @@ export const DatabaseMachine = () => {
           style={{
             display: "grid",
             gridTemplateColumns: "4ch auto",
-            gridTemplateAreas: `'.       breadcrumbs'
-                                'project main       '`,
+            gridTemplateAreas: `'  .     breadcrumbs'
+                                'project    main    '`,
           }}
         >
           <div style={{ gridArea: "breadcrumbs" }}>
             <Breadcrumbs
               jdSystem={jdSystem}
+              currentProject={currentProject}
               currentArea={currentArea}
               currentCategory={currentCategory}
             />
           </div>
-          <div style={{ gridArea: "project" }}>000.</div>
+
+          <div style={{ gridArea: "project" }}>{/* Nothing here yet */}</div>
+
           <div style={{ gridArea: "main" }}>
             <Area
               jdSystem={jdSystem}

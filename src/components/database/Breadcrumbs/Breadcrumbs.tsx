@@ -1,15 +1,37 @@
-import { JdAreaNumbers, JdCategoryNumbers, JdSystem } from "@types";
+import {
+  JdAreaNumbers,
+  JdCategoryNumbers,
+  JdProjectNumbers,
+  JdSystem,
+} from "@types";
+import { current } from "immer";
 
 export const Breadcrumbs = ({
   jdSystem,
+  currentProject,
   currentArea,
   currentCategory,
-}: // children,
-{
+}: {
   jdSystem: JdSystem;
+  currentProject: JdProjectNumbers;
   currentArea: JdAreaNumbers | null;
   currentCategory: JdCategoryNumbers | null;
-  // children: React.ReactNode;
 }) => {
-  return <div>Breadcrumbs</div>;
+  let breadcrumbs = "";
+
+  if (currentArea && !currentCategory) {
+    breadcrumbs =
+      currentArea + " " + jdSystem[currentProject]!.areas[currentArea]!.title;
+  }
+
+  if (currentArea && currentCategory) {
+    breadcrumbs =
+      currentArea +
+      " ‣ " +
+      currentCategory +
+      " " +
+      jdSystem[currentProject]!.areas[currentArea]!.categories[currentCategory]!
+        .title;
+  }
+  return <div className="bg-red">{breadcrumbs}&nbsp;</div>;
 };
