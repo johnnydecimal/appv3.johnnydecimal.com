@@ -69,7 +69,7 @@ export const Area = ({
     <div>
       {areas.map((area, i) => (
         <div className="cursor-pointer" key={i} onClick={() => openArea(area)}>
-          {area} {jdSystem[currentProject]!.areas[area]!.title}
+          <span className="border border-dotted">{area} {jdSystem[currentProject]!.areas[area]!.title}</span>
         </div>
       ))}
     </div>

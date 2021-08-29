@@ -29,29 +29,15 @@ export const Project = (props: any) => {
    * If not, show the *list of projects*.
    */
 
-  if (currentProject) {
-    return (
-      <div
-        className="grid text-2xl"
-        id="project"
-        style={{ gridTemplateColumns: "4ch auto" }}
-      >
-        <div
-          className="font-semibold cursor-pointer col-span-full"
-          onClick={() => {
-            openArea(null);
-          }}
-        >
-          {currentProject} {jdSystem[currentProject]!.title}
-        </div>
-        <div className="col-start-2">{children}</div>
-      </div>
-    );
-  }
-
-  // At the moment there's no way to un-set currentProject, so fill this in
-  // when there is.
-  return <div>yeah</div>;
+  return (
+    <div
+      className="grid"
+      id="project"
+      style={{ gridTemplateColumns: "4ch auto" }}
+    >
+      <div className="col-start-2">{children}</div>
+    </div>
+  );
 };
 
 // <h2 className="text-2xl font-bold">

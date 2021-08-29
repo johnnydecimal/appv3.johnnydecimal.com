@@ -23,7 +23,8 @@ import { databaseMachine } from "../machine/database.machine";
 import { DatabaseMachineReactContext } from "./context";
 
 // === BUILDING - FIX WHEN DONE
-import { Project } from "../Project/Project";
+import { Breadcrumbs } from "../Breadcrumbs/Breadcrumbs";
+// import { Project } from "../Project/Project";
 import { Area } from "../Area/Area";
 import { Category } from "../Category/Category";
 import { ID } from "../ID/ID";
@@ -158,6 +159,8 @@ export const DatabaseMachine = () => {
 
   return (
     <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
+      <div className="my-12"></div>
+      {/*
       <div>JD App</div>
       <hr className="my-2" />
       <button onClick={handleSignOut}>Sign out</button>
@@ -198,6 +201,8 @@ export const DatabaseMachine = () => {
         </label>
       </form>
       <hr className="my-12" />
+      */}
+
       {/**
        * What's passed as a prop vs. being pulled out of Context?
        * Prop: variables.
@@ -209,36 +214,58 @@ export const DatabaseMachine = () => {
        * the user can select one.
        */}
       {jdSystem?.[currentProject] ? (
-        <Project jdSystem={jdSystem} currentProject={currentProject}>
-          <Area
-            jdSystem={jdSystem}
-            currentProject={currentProject}
-            currentArea={currentArea}
-          >
-            {currentArea ? (
-              <Category
-                jdSystem={jdSystem}
-                currentProject={currentProject}
-                currentArea={currentArea}
-                currentCategory={currentCategory}
-              >
-                {currentCategory ? (
-                  <ID
-                    jdSystem={jdSystem}
-                    currentProject={currentProject}
-                    currentArea={currentArea}
-                    currentCategory={currentCategory}
-                    currentId={currentId}
-                  />
-                ) : (
-                  <div>EEP</div>
-                )}
-              </Category>
-            ) : (
-              <div>EEP</div>
-            )}
-          </Area>
-        </Project>
+        /**
+         * Set up the main outer grid. This has a 6ch wide column which may or
+         * may not display `000.` depending on the mode, and then the main
+         * content.
+         */
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "4ch auto",
+            gridTemplateAreas: `'.       breadcrumbs'
+                                'project main       '`,
+          }}
+        >
+          <div style={{ gridArea: "breadcrumbs" }}>
+            <Breadcrumbs
+              jdSystem={jdSystem}
+              currentArea={currentArea}
+              currentCategory={currentCategory}
+            />
+          </div>
+          <div style={{ gridArea: "project" }}>000.</div>
+          <div style={{ gridArea: "main" }}>
+            <Area
+              jdSystem={jdSystem}
+              currentProject={currentProject}
+              currentArea={currentArea}
+            >
+              {currentArea ? (
+                <Category
+                  jdSystem={jdSystem}
+                  currentProject={currentProject}
+                  currentArea={currentArea}
+                  currentCategory={currentCategory}
+                >
+                  {currentCategory ? (
+                    <ID
+                      jdSystem={jdSystem}
+                      currentProject={currentProject}
+                      currentArea={currentArea}
+                      currentCategory={currentCategory}
+                      currentId={currentId}
+                    />
+                  ) : (
+                    <div>EEP</div>
+                  )}
+                </Category>
+              ) : (
+                <div>EEP</div>
+              )}
+            </Area>
+          </div>
+        </div>
       ) : (
         <div>jdSystem.currentProject does not yet exist.</div>
       )}
