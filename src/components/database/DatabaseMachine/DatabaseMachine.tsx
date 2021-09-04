@@ -87,20 +87,20 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const openArea = (area: JdAreaNumbers) => {
+  const selectArea = (area: JdAreaNumbers) => {
     send({
       type: "OPEN_AREA",
       area,
     });
   };
 
-  const openCategory = (category: JdCategoryNumbers) => {
+  const selectCategory = (category: JdCategoryNumbers) => {
     send({
       type: "OPEN_CATEGORY",
       category,
     });
   };
-  const openId = (id: JdIdNumbers) => {
+  const selectId = (id: JdIdNumbers) => {
     send({
       type: "OPEN_ID",
       id,
@@ -114,9 +114,9 @@ export const DatabaseMachine = () => {
   window.DatabaseMachine = {
     changeDatabase,
     insertItem,
-    openArea,
-    openCategory,
-    openId,
+    selectArea,
+    selectCategory,
+    selectId,
     userbase,
   };
   // }
@@ -129,9 +129,9 @@ export const DatabaseMachine = () => {
   const DatabaseReactContextValue = {
     changeDatabase,
     insertItem,
-    openArea,
-    openCategory,
-    openId,
+    selectArea,
+    selectCategory,
+    selectId,
   };
 
   //#region temporary shit while we build it
@@ -228,12 +228,7 @@ export const DatabaseMachine = () => {
           }}
         >
           <div style={{ gridArea: "breadcrumbs" }}>
-            <Breadcrumbs
-              jdSystem={jdSystem}
-              currentProject={currentProject}
-              currentArea={currentArea}
-              currentCategory={currentCategory}
-            />
+            <Breadcrumbs />
           </div>
 
           <div style={{ gridArea: "project" }}>{/* Nothing here yet */}</div>
