@@ -3,6 +3,9 @@
  * created by `helpers/userbaseItemsToInternalJdProject`.
  */
 
+import { JdAreaNumbers, JdCategoryNumbers, JdIdNumbers } from "@types";
+import { JdProjectNumbers } from "./JdProjectNumbers";
+
 interface InternalJDId {
   title: string;
   meta?: { [key: string]: any };
