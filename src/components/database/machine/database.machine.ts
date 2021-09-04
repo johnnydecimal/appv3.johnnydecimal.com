@@ -101,9 +101,9 @@ const databaseModel = createModel(
       /**
        * Sent by the helper functions when the user interacts with the app.
        */
-      OPEN_AREA: (area: JdAreaNumbers) => ({ area }),
-      OPEN_CATEGORY: (category: JdCategoryNumbers) => ({ category }),
-      OPEN_ID: (id: JdIdNumbers) => ({ id }),
+      OPEN_AREA: (area: JdAreaNumbers | null) => ({ area }),
+      OPEN_CATEGORY: (category: JdCategoryNumbers | null) => ({ category }),
+      OPEN_ID: (id: JdIdNumbers | null) => ({ id }),
 
       /**
        * Testing #TODO delete
