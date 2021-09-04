@@ -1,37 +1,36 @@
+import { useContext } from "react";
 import {
+  JdSystem,
   JdAreaNumbers,
   JdCategoryNumbers,
-  JdProjectNumbers,
-  JdSystem,
+  JdIdNumbers,
 } from "@types";
-import { current } from "immer";
 
-export const Breadcrumbs = ({
-  jdSystem,
-  currentProject,
-  currentArea,
-  currentCategory,
-}: {
-  jdSystem: JdSystem;
-  currentProject: JdProjectNumbers;
-  currentArea: JdAreaNumbers | null;
-  currentCategory: JdCategoryNumbers | null;
-}) => {
-  let breadcrumbs = "";
+import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
-  if (currentArea && !currentCategory) {
-    breadcrumbs =
-      currentArea + " " + jdSystem[currentProject]!.areas[currentArea]!.title;
-  }
+export const Breadcrumbs = () => {
+  const {
+    jdSystem,
+    selectArea,
+    selectCategory,
+    selectId,
+  }: {
+    jdSystem: JdSystem;
+    selectArea: (area: JdAreaNumbers | null) => void;
+    selectCategory: (area: JdCategoryNumbers | null) => void;
+    selectId: (area: JdIdNumbers | null) => void;
+  } = useContext(DatabaseMachineReactContext);
 
-  if (currentArea && currentCategory) {
-    breadcrumbs =
-      currentArea +
-      " ‣ " +
-      currentCategory +
-      " " +
-      jdSystem[currentProject]!.areas[currentArea]!.categories[currentCategory]!
-        .title;
-  }
-  return <div className="bg-red">{breadcrumbs}&nbsp;</div>;
+  /**
+   * Let's try and actually design this thing rather than just hacking about as
+   * usual.
+   *
+   * It's a breadcrumb component. Simple! But it has to be able to communicate
+   * with the machine, as it's clickable.
+   *
+   * We're going to need the current[Everything] so we can figure out what's
+   * what.
+   */
+
+  return <div className="bg-red">breadcrumbs</div>;
 };

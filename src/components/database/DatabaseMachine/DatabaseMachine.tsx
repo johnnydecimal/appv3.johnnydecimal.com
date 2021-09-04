@@ -28,6 +28,7 @@ import { Breadcrumbs } from "../Breadcrumbs/Breadcrumbs";
 import { Area } from "../Area/Area";
 import { Category } from "../Category/Category";
 import { ID } from "../ID/ID";
+import { DatabaseReactContextValue } from "global";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 declare global {
@@ -87,20 +88,21 @@ export const DatabaseMachine = () => {
     });
   };
 
-  const selectArea = (area: JdAreaNumbers) => {
+  const selectArea = (area: JdAreaNumbers | null) => {
     send({
       type: "OPEN_AREA",
       area,
     });
   };
 
-  const selectCategory = (category: JdCategoryNumbers) => {
+  const selectCategory = (category: JdCategoryNumbers | null) => {
     send({
       type: "OPEN_CATEGORY",
       category,
     });
   };
-  const selectId = (id: JdIdNumbers) => {
+
+  const selectId = (id: JdIdNumbers | null) => {
     send({
       type: "OPEN_ID",
       id,
@@ -126,7 +128,7 @@ export const DatabaseMachine = () => {
    * declared here, that are passed down in React Context for use by child
    * components.
    */
-  const DatabaseReactContextValue = {
+  const DatabaseReactContextValue: DatabaseReactContextValue = {
     changeDatabase,
     insertItem,
     selectArea,
