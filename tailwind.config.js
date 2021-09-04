@@ -17,10 +17,11 @@ module.exports = {
         DEFAULT: "#FA2520",
       },
     },
-    extend: {},
-    fontFamily: {
-      jdcode: ["Fira Code"],
-      jdbody: ["Fira Sans"],
+    extend: {
+      fontFamily: {
+        jdcode: ["Fira Code"],
+        jdbody: ["Fira Sans"],
+      },
     },
   },
   variants: {

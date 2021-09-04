@@ -1,37 +1,20 @@
-import {
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdProjectNumbers,
-  JdSystem,
-} from "@types";
-import { current } from "immer";
+import { useContext } from "react";
 
-export const Breadcrumbs = ({
-  jdSystem,
-  currentProject,
-  currentArea,
-  currentCategory,
-}: {
-  jdSystem: JdSystem;
-  currentProject: JdProjectNumbers;
-  currentArea: JdAreaNumbers | null;
-  currentCategory: JdCategoryNumbers | null;
-}) => {
-  let breadcrumbs = "";
+import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
-  if (currentArea && !currentCategory) {
-    breadcrumbs =
-      currentArea + " " + jdSystem[currentProject]!.areas[currentArea]!.title;
-  }
+/**
+ * Don't forget, which you did, that the breadcrumbs also need to be clickable
+ * so that the user can go back.
+ *
+ * And hoverable with some sort of state indicator so they know this will
+ * happen.
+ */
+export const Breadcrumbs: React.FC = () => {
+  const { currentProject } = useContext(
+    DatabaseMachineReactContext
+  ) as DatabaseMachineReactContextType;
 
-  if (currentArea && currentCategory) {
-    breadcrumbs =
-      currentArea +
-      " ‣ " +
-      currentCategory +
-      " " +
-      jdSystem[currentProject]!.areas[currentArea]!.categories[currentCategory]!
-        .title;
-  }
-  return <div className="bg-red">{breadcrumbs}&nbsp;</div>;
+  console.log(currentProject);
+
+  return <div className="border border-dotted border-red">breadcrumbs</div>;
 };

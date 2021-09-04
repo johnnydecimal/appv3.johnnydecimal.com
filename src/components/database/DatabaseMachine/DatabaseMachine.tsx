@@ -10,7 +10,6 @@ import { AuthMachineReactContext } from "components/authentication";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ActorRefFrom } from "xstate";
 import {
-  JdProjectNumbers,
   JdAreaNumbers,
   JdCategoryNumbers,
   JdIdNumbers,
@@ -64,8 +63,13 @@ export const DatabaseMachine = () => {
     authState.children.databaseMachine as ActorRefFrom<typeof databaseMachine>
   );
 
-  const { jdSystem, currentProject, currentArea, currentCategory, currentId } =
-    state.context;
+  const {
+    jdSystem,
+    currentProject,
+    currentArea,
+    currentCategory,
+    currentId,
+  }: { currentProject: JdProjectNumbers } = state.context;
 
   //#region helper functions
   /**
@@ -128,7 +132,12 @@ export const DatabaseMachine = () => {
    */
   const DatabaseReactContextValue = {
     changeDatabase,
+    currentProject,
+    currentArea,
+    currentCategory,
+    currentId,
     insertItem,
+    jdSystem,
     openArea,
     openCategory,
     openId,
@@ -244,7 +253,7 @@ export const DatabaseMachine = () => {
               currentProject={currentProject}
               currentArea={currentArea}
             >
-              {currentArea ? (
+              {/* {currentArea ? (
                 <Category
                   jdSystem={jdSystem}
                   currentProject={currentProject}
@@ -265,7 +274,7 @@ export const DatabaseMachine = () => {
                 </Category>
               ) : (
                 <div>EEP</div>
-              )}
+              )} */}
             </Area>
           </div>
         </div>
