@@ -1,10 +1,4 @@
 import { useContext } from "react";
-import {
-  JdSystem,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdIdNumbers,
-} from "@types";
 
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
@@ -14,11 +8,6 @@ export const Breadcrumbs = () => {
     selectArea,
     selectCategory,
     selectId,
-  }: {
-    jdSystem: JdSystem;
-    selectArea: (area: JdAreaNumbers | null) => void;
-    selectCategory: (area: JdCategoryNumbers | null) => void;
-    selectId: (area: JdIdNumbers | null) => void;
   } = useContext(DatabaseMachineReactContext);
 
   /**

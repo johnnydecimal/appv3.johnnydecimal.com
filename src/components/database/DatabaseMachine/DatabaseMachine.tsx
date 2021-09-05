@@ -10,11 +10,11 @@ import { AuthMachineReactContext } from "components/authentication";
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 import { ActorRefFrom } from "xstate";
 import {
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdIdNumbers,
-  JdItem,
+  // JdProjectNumbers,
+  // JdAreaNumbers,
+  // JdCategoryNumbers,
+  // JdIdNumbers,
+  // JdItem,
   AuthMachineEvent,
 } from "@types";
 
@@ -28,7 +28,6 @@ import { Breadcrumbs } from "../Breadcrumbs/Breadcrumbs";
 import { Area } from "../Area/Area";
 import { Category } from "../Category/Category";
 import { ID } from "../ID/ID";
-import { DatabaseReactContextValue } from "global";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 declare global {
@@ -124,13 +123,14 @@ export const DatabaseMachine = () => {
   // }
 
   /**
-   * `DatabaseReactContextValue` contains all of the helper/sender functions,
+   * `DatabaseMachineReactContextValue` contains all of the helper/sender functions,
    * declared here, that are passed down in React Context for use by child
    * components.
    */
-  const DatabaseReactContextValue: DatabaseReactContextValue = {
+  const DatabaseMachineReactContextValue: DatabaseMachineReactContextValue = {
     changeDatabase,
     insertItem,
+    jdSystem,
     selectArea,
     selectCategory,
     selectId,
@@ -160,7 +160,7 @@ export const DatabaseMachine = () => {
   //#endregion
 
   return (
-    <DatabaseMachineReactContext.Provider value={DatabaseReactContextValue}>
+    <DatabaseMachineReactContext.Provider value={DatabaseMachineReactContextValue}>
       <div className="my-12"></div>
       {/*
       <div>JD App</div>
