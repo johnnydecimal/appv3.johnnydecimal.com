@@ -1,11 +1,3 @@
-import {
-  JdSystem,
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdIdNumbers,
-  JdItem,
-} from "@types";
 import { categoryNumberToAreaNumber } from "utils";
 import { idNumberToCategoryNumber } from "utils/idNumberToCategoryNumber/idNumberToCategoryNumber";
 

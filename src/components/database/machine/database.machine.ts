@@ -8,17 +8,7 @@ import { nanoid } from "nanoid";
 import { userbaseItemsToJdSystem } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  AuthMachineEvent,
-  JdSystem,
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdIdNumbers,
-  JdItem,
-  UserbaseError,
-  UserbaseItem,
-} from "@types";
+import { AuthMachineEvent, UserbaseItem } from "@types";
 import { jdSystemInsertCheck } from "utils";
 
 const databaseModel = createModel(

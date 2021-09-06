@@ -1,4 +1,3 @@
-import { JdItem, JdSystem } from "../../../@types";
 import {
   areaIsNotDuplicate,
   categoryIsNotDuplicate,

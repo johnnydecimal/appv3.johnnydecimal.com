@@ -1,10 +1,4 @@
 import { useContext } from "react";
-import {
-  JdSystem,
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-} from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Area = ({
@@ -18,13 +12,9 @@ export const Area = ({
   currentArea: JdAreaNumbers | null;
   children: React.ReactNode;
 }) => {
-  const {
-    openArea,
-    openCategory,
-  }: {
-    openArea: (area: JdAreaNumbers) => void;
-    openCategory: (category: JdCategoryNumbers | null) => void;
-  } = useContext(DatabaseMachineReactContext);
+  const { selectArea, selectCategory } = useContext(
+    DatabaseMachineReactContext
+  );
   if (currentArea) {
     /**
      * If there's a current area, the user has selected an area.
@@ -42,7 +32,7 @@ export const Area = ({
         <div
           className="cursor-pointer col-span-full"
           onClick={() => {
-            openCategory(null);
+            selectCategory(null);
           }}
         >
           {currentArea} {jdSystem[currentProject]!.areas[currentArea]!.title}
@@ -68,8 +58,14 @@ export const Area = ({
   return (
     <div>
       {areas.map((area, i) => (
-        <div className="cursor-pointer" key={i} onClick={() => openArea(area)}>
-          <span className="border border-dotted">{area} {jdSystem[currentProject]!.areas[area]!.title}</span>
+        <div
+          className="cursor-pointer"
+          key={i}
+          onClick={() => selectArea(area)}
+        >
+          <span className="border border-dotted">
+            {area} {jdSystem[currentProject]!.areas[area]!.title}
+          </span>
         </div>
       ))}
     </div>

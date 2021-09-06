@@ -4,7 +4,7 @@ import { EventFrom, sendParent } from "xstate";
 import { createModel } from "xstate/lib/model";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { AuthMachineEvent, UserbaseError } from "@types";
+import { AuthMachineEvent } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 const databaseGetterModel = createModel(

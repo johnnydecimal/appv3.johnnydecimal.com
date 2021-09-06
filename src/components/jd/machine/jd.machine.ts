@@ -1,6 +1,6 @@
 import { createModel } from "xstate/lib/model";
 
-import { JdSystem, UserbaseItem } from "@types";
+import { UserbaseItem } from "@types";
 import { userbaseItemsGenerator } from "utils";
 
 export const testUserbaseItems = userbaseItemsGenerator(

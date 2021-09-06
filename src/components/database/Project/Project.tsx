@@ -1,5 +1,4 @@
 import { useContext } from "react";
-import { JdSystem, JdProjectNumbers, JdAreaNumbers } from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Project = (props: any) => {
@@ -13,11 +12,7 @@ export const Project = (props: any) => {
     children: React.ReactNode;
   } = props;
 
-  const {
-    openArea,
-  }: {
-    openArea: (area: JdAreaNumbers | null) => void;
-  } = useContext(DatabaseMachineReactContext);
+  const { selectArea } = useContext(DatabaseMachineReactContext);
 
   /**
    * At the very least, we're always passed `jdSystem` which contains

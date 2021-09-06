@@ -1,5 +1,3 @@
-type PROACIDDetectorReturn = "project" | "area" | "category" | "id" | "error";
-
 export const proacidDetector = (item: string): PROACIDDetectorReturn => {
   if (typeof item !== "string") {
     return "error";

@@ -2,4 +2,17 @@
 import { createContext } from "react";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export const DatabaseMachineReactContext = createContext<Partial<DatabaseMachineReactContextValue>>({});
+/**
+ * We load this up with default values. The alternative is to make it a
+ * <Partial<DMRCV>> but then we have to check for the existence of every value
+ * when we consume context and that's really boring.
+ */
+export const DatabaseMachineReactContext =
+  createContext<DatabaseMachineReactContextValue>({
+    changeDatabase: () => {},
+    insertItem: () => {},
+    jdSystem: {},
+    selectArea: () => {},
+    selectCategory: () => {},
+    selectId: () => {},
+  });

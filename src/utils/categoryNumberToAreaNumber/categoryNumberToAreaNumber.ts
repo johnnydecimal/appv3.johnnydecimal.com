@@ -1,7 +1,3 @@
-// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JdAreaNumbers, JdCategoryNumbers } from "@types";
-
-// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const categoryNumberToAreaNumber = (
   category: JdCategoryNumbers
 ): JdAreaNumbers => {

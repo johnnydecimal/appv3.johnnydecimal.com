@@ -3,8 +3,6 @@ import { UserbaseItem } from "@types";
 import React from "react";
 import { nanoid } from "nanoid";
 
-import { JdAreaNumbers, JdCategoryNumbers, JdIdNumbers } from "@types";
-
 import {
   allAreas,
   allCategories,

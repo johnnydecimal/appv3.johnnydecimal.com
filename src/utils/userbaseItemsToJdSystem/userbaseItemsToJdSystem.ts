@@ -2,13 +2,7 @@
 import { categoryNumberToAreaNumber } from "utils";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import {
-  JdSystem,
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  UserbaseItem,
-} from "@types";
+import { UserbaseItem } from "@types";
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 /**

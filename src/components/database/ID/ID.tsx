@@ -1,11 +1,4 @@
 import { useContext } from "react";
-import {
-  JdSystem,
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdIdNumbers,
-} from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const ID = ({
@@ -23,11 +16,7 @@ export const ID = ({
   currentId: JdIdNumbers | null;
   // children: React.ReactNode;
 }) => {
-  const {
-    openId,
-  }: {
-    openId: (id: JdIdNumbers) => void;
-  } = useContext(DatabaseMachineReactContext);
+  const { selectId } = useContext(DatabaseMachineReactContext);
   if (currentId) {
     /**
      * If there's a current ID, the user has selected an ID.
@@ -73,7 +62,7 @@ export const ID = ({
   return (
     <div>
       {ids.map((id, i) => (
-        <div className="cursor-pointer" key={i} onClick={() => openId(id)}>
+        <div className="cursor-pointer" key={i} onClick={() => selectId(id)}>
           {id}{" "}
           {
             jdSystem[currentProject]!.areas[currentArea]!.categories[

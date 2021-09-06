@@ -1,11 +1,4 @@
 import { useContext } from "react";
-import {
-  JdSystem,
-  JdProjectNumbers,
-  JdAreaNumbers,
-  JdCategoryNumbers,
-  JdIdNumbers,
-} from "@types";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Category = ({
@@ -21,13 +14,7 @@ export const Category = ({
   currentCategory: JdCategoryNumbers | null;
   children: React.ReactNode;
 }) => {
-  const {
-    openCategory,
-    openId,
-  }: {
-    openCategory: (category: JdCategoryNumbers) => void;
-    openId: (id: JdIdNumbers | null) => void;
-  } = useContext(DatabaseMachineReactContext);
+  const { selectCategory, selectId } = useContext(DatabaseMachineReactContext);
   if (currentCategory) {
     /**
      * If there's a current category, the user has selected a category.
@@ -45,7 +32,7 @@ export const Category = ({
         <div
           className="cursor-pointer col-span-full"
           onClick={() => {
-            openId(null);
+            selectId(null);
           }}
         >
           {currentCategory}{" "}
@@ -81,7 +68,7 @@ export const Category = ({
         <div
           className="cursor-pointer"
           key={i}
-          onClick={() => openCategory(category)}
+          onClick={() => selectCategory(category)}
         >
           {category}{" "}
           {

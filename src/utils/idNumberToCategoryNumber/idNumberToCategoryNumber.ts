@@ -1,7 +1,3 @@
-// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import { JdCategoryNumbers, JdIdNumbers } from "@types";
-
-// === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const idNumberToCategoryNumber = (
   id: JdIdNumbers
 ): JdCategoryNumbers => {

@@ -1,11 +1,3 @@
-// export type {
-//     JdProjectNumbers,
-//     JdAreaNumbers,
-//     JdCategoryNumbers,
-//     JdIdNumbers,
-//     JdItem
-// } from '@types'
-
 /**
  * JdProjectNumbers is a sample of project numbers to help us in dev.
  */
@@ -19,11 +11,11 @@ type JdProjectNumbers =
   | "006"
   | "007"
   | "008"
-  | "009"
+  | "009";
 
 /**
-* JdAreaNumbers is the type which is all possible area numbers.
-*/
+ * JdAreaNumbers is the type which is all possible area numbers.
+ */
 type JdAreaNumbers =
   | "00-09"
   | "10-19"
@@ -37,8 +29,8 @@ type JdAreaNumbers =
   | "90-99";
 
 /**
-* JdCategoryNumbers is the type which is all possible category numbers.
-*/
+ * JdCategoryNumbers is the type which is all possible category numbers.
+ */
 type JdCategoryNumbers =
   | "00"
   | "01"
@@ -50,6 +42,9 @@ type JdCategoryNumbers =
   | "07"
   | "08"
   | "09"
+  | "10"
+  | "80"
+  | "99";
 
 /**
  * JdIdNumbers is a sample of ID numbers to help us in dev.
@@ -120,15 +115,6 @@ interface JDUserProfile extends UserProfile {
   currentProject: string;
 }
 
-// -=- Database  --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
-/**
- * `Item` is the base Userbase item type. We extend it by specifying that the
- * `item` property must be a `JdItem`.
- */
-interface UserbaseItem extends Item {
-  item: JdItem;
-}
-
 /**
  * The `UserbaseData` array is an array of `UserbaseItem`s as returned by
  * `userbase.openDatabase()`.
@@ -157,34 +143,34 @@ interface UserbaseError {
 
 type JdItem =
   | {
-    jdType: "project";
-    jdNumber: JdProjectNumbers;
-    jdTitle: string;
-    meta?: Object;
-  }
+      jdType: "project";
+      jdNumber: JdProjectNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
   | {
-    jdType: "area";
-    jdNumber: JdAreaNumbers;
-    jdTitle: string;
-    meta?: Object;
-  }
+      jdType: "area";
+      jdNumber: JdAreaNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
   | {
-    jdType: "category";
-    jdNumber: JdCategoryNumbers;
-    jdTitle: string;
-    meta?: Object;
-  }
+      jdType: "category";
+      jdNumber: JdCategoryNumbers;
+      jdTitle: string;
+      meta?: Object;
+    }
   | {
-    jdType: "id";
-    jdNumber: JdIdNumbers;
-    jdTitle: string;
-    meta?: Object;
-  };
+      jdType: "id";
+      jdNumber: JdIdNumbers;
+      jdTitle: string;
+      meta?: Object;
+    };
 
 type SelectArea = (area: JdAreaNumbers | null) => void;
 type SelectCategory = (category: JdCategoryNumbers | null) => void;
 type SelectId = (id: JdIdNumbers | null) => void;
-type ChangeDatabase = (newDatabase: JdProjectNumbers) => void;;
+type ChangeDatabase = (newDatabase: JdProjectNumbers) => void;
 type InsertItem = (item: JdItem) => void;
 
 interface DatabaseMachineReactContextValue {
@@ -194,4 +180,6 @@ interface DatabaseMachineReactContextValue {
   selectCategory: SelectCategory;
   selectId: SelectId;
   insertItem: InsertItem;
-};
+}
+
+type PROACIDDetectorReturn = "project" | "area" | "category" | "id" | "error";

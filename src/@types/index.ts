@@ -12,6 +12,8 @@
 //   UserbaseItem,
 // } from "./Userbase";
 
+import { Item } from "userbase-js";
+
 export type {
   AuthMachineContext,
   AuthMachineEvent,
@@ -21,3 +23,12 @@ export type {
   DatabaseMachineContext,
   DatabaseMachineEvent,
 } from "../components/database/machine/database.machine";
+
+// -=- Database  --=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--
+/**
+ * `Item` is the base Userbase item type. We extend it by specifying that the
+ * `item` property must be a `JdItem`.
+ */
+export interface UserbaseItem extends Item {
+  item: JdItem;
+}
