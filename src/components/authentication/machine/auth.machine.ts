@@ -7,10 +7,6 @@ import { createModel } from "xstate/lib/model";
 import { databaseMachine } from "components/database";
 import { databaseGetterMachine } from "components/databaseGetter";
 
-// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import type { SignInFormData } from "../SignInForm/SignInForm";
-import type { SignUpFormData } from "../SignUpForm/SignUpForm";
-
 interface UserbaseError {
   name: string; // UsernameOrPasswordMismatch
   message: string; // Username or password mismatch.

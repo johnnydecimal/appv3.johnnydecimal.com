@@ -173,6 +173,18 @@ type SelectId = (id: JdIdNumbers | null) => void;
 type ChangeDatabase = (newDatabase: JdProjectNumbers) => void;
 type InsertItem = (item: JdItem) => void;
 
+interface AuthMachineReactContextValue {
+  handleAcknowledgeDireWarningAboutE2EEncryption: () => void;
+  handleDeleteUser: () => void;
+  handleSignOut: () => void;
+  switchToSignIn: () => void;
+  switchToSignUp: () => void;
+  handleSignIn: (formData: SignInFormData) => void;
+  handleSignUp: (formData: SignUpFormData) => void;
+  send: any;
+  state: any;
+}
+
 interface DatabaseMachineReactContextValue {
   jdSystem: JdSystem;
   changeDatabase: ChangeDatabase;
@@ -183,3 +195,13 @@ interface DatabaseMachineReactContextValue {
 }
 
 type PROACIDDetectorReturn = "project" | "area" | "category" | "id" | "error";
+
+interface SignInFormData {
+  username: string;
+  password: string;
+}
+
+interface SignUpFormData {
+  username: string;
+  password: string;
+}

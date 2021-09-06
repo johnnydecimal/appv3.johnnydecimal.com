@@ -6,12 +6,6 @@ import { useForm } from "react-hook-form";
 import { AuthMachineReactContext } from "../AuthMachine/context";
 import { LogViewer } from "../LogViewer/LogViewer";
 
-// === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-export interface SignInFormData {
-  username: string;
-  password: string;
-}
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const SignInForm = () => {
   /**

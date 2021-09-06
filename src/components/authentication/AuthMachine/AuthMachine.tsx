@@ -11,8 +11,6 @@ import { SignInForm } from "../SignInForm/SignInForm";
 import { SignUpForm } from "../SignUpForm/SignUpForm";
 
 // === Types    ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-import type { SignInFormData } from "../SignInForm/SignInForm";
-import type { SignUpFormData } from "../SignUpForm/SignUpForm";
 declare global {
   interface Window {
     // TODO: For testing, remove in prod

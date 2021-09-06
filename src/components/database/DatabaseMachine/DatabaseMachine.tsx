@@ -51,10 +51,6 @@ export const DatabaseMachine = () => {
     handleSignOut,
     send: authSend,
     state: authState,
-  }: {
-    handleSignOut: () => void;
-    send: (event: AuthMachineEvent) => void;
-    state: any;
   } = useContext(AuthMachineReactContext);
 
   /**
@@ -160,7 +156,9 @@ export const DatabaseMachine = () => {
   //#endregion
 
   return (
-    <DatabaseMachineReactContext.Provider value={DatabaseMachineReactContextValue}>
+    <DatabaseMachineReactContext.Provider
+      value={DatabaseMachineReactContextValue}
+    >
       <div className="my-12"></div>
       {/*
       <div>JD App</div>
