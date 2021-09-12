@@ -5,6 +5,9 @@ import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 export const Breadcrumbs = () => {
   const {
     jdSystem,
+    currentArea,
+    currentCategory,
+    currentId,
     selectArea,
     selectCategory,
     selectId,
