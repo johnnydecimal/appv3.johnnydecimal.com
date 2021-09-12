@@ -94,7 +94,7 @@ export const AuthMachine = () => {
     send,
     state,
     switchToSignIn,
-    switchToSignUp,
+    switchToSignUp, 
   };
 
   let RenderComponent;
