@@ -189,6 +189,7 @@ interface AuthMachineReactContextValue {
 interface DatabaseMachineReactContextValue {
   jdSystem: JdSystem;
   changeDatabase: ChangeDatabase;
+  currentProject: JdProjectNumbers;
   currentArea: JdAreaNumbers | null;
   currentCategory: JdCategoryNumbers | null;
   currentId: JdIdNumbers | null;

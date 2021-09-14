@@ -130,6 +130,7 @@ export const DatabaseMachine = () => {
     changeDatabase,
     insertItem,
     jdSystem,
+    currentProject,
     currentArea,
     currentCategory,
     currentId,
@@ -166,59 +167,6 @@ export const DatabaseMachine = () => {
       value={DatabaseMachineReactContextValue}
     >
       <div className="my-12"></div>
-      {/*
-      <div>JD App</div>
-      <hr className="my-2" />
-      <button onClick={handleSignOut}>Sign out</button>
-      <hr className="my-2" />
-      <div>User: {state.context.currentUsername}</div>
-      <hr className="my-2" />
-      <form onSubmit={handleSubmit}>
-        <label>
-          New project:
-          <input id="new-project" ref={formRef} type="text" />
-          <input type="submit" value="submit" />
-        </label>
-      </form>
-      <hr className="my-2" />
-      <h2>Create item</h2>
-      <form onSubmit={handleSubmitNewItem}>
-        <label>
-          New item:
-          <input
-            name="jdType"
-            placeholder="jdType"
-            type="text"
-            ref={jdTypeRef}
-          />
-          <input
-            name="jdNumber"
-            placeholder="jdNumber"
-            type="text"
-            ref={jdNumberRef}
-          />
-          <input
-            name="jdTitle"
-            placeholder="jdTitle"
-            type="text"
-            ref={jdTitleRef}
-          />
-          <input type="submit" value="submit" />
-        </label>
-      </form>
-      <hr className="my-12" />
-      */}
-
-      {/**
-       * What's passed as a prop vs. being pulled out of Context?
-       * Prop: variables.
-       * Context: static, i.e. helper functions.
-       *
-       * Remember, it's perfectly valid for these components to be passed their
-       * 'primary' thing -- `currentArea` for `<Area />` -- as `null`. This
-       * indicates that they should render the *list* of things in order that
-       * the user can select one.
-       */}
       {jdSystem?.[currentProject] ? (
         /**
          * Set up the main outer grid. This has a 6ch wide column which may or
@@ -230,7 +178,7 @@ export const DatabaseMachine = () => {
             display: "grid",
             gridTemplateColumns: "4ch auto",
             gridTemplateAreas: `'  .     breadcrumbs'
-                                'project    main    '`,
+          'project    main    '`,
           }}
         >
           <div style={{ gridArea: "breadcrumbs" }}>
@@ -292,3 +240,46 @@ export const DatabaseMachine = () => {
  *
  * Getting there, going to bed.
  */
+
+/*
+<div>JD App</div>
+<hr className="my-2" />
+<button onClick={handleSignOut}>Sign out</button>
+<hr className="my-2" />
+<div>User: {state.context.currentUsername}</div>
+<hr className="my-2" />
+<form onSubmit={handleSubmit}>
+  <label>
+    New project:
+    <input id="new-project" ref={formRef} type="text" />
+    <input type="submit" value="submit" />
+  </label>
+</form>
+<hr className="my-2" />
+<h2>Create item</h2>
+<form onSubmit={handleSubmitNewItem}>
+  <label>
+    New item:
+    <input
+      name="jdType"
+      placeholder="jdType"
+      type="text"
+      ref={jdTypeRef}
+    />
+    <input
+      name="jdNumber"
+      placeholder="jdNumber"
+      type="text"
+      ref={jdNumberRef}
+    />
+    <input
+      name="jdTitle"
+      placeholder="jdTitle"
+      type="text"
+      ref={jdTitleRef}
+    />
+    <input type="submit" value="submit" />
+  </label>
+</form>
+<hr className="my-12" />
+*/

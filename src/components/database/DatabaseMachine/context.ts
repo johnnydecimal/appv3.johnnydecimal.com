@@ -12,6 +12,7 @@ export const DatabaseMachineReactContext =
     changeDatabase: () => {},
     insertItem: () => {},
     jdSystem: {},
+    currentProject: "000",
     currentArea: null,
     currentCategory: null,
     currentId: null,
