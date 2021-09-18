@@ -37,14 +37,6 @@ declare global {
   }
 }
 
-// === Helpers (extract!)   ===-===-===-===-===-===-===-===-===-===-===-===-===
-// https://kyleshevlin.com/how-to-render-an-object-in-react
-// const Log = ({ value = {}, replacer = null, space = 2 }) => (
-//   <pre>
-//     <code>{JSON.stringify(value, replacer, space)}</code>
-//   </pre>
-// );
-
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
 export const DatabaseMachine = () => {
   const {
@@ -173,12 +165,13 @@ export const DatabaseMachine = () => {
          * may not display `000.` depending on the mode, and then the main
          * content.
          */
+        // prettier-ignore
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "4ch auto",
-            gridTemplateAreas: `'  .     breadcrumbs'
-          'project    main    '`,
+            gridTemplateAreas: `'   .    breadcrumbs'
+                                'project    main    '`,
           }}
         >
           <div style={{ gridArea: "breadcrumbs" }}>
