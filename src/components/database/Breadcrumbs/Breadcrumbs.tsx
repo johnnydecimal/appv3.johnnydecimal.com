@@ -47,7 +47,11 @@ export const Breadcrumbs = () => {
 
   /** An area is selected. */
   if (currentArea && !currentCategory) {
-    const areaTitle = jdSystem[currentProject]!.areas[currentArea]!.title;
+    const areaTitle =
+      jdSystem[currentProject]!
+        .areas[currentArea]!
+        .title;
+
     return (
       <div className="border border-red">
         {currentArea} {areaTitle}
@@ -58,13 +62,35 @@ export const Breadcrumbs = () => {
   /** A category is selected. */
   if (currentCategory && !currentId) {
     const categoryTitle =
-      jdSystem[currentProject]!.areas[currentArea]!.categories[currentCategory]!
+      jdSystem[currentProject]!
+        .areas[currentArea]!
+        .categories[currentCategory]!
         .title;
-    return (
-      <div className="border border-red">
+        
+        return (
+          <div className="border border-red">
         {currentArea} ‣ {currentCategory} {categoryTitle}
       </div>
     );
+  }
+  
+  /** An ID is selected. */
+  if (currentId) {
+    const categoryTitle =
+      jdSystem[currentProject]!
+        .areas[currentArea]!
+        .categories[currentCategory!]!
+        .title;
+    const idTitle =
+      jdSystem[currentProject]!
+        .areas[currentArea]!
+        .categories[currentCategory!]!
+        .ids[currentId]!
+        .title;
+
+    return <div className="border border-red">
+      {currentArea} ‣ {currentCategory} {categoryTitle} ‣ {currentId} {idTitle}
+    </div>
   }
 
   return <div className="border border-red">breadcrumbs</div>;
