@@ -6,4 +6,62 @@ body {
   color: #2f3160;
 }
 
+/* https://www.freecodecamp.org/news/the-100-correct-way-to-do-css-breakpoints-88d6a5ba1862/ */
+@media (max-width: 900px) {
+  /* Tablet portrait and below. */
+  .test {
+    background-color: hotpink;
+  }
+  
+  .jd_grid {
+    display: grid;
+    background-color: hotpink;
+    grid-template-columns: 3ch auto;
+    /* grid-template-rows: repeat(10, 50px); */
+    grid-template-areas:
+    "project  project"
+    " area     area"
+    "   .     category"
+    "   .       id"
+    "   .      main";
+  }
+  
+}
+
+@media (min-width: 901px) {
+  /* Tablet landscape and above. */
+  .test {
+    background-color: slateblue;
+  }
+  
+  .jd_grid {
+    display: grid;
+    background-color: slateblue;
+    grid-template-columns: 4ch 3ch 3ch auto;
+    /* grid-template-rows: max-content max-content max-content max-content max-content; */
+    grid-template-areas:
+      "project project project  project"
+      "   .     area    area     area"
+      "   .      .     category category"
+      "   .      .        .       id"
+      "   .      .        .      main";
+  }
+}
+
+.project {
+  grid-area: project;
+}
+.area {
+  grid-area: area;
+}
+.category {
+  grid-area: category;
+}
+.id {
+  grid-area: id;
+}
+.main {
+  grid-area: main;
+}
+
 @tailwind utilities;

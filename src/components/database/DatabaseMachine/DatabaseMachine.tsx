@@ -159,6 +159,16 @@ export const DatabaseMachine = () => {
       value={DatabaseMachineReactContextValue}
     >
       <div className="my-12"></div>
+
+      <div className="jd_grid">
+        <div className="project">006 HW PODIP</div>
+        <div className="area">20-29 PMP</div>
+        <div className="category">21 Scope</div>
+        <div className="id">21.01 Scope management plan</div>
+        <div className="main">main</div>
+      </div>
+
+      <div className="my-12"></div>
       {jdSystem?.[currentProject] ? (
         /**
          * Set up the main outer grid. This has a 6ch wide column which may or
@@ -167,6 +177,7 @@ export const DatabaseMachine = () => {
          */
         // prettier-ignore
         <div
+          className="test"
           style={{
             display: "grid",
             gridTemplateColumns: "4ch auto",
@@ -175,7 +186,7 @@ export const DatabaseMachine = () => {
           }}
         >
           <div style={{ gridArea: "breadcrumbs" }}>
-            {/* <Breadcrumbs /> */}
+            <Breadcrumbs />
           </div>
 
           <div style={{ gridArea: "project" }}>{/* Nothing here yet */}</div>
