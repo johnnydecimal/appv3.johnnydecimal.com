@@ -175,32 +175,17 @@ export const DatabaseMachine = () => {
           }}
         >
           <div style={{ gridArea: "breadcrumbs" }}>
-            <Breadcrumbs />
+            {/* <Breadcrumbs /> */}
           </div>
 
           <div style={{ gridArea: "project" }}>{/* Nothing here yet */}</div>
 
           <div style={{ gridArea: "main" }}>
-            <Area
-              jdSystem={jdSystem}
-              currentProject={currentProject}
-              currentArea={currentArea}
-            >
+            <Area>
               {currentArea ? (
-                <Category
-                  jdSystem={jdSystem}
-                  currentProject={currentProject}
-                  currentArea={currentArea}
-                  currentCategory={currentCategory}
-                >
+                <Category>
                   {currentCategory ? (
-                    <ID
-                      jdSystem={jdSystem}
-                      currentProject={currentProject}
-                      currentArea={currentArea}
-                      currentCategory={currentCategory}
-                      currentId={currentId}
-                    />
+                    <ID />
                   ) : (
                     <div>EEP</div>
                   )}
@@ -214,6 +199,8 @@ export const DatabaseMachine = () => {
       ) : (
         <div>jdSystem.currentProject does not yet exist.</div>
       )}
+      <hr className="mt-24" />
+      <button onClick={handleSignOut}>Sign out</button>
       {/*
       <div>appMachine.state: {JSON.stringify(state.value)}</div>
       <Log value={state.context} /> */}

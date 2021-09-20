@@ -1,20 +1,10 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
-export const Area = ({
-  jdSystem,
-  currentProject,
-  currentArea,
-  children,
-}: {
-  jdSystem: JdSystem;
-  currentProject: JdProjectNumbers;
-  currentArea: JdAreaNumbers | null;
-  children: React.ReactNode;
-}) => {
-  const { selectArea, selectCategory } = useContext(
-    DatabaseMachineReactContext
-  );
+export const Area = ({ children }: { children: React.ReactNode }) => {
+  const { jdSystem, currentProject, currentArea, selectArea, selectCategory } =
+    useContext(DatabaseMachineReactContext);
+
   if (currentArea) {
     /**
      * If there's a current area, the user has selected an area.
@@ -43,31 +33,31 @@ export const Area = ({
         <div className="col-start-2">{children}</div>
       </div>
     );
+  } else {
+    /**
+     * If there isn't a current area, the user has not selected an area.
+     *
+     * We render a list of all areas, each of which is clickable. Doing so makes
+     * that area the `currentArea`.
+     */
+    const areas = Object.keys(jdSystem[currentProject]!.areas).sort((a, b) => {
+      return Number(a.charAt(0)) - Number(b.charAt(0));
+    }) as JdAreaNumbers[];
+
+    return (
+      <div>
+        {areas.map((area, i) => (
+          <div
+            className="cursor-pointer"
+            key={i}
+            onClick={() => selectArea(area)}
+          >
+            <span className="border border-dotted">
+              {area} {jdSystem[currentProject]!.areas[area]!.title}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   }
-
-  /**
-   * If there isn't a current area, the user has not selected an area.
-   *
-   * We render a list of all areas, each of which is clickable. Doing so makes
-   * that area the `currentArea`.
-   */
-  const areas = Object.keys(jdSystem[currentProject]!.areas).sort((a, b) => {
-    return Number(a.charAt(0)) - Number(b.charAt(0));
-  }) as JdAreaNumbers[];
-
-  return (
-    <div>
-      {areas.map((area, i) => (
-        <div
-          className="cursor-pointer"
-          key={i}
-          onClick={() => selectArea(area)}
-        >
-          <span className="border border-dotted">
-            {area} {jdSystem[currentProject]!.areas[area]!.title}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
 };

@@ -1,22 +1,18 @@
 import { useContext } from "react";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
-export const ID = ({
-  jdSystem,
-  currentProject,
-  currentArea,
-  currentCategory,
-  currentId,
-}: // children,
-{
-  jdSystem: JdSystem;
-  currentProject: JdProjectNumbers;
-  currentArea: JdAreaNumbers;
-  currentCategory: JdCategoryNumbers;
-  currentId: JdIdNumbers | null;
-  // children: React.ReactNode;
-}) => {
-  const { selectId } = useContext(DatabaseMachineReactContext);
+export const ID = () => {
+  const {
+    jdSystem,
+    currentProject,
+    currentArea,
+    currentCategory,
+    currentId,
+    // selectArea,
+    // selectCategory,
+    selectId,
+  } = useContext(DatabaseMachineReactContext);
+
   if (currentId) {
     /**
      * If there's a current ID, the user has selected an ID.
@@ -34,8 +30,8 @@ export const ID = ({
         <div className="col-span-full">
           {currentId}{" "}
           {
-            jdSystem[currentProject]!.areas[currentArea]!.categories[
-              currentCategory
+            jdSystem[currentProject]!.areas[currentArea!]!.categories[
+              currentCategory!
             ]!.ids[currentId]!.title
           }
         </div>
@@ -53,7 +49,7 @@ export const ID = ({
    * that ID the `currentId`.
    */
   const ids = Object.keys(
-    jdSystem[currentProject]!.areas[currentArea]!.categories[currentCategory]!
+    jdSystem[currentProject]!.areas[currentArea!]!.categories[currentCategory!]!
       .ids
   ).sort((a, b) => {
     return Number(a) - Number(b);
@@ -65,8 +61,8 @@ export const ID = ({
         <div className="cursor-pointer" key={i} onClick={() => selectId(id)}>
           {id}{" "}
           {
-            jdSystem[currentProject]!.areas[currentArea]!.categories[
-              currentCategory
+            jdSystem[currentProject]!.areas[currentArea!]!.categories[
+              currentCategory!
             ]!.ids[id]!.title
           }
         </div>
