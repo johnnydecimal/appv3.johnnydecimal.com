@@ -7,7 +7,7 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
     currentProject,
     currentArea,
     currentCategory,
-    // currentId,
+    currentId,
     // selectArea,
     selectCategory,
     selectId,
@@ -30,15 +30,17 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
       <div className="category">
         {categories.map((category, i) => (
           <div key={i}>
+            {/* prettier-ignore */}
             <span
               className="cursor-pointer"
               onClick={() => selectCategory(category)}
             >
-              {category}{" "}
-              {
-                jdSystem[currentProject]!.areas[currentArea]!.categories[
-                  category
-                ]!.title
+              {category}
+              {" "}
+              {jdSystem[currentProject]!
+                .areas[currentArea]!
+                .categories[category]!
+                .title
               }
             </span>
           </div>
@@ -57,17 +59,19 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
     return (
       <>
         <div className="category">
+          {/* prettier-ignore */}
           <span
-            className="selected"
+            className={currentId ? "cursor-pointer" : 'selected'}
             onClick={() => {
               selectId(null);
             }}
           >
-            {currentCategory}{" "}
-            {
-              jdSystem[currentProject]!.areas[currentArea]!.categories[
-                currentCategory
-              ]!.title
+            {currentCategory}
+            {" "}
+            {jdSystem[currentProject]!
+              .areas[currentArea]!
+              .categories[currentCategory]!
+              .title
             }
           </span>
         </div>

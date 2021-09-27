@@ -13,7 +13,44 @@ export const ID = () => {
     selectId,
   } = useContext(DatabaseMachineReactContext);
 
-  if (currentId) {
+  if (currentArea && currentCategory && !currentId) {
+    /**
+     * If there isn't a current ID, the user has not selected an ID.
+     *
+     * We render a list of all IDs, each of which is clickable. Doing so makes
+     * that ID the `currentId`.
+     */
+    const ids = Object.keys(
+      jdSystem[currentProject]!.areas[currentArea!]!.categories[
+        currentCategory!
+      ]!.ids
+    ).sort((a, b) => {
+      return Number(a) - Number(b);
+    }) as JdIdNumbers[];
+
+    return (
+      <div className="id">
+        {ids.map((id, i) => (
+          <div key={i}>
+            {/* prettier-ignore */}
+            <span
+              className="cursor-pointer"
+              onClick={() => selectId(id)}
+            >
+              {id}
+              {" "}
+              {jdSystem[currentProject]!
+                .areas[currentArea]!
+                .categories[currentCategory]!
+                .ids[id]!
+                .title
+              }
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  } else if (currentArea && currentCategory && currentId) {
     /**
      * If there's a current ID, the user has selected an ID.
      *
@@ -23,50 +60,21 @@ export const ID = () => {
      * This header isn't clickable, as there's nothing 'below' to reveal.
      */
     return (
-      <div className="grid" style={{ gridTemplateColumns: "3ch auto" }}>
-        {/**
-         * Spanned across all columns, the ID number + title.
-         */}
-        <div className="col-span-full">
-          {currentId}{" "}
-          {
-            jdSystem[currentProject]!.areas[currentArea!]!.categories[
-              currentCategory!
-            ]!.ids[currentId]!.title
+      <div className="id">
+        {/* prettier-ignore */}
+        <span className="selected">
+          {currentId}
+          {" "}
+          {jdSystem[currentProject]!
+            .areas[currentArea]!
+            .categories[currentCategory]!
+            .ids[currentId]!
+            .title
           }
-        </div>
-        <div className="text-base col-span-full">
-          The contents of this ID will be here when we've built this.
-        </div>
+          </span>
       </div>
     );
+  } else {
+    return <div>Impossible</div>; // TODO: test/handle.
   }
-
-  /**
-   * If there isn't a current ID, the user has not selected an ID.
-   *
-   * We render a list of all IDs, each of which is clickable. Doing so makes
-   * that ID the `currentId`.
-   */
-  const ids = Object.keys(
-    jdSystem[currentProject]!.areas[currentArea!]!.categories[currentCategory!]!
-      .ids
-  ).sort((a, b) => {
-    return Number(a) - Number(b);
-  }) as JdIdNumbers[];
-
-  return (
-    <div>
-      {ids.map((id, i) => (
-        <div className="cursor-pointer" key={i} onClick={() => selectId(id)}>
-          {id}{" "}
-          {
-            jdSystem[currentProject]!.areas[currentArea!]!.categories[
-              currentCategory!
-            ]!.ids[id]!.title
-          }
-        </div>
-      ))}
-    </div>
-  );
 };

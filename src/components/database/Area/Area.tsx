@@ -26,8 +26,14 @@ export const Area = ({ children }: { children: React.ReactNode }) => {
       <div className="area">
         {areas.map((area, i) => (
           <div key={i}>
+            {/* prettier-ignore */}
             <span className="cursor-pointer" onClick={() => selectArea(area)}>
-              {area} {jdSystem[currentProject]!.areas[area]!.title}
+              {area}
+              {" "}
+              {jdSystem[currentProject]!
+                .areas[area]!
+                .title
+              }
             </span>
           </div>
         ))}
@@ -45,13 +51,19 @@ export const Area = ({ children }: { children: React.ReactNode }) => {
     return (
       <>
         <div className="area">
+          {/* prettier-ignore */}
           <span
             className={currentCategory ? "cursor-pointer" : "selected"}
             onClick={() => {
               selectCategory(null);
             }}
           >
-            {currentArea} {jdSystem[currentProject]!.areas[currentArea]!.title}
+            {currentArea}
+            {" "}
+            {jdSystem[currentProject]!
+              .areas[currentArea]!
+              .title
+            }
           </span>
         </div>
 
