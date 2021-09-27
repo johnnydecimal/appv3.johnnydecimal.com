@@ -35,12 +35,12 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
               onClick={() => selectCategory(category)}
             >
               {category}{" "}
+              {
+                jdSystem[currentProject]!.areas[currentArea]!.categories[
+                  category
+                ]!.title
+              }
             </span>
-            {
-              jdSystem[currentProject]!.areas[currentArea]!.categories[
-                category
-              ]!.title
-            }
           </div>
         ))}
       </div>
@@ -55,28 +55,31 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
      * categories, which we do by clearing `currentId`.
      */
     return (
-      <div className="grid" style={{ gridTemplateColumns: "3ch auto" }}>
-        {/**
-         * Spanned across all columns, the category number + title.
-         */}
-        <div
-          className="cursor-pointer col-span-full"
-          onClick={() => {
-            selectId(null);
-          }}
-        >
-          {currentCategory}{" "}
-          {
-            jdSystem[currentProject]!.areas[currentArea]!.categories[
-              currentCategory
-            ]!.title
-          }
+      <>
+        <div className="category">
+          <span
+            className="selected"
+            onClick={() => {
+              selectId(null);
+            }}
+          >
+            {currentCategory}{" "}
+            {
+              jdSystem[currentProject]!.areas[currentArea]!.categories[
+                currentCategory
+              ]!.title
+            }
+          </span>
         </div>
-        {/**
-         * In the indented second column, children (which is `<ID />`).
-         */}
-        <div className="col-start-2">{children}</div>
-      </div>
+
+        {/* If there's a currentCategory, <DatabaseMachine> has passed us
+            <ID> as a child.
+            
+            Don't wrap this in a <div>! Otherwise we break the grid. We do
+            that in <ID>.
+          */}
+        {children}
+      </>
     );
   } else {
     return <div>Impossible</div>; // TODO: test/handle.

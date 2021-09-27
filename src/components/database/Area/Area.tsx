@@ -2,8 +2,14 @@ import React, { useContext } from "react";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Area = ({ children }: { children: React.ReactNode }) => {
-  const { jdSystem, currentProject, currentArea, selectArea, selectCategory } =
-    useContext(DatabaseMachineReactContext);
+  const {
+    jdSystem,
+    currentProject,
+    currentArea,
+    currentCategory,
+    selectArea,
+    selectCategory,
+  } = useContext(DatabaseMachineReactContext);
 
   if (!currentArea) {
     /**
@@ -40,7 +46,7 @@ export const Area = ({ children }: { children: React.ReactNode }) => {
       <>
         <div className="area">
           <span
-            className="cursor-pointer col-span-full selected"
+            className={currentCategory ? "cursor-pointer" : "selected"}
             onClick={() => {
               selectCategory(null);
             }}

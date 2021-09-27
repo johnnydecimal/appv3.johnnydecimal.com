@@ -36,6 +36,7 @@ body {
   .jd_grid {
     display: grid;
     background-color: lightgoldenrodyellow;
+    row-gap: 5px;
     grid-template-columns: 4ch 3ch 3ch auto;
     /* grid-template-rows: max-content max-content max-content max-content max-content; */
     grid-template-areas:
@@ -65,7 +66,7 @@ body {
 }
 
 .selected {
-  @apply font-semibold border-b border-black;
+  @apply font-semibold border-b-2 border-black;
 }
 /* .jd_grid :not(.selected):hover {
   @apply border-b-2 border-black;
