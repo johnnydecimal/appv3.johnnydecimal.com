@@ -32,23 +32,21 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
     }) as JdCategoryNumbers[];
 
     // Find the next available category. It might be in the middle of the range.
-    // const nextAvailableCategory = () => {
-    let nextAvailableCategory: any; // TODO: FIX
+    let nextAvailableCategory: any; // TODO: FIX - any other value TS errors
     const categoryFamily = currentArea.charAt(0);
+    // prettier-ignore
     for (let i = 1; i <= 9; i++) {
-      const categoryToTest = (categoryFamily +
-        i.toString()) as JdCategoryNumbers;
+      const categoryToTest =
+        (categoryFamily + i.toString()) as JdCategoryNumbers;
       if (
-        !jdSystem[currentProject]!.areas[currentArea]!.categories[
-          categoryToTest
-        ]
+        !jdSystem[currentProject]!
+          .areas[currentArea]!
+          .categories[categoryToTest]
       ) {
         nextAvailableCategory = categoryToTest;
         break;
       }
     }
-    // return nextAvailableCategory;
-    // };
 
     // Set up the add-a-new-thing handlers.
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -62,23 +60,8 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
         jdNumber: nextAvailableCategory,
         jdTitle: newCategory,
       });
+      setNewCategory("");
     };
-
-    // if (categories.length <= 9) {
-    //   return (
-    //     <div className="category text-grey-light">
-    //       <form onSubmit={handleSubmit}>
-    //         <span className="">41 </span>
-    //         <input
-    //           className="text-black outline-none w-96"
-    //           placeholder="Add a new category here..."
-    //           onChange={handleChange}
-    //           value={newCategory}
-    //         />
-    //       </form>
-    //     </div>
-    //   );
-    // }
 
     return (
       <div className="category">
@@ -101,7 +84,7 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
           </div>
         ))}
         {/* The add-a-new-category line, if there are any spare. */}
-        {categories.length <= 9 && nextAvailableCategory ? (
+        {categories.length <= 9 && !!nextAvailableCategory ? (
           <form onSubmit={handleSubmit}>
             <span className="text-grey-light">{nextAvailableCategory} </span>
             <input
