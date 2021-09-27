@@ -54,7 +54,6 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
     };
     const handleSubmit = (event: SyntheticEvent) => {
       event.preventDefault();
-      console.debug("🚇 handleSubmit");
       insertItem({
         jdType: "category",
         jdNumber: nextAvailableCategory,
@@ -84,7 +83,7 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
           </div>
         ))}
         {/* The add-a-new-category line, if there are any spare. */}
-        {categories.length <= 9 && !!nextAvailableCategory ? (
+        {categories.length <= 9 && nextAvailableCategory ? (
           <form onSubmit={handleSubmit}>
             <span className="text-grey-light">{nextAvailableCategory} </span>
             <input
