@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { ChangeEvent, SyntheticEvent, useContext, useState } from "react";
 import { DatabaseMachineReactContext } from "../DatabaseMachine/context";
 
 export const Category = ({ children }: { children: React.ReactNode }) => {
@@ -8,10 +8,13 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
     currentArea,
     currentCategory,
     currentId,
+    insertItem,
     // selectArea,
     selectCategory,
     selectId,
   } = useContext(DatabaseMachineReactContext);
+
+  const [newCategory, setNewCategory] = useState("");
 
   if (currentArea && !currentCategory) {
     /**
@@ -20,29 +23,66 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
      * We render a list of all categories, each of which is clickable. Doing so
      * makes that category the `currentCategory`.
      */
+
+    // Get the list of existing categories.
     const categories = Object.keys(
       jdSystem[currentProject]!.areas[currentArea]!.categories
     ).sort((a, b) => {
       return Number(a) - Number(b);
     }) as JdCategoryNumbers[];
 
-    /**
-     * If there are no categories, display a placeholder rather than nothing.
-     */
-    if (categories.length === 0) {
-      return (
-        <div className="category text-grey-light">
-          <span className="">41 </span>
-          <input
-            className="outline-none w-96 text-grey-light"
-            placeholder="Add a new category here..."
-          />
-        </div>
-      );
+    // Find the next available category. It might be in the middle of the range.
+    // const nextAvailableCategory = () => {
+    let nextAvailableCategory: any; // TODO: FIX
+    const categoryFamily = currentArea.charAt(0);
+    for (let i = 1; i <= 9; i++) {
+      const categoryToTest = (categoryFamily +
+        i.toString()) as JdCategoryNumbers;
+      if (
+        !jdSystem[currentProject]!.areas[currentArea]!.categories[
+          categoryToTest
+        ]
+      ) {
+        nextAvailableCategory = categoryToTest;
+        break;
+      }
     }
+    // return nextAvailableCategory;
+    // };
+
+    // Set up the add-a-new-thing handlers.
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+      setNewCategory(event.target.value);
+    };
+    const handleSubmit = (event: SyntheticEvent) => {
+      event.preventDefault();
+      console.debug("🚇 handleSubmit");
+      insertItem({
+        jdType: "category",
+        jdNumber: nextAvailableCategory,
+        jdTitle: newCategory,
+      });
+    };
+
+    // if (categories.length <= 9) {
+    //   return (
+    //     <div className="category text-grey-light">
+    //       <form onSubmit={handleSubmit}>
+    //         <span className="">41 </span>
+    //         <input
+    //           className="text-black outline-none w-96"
+    //           placeholder="Add a new category here..."
+    //           onChange={handleChange}
+    //           value={newCategory}
+    //         />
+    //       </form>
+    //     </div>
+    //   );
+    // }
 
     return (
       <div className="category">
+        {/* The list of existing categories, if there are any. */}
         {categories.map((category, i) => (
           <div key={i}>
             {/* prettier-ignore */}
@@ -60,6 +100,18 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
             </span>
           </div>
         ))}
+        {/* The add-a-new-category line, if there are any spare. */}
+        {categories.length <= 9 && nextAvailableCategory ? (
+          <form onSubmit={handleSubmit}>
+            <span className="text-grey-light">{nextAvailableCategory} </span>
+            <input
+              className="text-black outline-none w-96"
+              placeholder="Add a new category here..."
+              onChange={handleChange}
+              value={newCategory}
+            />
+          </form>
+        ) : null}
       </div>
     );
   } else if (currentArea && currentCategory) {

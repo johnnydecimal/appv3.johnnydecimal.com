@@ -7,14 +7,14 @@ import { AuthMachine } from "components/authentication";
 
 /**
  * The XState inspector popup.
- if (!("Cypress" in window)) {
-   inspect({
-     // url: 'https://statecharts.io/inspect', // (default)
-     // url: "https://stately.ai/viz?inspect",
-     iframe: false, // open in new window
-    });
-  }
-  */
+ */
+if (!("Cypress" in window)) {
+  inspect({
+    // url: 'https://statecharts.io/inspect', // (default)
+    // url: "https://stately.ai/viz?inspect",
+    iframe: false, // open in new window
+  });
+}
 
 export const App = () => {
   // return <Scratch />;
