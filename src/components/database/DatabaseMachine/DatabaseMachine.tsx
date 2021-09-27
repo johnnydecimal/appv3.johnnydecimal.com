@@ -158,8 +158,6 @@ export const DatabaseMachine = () => {
     <DatabaseMachineReactContext.Provider
       value={DatabaseMachineReactContextValue}
     >
-      <div className="my-12"></div>
-
       <div className="jd_grid">
         <div className="project">006 HW PODIP</div>
         <div className="area">20-29 PMP</div>
@@ -169,43 +167,35 @@ export const DatabaseMachine = () => {
       </div>
 
       <div className="my-12"></div>
+
       {jdSystem?.[currentProject] ? (
         /**
          * Set up the main outer grid. This has a 6ch wide column which may or
          * may not display `000.` depending on the mode, and then the main
          * content.
          */
-        // prettier-ignore
-        <div
-          className="test"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "4ch auto",
-            gridTemplateAreas: `'   .    breadcrumbs'
-                                'project    main    '`,
-          }}
-        >
-          <div style={{ gridArea: "breadcrumbs" }}>
-            <Breadcrumbs />
+        <div className="jd_grid">
+          <div className="project">
+            <span
+              className={currentArea ? "cursor-pointer" : "selected"}
+              onClick={() => selectArea(null)}
+            >
+              {jdSystem[currentProject]!.title}
+            </span>
           </div>
-
-          <div style={{ gridArea: "project" }}>{/* Nothing here yet */}</div>
-
-          <div style={{ gridArea: "main" }}>
-            <Area>
-              {currentArea ? (
-                <Category>
-                  {currentCategory ? (
-                    <ID />
-                  ) : (
-                    <div>EEP</div>
-                  )}
-                </Category>
-              ) : (
-                <div>EEP</div>
-              )}
-            </Area>
-          </div>
+          {/* prettier-ignore */}
+          <Area>
+            {currentArea ? (
+              <Category>
+                {currentCategory ? 
+                  <ID />
+                :
+                  <div>EEP</div>}
+              </Category>
+            ) : (
+              <div>EEP</div>
+            )}
+          </Area>
         </div>
       ) : (
         <div>jdSystem.currentProject does not yet exist.</div>

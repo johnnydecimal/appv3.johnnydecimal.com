@@ -12,31 +12,30 @@ body {
   .test {
     background-color: hotpink;
   }
-  
+
   .jd_grid {
     display: grid;
     background-color: hotpink;
     grid-template-columns: 3ch auto;
     /* grid-template-rows: repeat(10, 50px); */
     grid-template-areas:
-    "project  project"
-    " area     area"
-    "   .     category"
-    "   .       id"
-    "   .      main";
+      "project  project"
+      " area     area"
+      "   .     category"
+      "   .       id"
+      "   .      main";
   }
-  
 }
 
 @media (min-width: 901px) {
   /* Tablet landscape and above. */
   .test {
-    background-color: slateblue;
+    background-color: lightgoldenrodyellow;
   }
-  
+
   .jd_grid {
     display: grid;
-    background-color: slateblue;
+    background-color: lightgoldenrodyellow;
     grid-template-columns: 4ch 3ch 3ch auto;
     /* grid-template-rows: max-content max-content max-content max-content max-content; */
     grid-template-areas:
@@ -53,6 +52,7 @@ body {
 }
 .area {
   grid-area: area;
+  /* background-color: yellow; */
 }
 .category {
   grid-area: category;
@@ -63,5 +63,12 @@ body {
 .main {
   grid-area: main;
 }
+
+.selected {
+  @apply font-semibold border-b border-black;
+}
+/* .jd_grid :not(.selected):hover {
+  @apply border-b-2 border-black;
+} */
 
 @tailwind utilities;

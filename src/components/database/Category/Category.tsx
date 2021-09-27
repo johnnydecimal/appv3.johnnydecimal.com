@@ -13,7 +13,39 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
     selectId,
   } = useContext(DatabaseMachineReactContext);
 
-  if (currentArea && currentCategory) {
+  if (currentArea && !currentCategory) {
+    /**
+     * If there isn't a current category, the user has not selected a category.
+     *
+     * We render a list of all categories, each of which is clickable. Doing so
+     * makes that category the `currentCategory`.
+     */
+    const categories = Object.keys(
+      jdSystem[currentProject]!.areas[currentArea]!.categories
+    ).sort((a, b) => {
+      return Number(a) - Number(b);
+    }) as JdCategoryNumbers[];
+
+    return (
+      <div className="category">
+        {categories.map((category, i) => (
+          <div key={i}>
+            <span
+              className="cursor-pointer"
+              onClick={() => selectCategory(category)}
+            >
+              {category}{" "}
+            </span>
+            {
+              jdSystem[currentProject]!.areas[currentArea]!.categories[
+                category
+              ]!.title
+            }
+          </div>
+        ))}
+      </div>
+    );
+  } else if (currentArea && currentCategory) {
     /**
      * If there's a current category, the user has selected a category.
      *
@@ -44,37 +76,6 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
          * In the indented second column, children (which is `<ID />`).
          */}
         <div className="col-start-2">{children}</div>
-      </div>
-    );
-  } else if (currentArea) {
-    /**
-     * If there isn't a current category, the user has not selected a category.
-     *
-     * We render a list of all categories, each of which is clickable. Doing so
-     * makes that category the `currentCategory`.
-     */
-    const categories = Object.keys(
-      jdSystem[currentProject]!.areas[currentArea]!.categories
-    ).sort((a, b) => {
-      return Number(a) - Number(b);
-    }) as JdCategoryNumbers[];
-
-    return (
-      <div>
-        {categories.map((category, i) => (
-          <div
-            className="cursor-pointer"
-            key={i}
-            onClick={() => selectCategory(category)}
-          >
-            {category}{" "}
-            {
-              jdSystem[currentProject]!.areas[currentArea]!.categories[
-                category
-              ]!.title
-            }
-          </div>
-        ))}
       </div>
     );
   } else {
