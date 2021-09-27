@@ -61,8 +61,9 @@ export const ID = () => {
      */
     return (
       <div className="id">
-        {/* prettier-ignore */}
-        <span className="selected">
+        <div>
+          {/* prettier-ignore */}
+          <span className="selected">
           {currentId}
           {" "}
           {jdSystem[currentProject]!
@@ -72,6 +73,8 @@ export const ID = () => {
             .title
           }
           </span>
+          <div>This is where your ID and stuff will be shown.</div>
+        </div>
       </div>
     );
   } else {

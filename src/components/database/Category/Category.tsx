@@ -26,6 +26,21 @@ export const Category = ({ children }: { children: React.ReactNode }) => {
       return Number(a) - Number(b);
     }) as JdCategoryNumbers[];
 
+    /**
+     * If there are no categories, display a placeholder rather than nothing.
+     */
+    if (categories.length === 0) {
+      return (
+        <div className="category text-grey-light">
+          <span className="">41 </span>
+          <input
+            className="outline-none w-96 text-grey-light"
+            placeholder="Add a new category here..."
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="category">
         {categories.map((category, i) => (

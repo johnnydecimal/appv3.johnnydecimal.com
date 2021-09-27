@@ -22,6 +22,17 @@ export const Area = ({ children }: { children: React.ReactNode }) => {
       return Number(a.charAt(0)) - Number(b.charAt(0));
     }) as JdAreaNumbers[];
 
+    /**
+     * If there are no areas, display a placeholder rather than nothing.
+     */
+    if (areas.length === 0) {
+      return (
+        <div className="area">
+          <span className="text-grey-light">No areas here.</span>
+        </div>
+      );
+    }
+
     return (
       <div className="area">
         {areas.map((area, i) => (

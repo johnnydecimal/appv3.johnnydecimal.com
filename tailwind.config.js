@@ -10,8 +10,8 @@ module.exports = {
         DEFAULT: "#fcfbf8",
       },
       grey: {
-        light: "#dfdfdf",
-        DEFAULT: "#bebebe",
+        light: "#BDC3C7",
+        DEFAULT: "#374140",
       },
       red: {
         DEFAULT: "#FA2520",

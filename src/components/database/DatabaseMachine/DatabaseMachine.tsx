@@ -158,13 +158,13 @@ export const DatabaseMachine = () => {
     <DatabaseMachineReactContext.Provider
       value={DatabaseMachineReactContextValue}
     >
-      <div className="jd_grid">
+      {/* <div className="jd_grid">
         <div className="project">006 HW PODIP</div>
         <div className="area">20-29 PMP</div>
         <div className="category">21 Scope</div>
         <div className="id">21.01 Scope management plan</div>
         <div className="main">main</div>
-      </div>
+      </div> */}
 
       <div className="my-12"></div>
 

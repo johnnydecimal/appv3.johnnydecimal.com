@@ -19,7 +19,6 @@ declare global {
 }
 
 // === Temp ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
-const FourOhFour = () => <div>404</div>;
 const WaitOne = () => <div>Wait one. Doing networks.</div>;
 
 // === Main ===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===-===
@@ -32,6 +31,7 @@ export const AuthMachine = () => {
   const [state, send] = useMachine(authMachine, {
     devTools: true,
   });
+  const FourOhFour = () => <div>404 - {state.context.error?.message}</div>;
 
   window.AuthMachine = { send };
 
@@ -94,7 +94,7 @@ export const AuthMachine = () => {
     send,
     state,
     switchToSignIn,
-    switchToSignUp, 
+    switchToSignUp,
   };
 
   let RenderComponent;

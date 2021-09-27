@@ -1,9 +1,15 @@
 @tailwind base;
 @tailwind components;
 
-body {
+body,
+input {
   background-color: #fcfbf8;
   color: #2f3160;
+}
+
+input::placeholder {
+  @apply text-grey-light;
+  opacity: 1;
 }
 
 /* https://www.freecodecamp.org/news/the-100-correct-way-to-do-css-breakpoints-88d6a5ba1862/ */
@@ -29,13 +35,9 @@ body {
 
 @media (min-width: 901px) {
   /* Tablet landscape and above. */
-  .test {
-    background-color: lightgoldenrodyellow;
-  }
-
   .jd_grid {
     display: grid;
-    background-color: lightgoldenrodyellow;
+    /* background-color: lightgoldenrodyellow; */
     row-gap: 5px;
     grid-template-columns: 4ch 3ch 3ch auto;
     /* grid-template-rows: max-content max-content max-content max-content max-content; */
